@@ -187,7 +187,6 @@
 <button id="btn-menu" title="Menu">☰</button>
 <div id="drawer-backdrop"></div>
 <nav id="drawer">
-  <a class="drawer-link" href="/">🏠 Home</a>
   <button class="drawer-link" id="btn-open-file">📂 Open new file</button>
   <input type="file" id="file-input" accept=".json" hidden>
   <button class="drawer-link" id="btn-browse-runs">🗄️ Browse server logs</button>
@@ -669,4 +668,9 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft' && currentIndex > 0) { e.preventDefault(); renderStep(currentIndex - 1); }
   if (e.key === 'ArrowRight' && currentIndex < currentSteps.length - 1) { e.preventDefault(); renderStep(currentIndex + 1); }
 });
+
+// Nothing's loaded yet on a fresh page load -- open with the drawer already
+// out so "pick a file" / "browse server logs" is the first thing visible,
+// instead of an empty board behind a closed hamburger menu.
+openDrawer();
 </script>
