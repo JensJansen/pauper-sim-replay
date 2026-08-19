@@ -23,6 +23,13 @@ Two ways to load a game log:
   python run_league.py --matchup deck_a deck_b --log ../src/webapp/logs/<run-name>/event_log.json
   ```
 
+## Tests
+
+```
+pip install -r requirements-dev.txt
+pytest test_replay_engine.py
+```
+
 ## Hosting
 
 `render.yaml` deploys `app_public.py` (the file-picker-only subset — no
