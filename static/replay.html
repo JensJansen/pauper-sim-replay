@@ -523,7 +523,11 @@ async function toggleRunsList() {
 }
 
 async function onSelectRun(name) {
-  const res = await fetch(`/api/replay/runs/${encodeURIComponent(name)}/raw`);
+  // name may be a nested relative path ("myrun/event_log.json") -- encode
+  // each segment on its own so a literal "/" survives to match the
+  // backend's <path:name> route instead of becoming a stray %2F.
+  const urlPath = name.split('/').map(encodeURIComponent).join('/');
+  const res = await fetch(`/api/replay/runs/${urlPath}/raw`);
   if (!res.ok) {
     alert('Failed to load log: ' + res.statusText);
     return;

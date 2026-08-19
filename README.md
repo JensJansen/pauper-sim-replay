@@ -16,12 +16,16 @@ python app.py          # http://127.0.0.1:5000 -- localhost only, no auth
 Two ways to load a game log:
 - **Open new file** — pick any `--log` event-log JSON file from disk.
 - **Browse server logs** (`app.py` only, not `app_public.py`) — lists every
-  `logs/<run>/event_log.json` already sitting in this repo's own `logs/`
-  (gitignored). From pauper_sim's `src/`, point `run_league.py --log` at a
-  path inside this submodule's checkout, e.g.:
+  `*.json` file already sitting under this repo's own `logs/` (gitignored),
+  any depth, any filename — no naming or folder convention required, just
+  drop a file there. An invalid one fails to load with a normal error, the
+  same as picking a bad file by hand. From pauper_sim's `src/`, point
+  `run_league.py --log` at a path inside this submodule's checkout, e.g.:
   ```
   python run_league.py --matchup deck_a deck_b --log ../src/webapp/logs/<run-name>/event_log.json
   ```
+  (the filename `event_log.json` there is just a convention, not a
+  requirement — any name works).
 
 ## Tests
 

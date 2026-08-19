@@ -1,9 +1,12 @@
 """Local web UI for this repo's game-review tooling: the replay viewer
 (/, static/replay.html) -- pick a --log event-log JSON file from disk, or
-browse logs/<run>/event_log.json files already on disk (/api/replay/runs,
-local-only), and step through a logged game's board state. The backend
-parses the raw log directly (replay_engine.py) -- no intermediate replay
-file format.
+browse whatever *.json files are already sitting under logs/ (any depth,
+/api/replay/runs, local-only), and step through a logged game's board
+state. The backend parses the raw log directly (replay_engine.py) -- no
+intermediate replay file format, and no required filename or folder
+convention: any JSON file under logs/ is a candidate, valid or not --
+an invalid one just fails to load with a normal error, same as a bad file
+picked by hand.
 
 Local single-user tool: no auth, binds to localhost only. See README's
 "Game replay viewer" section. Training runs are launched from the
@@ -37,22 +40,31 @@ def replay_page():
 @app.get("/api/replay/runs")
 def replay_runs():
     """Server-side log browser -- local-only (app_public.py has no equivalent,
-    see its own docstring). Every logs/<run>/event_log.json on disk, newest
-    first -- however it got there (a --log PATH pointed at that folder, by
-    hand or from a script/skill following the same convention)."""
+    see its own docstring). Every *.json file under logs/ at any depth,
+    newest first, named by its path relative to LOGS_DIR -- no fixed
+    filename or folder convention required, just however a --log PATH (or
+    a hand-copied file) ended up there. Cheap even for many/large files:
+    only stats each one, never opens it -- an invalid log is caught later,
+    when actually opened, the same way a bad file picked by hand already
+    is."""
     runs = []
-    for event_path in LOGS_DIR.glob("*/event_log.json"):
+    for event_path in LOGS_DIR.rglob("*.json"):
         stat = event_path.stat()
-        runs.append({"name": event_path.parent.name, "mtime": stat.st_mtime, "size_kb": stat.st_size / 1024})
+        name = event_path.relative_to(LOGS_DIR).as_posix()
+        runs.append({"name": name, "mtime": stat.st_mtime, "size_kb": stat.st_size / 1024})
     runs.sort(key=lambda r: r["mtime"], reverse=True)
     return jsonify(runs)
 
 
-@app.get("/api/replay/runs/<name>/raw")
+@app.get("/api/replay/runs/<path:name>/raw")
 def replay_run_raw(name):
-    if not (LOGS_DIR / name / "event_log.json").is_file():
+    # <path:name> allows "/" (any nesting depth) so a ".." segment must be
+    # rejected explicitly here -- resolve() collapses it, then confirm the
+    # result actually landed inside LOGS_DIR rather than escaping it.
+    path = (LOGS_DIR / name).resolve()
+    if LOGS_DIR.resolve() not in path.parents or not path.is_file():
         return jsonify({"error": "not found"}), 404
-    return send_from_directory(LOGS_DIR / name, "event_log.json")
+    return send_from_directory(path.parent, path.name)
 
 
 @app.post("/api/replay/games")
