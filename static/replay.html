@@ -68,7 +68,7 @@
   #step-desc { font-size: 15px; margin: 8px 0 2px; }
   #turn-phase { color: #b8c0d0; font-size: 13px; font-weight: 600; }
 
-  /* Full-height stack on the left, spanning both players (align-items: stretch
+  /* Full-height stack, to the right of the decision panel, spanning both players (align-items: stretch
      makes it match players-col's combined height with no manual calc); split
      into one half per player so each is ~the height of that player's own row. */
   .board { display: flex; gap: 14px; align-items: stretch; }
@@ -80,7 +80,7 @@
   .stack-half h3 { margin: 0 0 8px; font-size: 13px; }
   .players-col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
 
-  /* Far-right decision-weights panel, split the same way as the stack
+  /* Far-left decision-weights panel, split the same way as the stack
      column (see .stack-half above): one half per player. A decision_weights
      step always has exactly one deciding player (state.active_idx at log
      time, carried through as step.active_player_idx -- see rl/agent.py's
@@ -212,6 +212,17 @@
 
 <main>
   <div class="board" id="board" style="display:none">
+    <div class="decision-col">
+      <div class="decision-half">
+        <h3>Agent's top actions — P0</h3>
+        <div id="decision-panel-0"><span class="hint">no decision data for this step</span></div>
+      </div>
+      <div class="decision-half">
+        <h3>Agent's top actions — P1</h3>
+        <div id="decision-panel-1"><span class="hint">no decision data for this step</span></div>
+      </div>
+    </div>
+
     <div class="stack-col">
       <div class="stack-half">
         <h3>Stack — P0</h3>
@@ -266,17 +277,6 @@
             <div class="side-block"><div class="side-label">Mana pool</div><div class="mana-pool"></div></div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div class="decision-col">
-      <div class="decision-half">
-        <h3>Agent's top actions — P0</h3>
-        <div id="decision-panel-0"><span class="hint">no decision data for this step</span></div>
-      </div>
-      <div class="decision-half">
-        <h3>Agent's top actions — P1</h3>
-        <div id="decision-panel-1"><span class="hint">no decision data for this step</span></div>
       </div>
     </div>
   </div>
