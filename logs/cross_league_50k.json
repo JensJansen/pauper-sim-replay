@@ -1,0 +1,171 @@
+{
+  "main_league": "4_deck_subleague_test",
+  "twin_league": "4_deck_subleague_gauntlet",
+  "games_per_pairing": 40,
+  "seed": 20260819,
+  "rows": [
+    {
+      "main_deck": "rakdos_madness",
+      "twin_deck": "rakdos_madness",
+      "wins": 27,
+      "decided": 40,
+      "win_rate": 0.675,
+      "on_the_play_wins": 13,
+      "on_the_draw_wins": 14,
+      "is_mirror_pairing": true
+    },
+    {
+      "main_deck": "rakdos_madness",
+      "twin_deck": "dmir_terror",
+      "wins": 32,
+      "decided": 40,
+      "win_rate": 0.8,
+      "on_the_play_wins": 15,
+      "on_the_draw_wins": 17,
+      "is_mirror_pairing": false
+    },
+    {
+      "main_deck": "rakdos_madness",
+      "twin_deck": "elves",
+      "wins": 35,
+      "decided": 40,
+      "win_rate": 0.875,
+      "on_the_play_wins": 18,
+      "on_the_draw_wins": 17,
+      "is_mirror_pairing": false
+    },
+    {
+      "main_deck": "rakdos_madness",
+      "twin_deck": "mono_red_rally",
+      "wins": 14,
+      "decided": 40,
+      "win_rate": 0.35,
+      "on_the_play_wins": 6,
+      "on_the_draw_wins": 8,
+      "is_mirror_pairing": false
+    },
+    {
+      "main_deck": "dmir_terror",
+      "twin_deck": "rakdos_madness",
+      "wins": 27,
+      "decided": 40,
+      "win_rate": 0.675,
+      "on_the_play_wins": 14,
+      "on_the_draw_wins": 13,
+      "is_mirror_pairing": false
+    },
+    {
+      "main_deck": "dmir_terror",
+      "twin_deck": "dmir_terror",
+      "wins": 28,
+      "decided": 40,
+      "win_rate": 0.7,
+      "on_the_play_wins": 14,
+      "on_the_draw_wins": 14,
+      "is_mirror_pairing": true
+    },
+    {
+      "main_deck": "dmir_terror",
+      "twin_deck": "elves",
+      "wins": 26,
+      "decided": 40,
+      "win_rate": 0.65,
+      "on_the_play_wins": 12,
+      "on_the_draw_wins": 14,
+      "is_mirror_pairing": false
+    },
+    {
+      "main_deck": "dmir_terror",
+      "twin_deck": "mono_red_rally",
+      "wins": 13,
+      "decided": 40,
+      "win_rate": 0.325,
+      "on_the_play_wins": 7,
+      "on_the_draw_wins": 6,
+      "is_mirror_pairing": false
+    },
+    {
+      "main_deck": "elves",
+      "twin_deck": "rakdos_madness",
+      "wins": 14,
+      "decided": 40,
+      "win_rate": 0.35,
+      "on_the_play_wins": 4,
+      "on_the_draw_wins": 10,
+      "is_mirror_pairing": false
+    },
+    {
+      "main_deck": "elves",
+      "twin_deck": "dmir_terror",
+      "wins": 29,
+      "decided": 40,
+      "win_rate": 0.725,
+      "on_the_play_wins": 14,
+      "on_the_draw_wins": 15,
+      "is_mirror_pairing": false
+    },
+    {
+      "main_deck": "elves",
+      "twin_deck": "elves",
+      "wins": 33,
+      "decided": 40,
+      "win_rate": 0.825,
+      "on_the_play_wins": 16,
+      "on_the_draw_wins": 17,
+      "is_mirror_pairing": true
+    },
+    {
+      "main_deck": "elves",
+      "twin_deck": "mono_red_rally",
+      "wins": 14,
+      "decided": 40,
+      "win_rate": 0.35,
+      "on_the_play_wins": 6,
+      "on_the_draw_wins": 8,
+      "is_mirror_pairing": false
+    },
+    {
+      "main_deck": "mono_red_rally",
+      "twin_deck": "rakdos_madness",
+      "wins": 35,
+      "decided": 40,
+      "win_rate": 0.875,
+      "on_the_play_wins": 16,
+      "on_the_draw_wins": 19,
+      "is_mirror_pairing": false
+    },
+    {
+      "main_deck": "mono_red_rally",
+      "twin_deck": "dmir_terror",
+      "wins": 37,
+      "decided": 40,
+      "win_rate": 0.925,
+      "on_the_play_wins": 19,
+      "on_the_draw_wins": 18,
+      "is_mirror_pairing": false
+    },
+    {
+      "main_deck": "mono_red_rally",
+      "twin_deck": "elves",
+      "wins": 37,
+      "decided": 40,
+      "win_rate": 0.925,
+      "on_the_play_wins": 20,
+      "on_the_draw_wins": 17,
+      "is_mirror_pairing": false
+    },
+    {
+      "main_deck": "mono_red_rally",
+      "twin_deck": "mono_red_rally",
+      "wins": 26,
+      "decided": 40,
+      "win_rate": 0.65,
+      "on_the_play_wins": 17,
+      "on_the_draw_wins": 9,
+      "is_mirror_pairing": true
+    }
+  ],
+  "overall_win_rate": 0.6671875,
+  "mirror_win_rate": 0.7125,
+  "cross_win_rate": 0.6520833333333333
+}
