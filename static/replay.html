@@ -6,9 +6,16 @@
     margin: 0; font: 14px/1.4 -apple-system, Segoe UI, sans-serif;
     background: #14161a; color: #d8dbe0;
   }
-  header { padding: 14px 20px 14px 64px; border-bottom: 1px solid #2a2d33; }
+  /* height is 2x #btn-menu's own vertical center (top:18px + half its
+     36px-tall padding/border/line-height box == ~36px from the page top),
+     so align-items:center below centers the title row on that same point
+     instead of on the header's own (mismatched) content box. */
+  header {
+    display: flex; align-items: center; gap: 12px; height: 72px;
+    padding: 0 20px 0 64px; border-bottom: 1px solid #2a2d33;
+  }
   header h1 { margin: 0; font-size: 18px; }
-  header p { margin: 2px 0 0; color: #888; font-size: 12px; }
+  header p { margin: 0; color: #888; font-size: 12px; }
   main { padding: 16px 20px 110px; }
   h2 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: #9aa0aa; }
   button {
@@ -18,6 +25,8 @@
   button:hover { background: #2f343c; }
   button:disabled { opacity: .4; cursor: default; }
   .hint { color: #666; font-size: 12px; }
+  #file-hint { margin: 0; }
+  #file-hint:empty { display: none; }
 
   /* Hamburger stays fixed top-left regardless of scroll; drawer slides out
      from under it. z-index: menu button (70) > drawer (60) > backdrop (55),
@@ -28,7 +37,7 @@
   }
   #drawer-backdrop.open { display: block; }
   #drawer {
-    position: fixed; top: 0; left: 0; bottom: 0; width: 300px; z-index: 60;
+    position: fixed; top: 0; left: 0; bottom: 0; width: 420px; z-index: 60;
     background: #1b1e24; border-right: 1px solid #2a2d33; box-shadow: 10px 0 30px #000a;
     padding: 60px 16px 16px; display: flex; flex-direction: column; gap: 10px;
     transform: translateX(-100%); transition: transform .18s ease; overflow-y: auto;
@@ -52,21 +61,36 @@
   }
   .game-item:hover { background: #22262d; }
   .game-item.selected { background: #22344f; border-color: #3a6df0; }
-  .game-item-header { font-size: 12px; font-weight: 600; color: #d8dbe0; }
+  .game-item-header { font-size: 12px; font-weight: 600; color: #d8dbe0; overflow-wrap: anywhere; }
   .game-item.selected .game-item-header { color: #fff; }
-  .game-item-detail { font-size: 10px; font-weight: 400; color: #777; margin-top: 2px; }
+  .game-item-detail { font-size: 10px; font-weight: 400; color: #777; margin-top: 2px; overflow-wrap: anywhere; }
   .game-item.selected .game-item-detail { color: #a8bfe0; }
   #game-pager { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #8890a0; }
   #game-pager button { padding: 3px 9px; }
 
   #scrub-panel {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
-    background: #1b1e24; border-top: 1px solid #2a2d33; padding: 10px 20px;
+    background: #1b1e24; border-top: 1px solid #2a2d33; padding: 8px 20px;
   }
-  #controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  /* One row, three columns: step-desc left, phase-track (game.turn.Phase,
+     current one pilled -- shared across both players, not per-player) truly
+     centered on the full row (the flanking 1fr columns stay equal width
+     regardless of each side's content length), turn-phase right. */
+  #info-line { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; margin: 4px 0; }
+  #step-desc {
+    font-size: 14px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  #phase-track { display: flex; align-items: center; flex-wrap: nowrap; gap: 0; font-size: 12px; }
+  .phase-step { padding: 2px 8px; border-radius: 12px; color: #6a6f7a; white-space: nowrap; }
+  .phase-step.current { background: #22344f; border: 1px solid #3a6df0; color: #fff; font-weight: 600; }
+  .phase-sep { color: #3a3f47; padding: 0 1px; }
+  #turn-phase {
+    color: #b8c0d0; font-size: 12px; font-weight: 600; text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  #controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   #scrubber { flex: 1; min-width: 200px; }
-  #step-desc { font-size: 15px; margin: 8px 0 2px; }
-  #turn-phase { color: #b8c0d0; font-size: 13px; font-weight: 600; }
 
   /* Full-height stack, to the right of the decision panel, spanning both players (align-items: stretch
      makes it match players-col's combined height with no manual calc); split
@@ -189,9 +213,12 @@
 <nav id="drawer">
   <button class="drawer-link" id="btn-open-file">📂 Open new file</button>
   <input type="file" id="file-input" accept=".json" hidden>
-  <button class="drawer-link" id="btn-browse-runs">🗄️ Browse server logs</button>
   <p class="hint" id="file-hint"></p>
-  <div id="runs-list" style="display:none"></div>
+
+  <div class="drawer-section" style="flex: 0 0 auto;">
+    <h2>Server logs</h2>
+    <div id="runs-list"><p class="hint">loading…</p></div>
+  </div>
 
   <div class="drawer-section">
     <h2>Games</h2>
@@ -283,14 +310,17 @@
 </main>
 
 <footer id="scrub-panel" style="display:none">
+  <div id="info-line">
+    <div id="step-desc"></div>
+    <div id="phase-track"></div>
+    <div id="turn-phase"></div>
+  </div>
   <div id="controls">
     <button id="btn-prev">◀</button>
     <input type="range" id="scrubber" min="0" max="0" value="0">
     <button id="btn-next">▶</button>
     <span id="step-counter" class="hint"></span>
   </div>
-  <div id="step-desc"></div>
-  <div id="turn-phase"></div>
 </footer>
 
 <script>
@@ -442,6 +472,21 @@ function renderDecisionPanel(step) {
   }
 }
 
+// game.turn.Phase's own order/values (src/game/turn.py) -- MAIN2 only ever
+// matches for combat-enabled decks (see turn.py's MINIMAL_PHASES comment),
+// so it just never highlights for the rest, no special-casing needed here.
+const PHASE_TRACK = [
+  ['untap', 'Untap'], ['upkeep', 'Upkeep'], ['draw', 'Draw'], ['main1', 'Main'],
+  ['declare_attackers', 'Attack'], ['declare_blockers', 'Block'], ['combat_damage', 'Damage'],
+  ['main2', 'Main'], ['end', 'End'],
+];
+
+function renderPhaseTrack(phase) {
+  document.getElementById('phase-track').innerHTML = PHASE_TRACK.map(([key, label], i) => `
+    ${i > 0 ? '<span class="phase-sep">–</span>' : ''}
+    <span class="phase-step${key === phase ? ' current' : ''}">${label}</span>`).join('');
+}
+
 function renderStep(i) {
   currentIndex = i;
   const step = currentSteps[i];
@@ -459,6 +504,7 @@ function renderStep(i) {
   }
   document.getElementById('turn-phase').textContent =
     `Turn ${step.turn ?? '?'}${step.phase ? ' — ' + step.phase.replace(/_/g, ' ') : ''}${who}`;
+  renderPhaseTrack(step.phase);
   document.getElementById('btn-prev').disabled = i === 0;
   document.getElementById('btn-next').disabled = i === currentSteps.length - 1;
   renderBoard(step);
@@ -493,18 +539,11 @@ async function loadContent(content, label) {
 async function onFile(ev) {
   const file = ev.target.files[0];
   if (!file) return;
-  document.getElementById('runs-list').style.display = 'none';
   await loadContent(await file.text(), file.name);
 }
 
-async function toggleRunsList() {
+async function loadRunsList() {
   const listEl = document.getElementById('runs-list');
-  if (listEl.style.display !== 'none') {
-    listEl.style.display = 'none';
-    return;
-  }
-  listEl.style.display = '';
-  listEl.innerHTML = '<p class="hint">loading…</p>';
   try {
     const res = await fetch('/api/replay/runs');
     const runs = await res.json();
@@ -531,7 +570,6 @@ async function onSelectRun(name) {
     alert('Failed to load log: ' + res.statusText);
     return;
   }
-  document.getElementById('runs-list').style.display = 'none';
   await loadContent(await res.text(), name);
 }
 
@@ -583,6 +621,7 @@ async function selectGame(gameIndex) {
     document.getElementById('scrubber').max = Math.max(0, currentSteps.length - 1);
     document.getElementById('scrub-panel').style.display = '';
     document.getElementById('board').style.display = '';
+    updateDrawerLock();
     closeDrawer();
     renderStep(0);
   } catch (err) {
@@ -594,9 +633,16 @@ function openDrawer() {
   document.getElementById('drawer').classList.add('open');
   document.getElementById('drawer-backdrop').classList.add('open');
 }
+// Until a game is actually loaded there's nothing to see behind the drawer,
+// so closing it (hamburger, backdrop click, Escape) is disabled -- forces
+// picking a file/game instead of landing on an empty board.
 function closeDrawer() {
+  if (!currentSteps) return;
   document.getElementById('drawer').classList.remove('open');
   document.getElementById('drawer-backdrop').classList.remove('open');
+}
+function updateDrawerLock() {
+  document.getElementById('btn-menu').disabled = !currentSteps;
 }
 function toggleDrawer() {
   document.getElementById('drawer').classList.contains('open') ? closeDrawer() : openDrawer();
@@ -645,7 +691,6 @@ document.addEventListener('mouseout', e => {
 
 document.getElementById('file-input').addEventListener('change', onFile);
 document.getElementById('btn-open-file').addEventListener('click', () => document.getElementById('file-input').click());
-document.getElementById('btn-browse-runs').addEventListener('click', toggleRunsList);
 document.getElementById('runs-list').addEventListener('click', e => {
   const btn = e.target.closest('[data-run-name]');
   if (btn) onSelectRun(btn.dataset.runName);
@@ -670,7 +715,9 @@ document.addEventListener('keydown', e => {
 });
 
 // Nothing's loaded yet on a fresh page load -- open with the drawer already
-// out so "pick a file" / "browse server logs" is the first thing visible,
+// out so "pick a file" / server logs list is the first thing visible,
 // instead of an empty board behind a closed hamburger menu.
 openDrawer();
+updateDrawerLock();
+loadRunsList();
 </script>
