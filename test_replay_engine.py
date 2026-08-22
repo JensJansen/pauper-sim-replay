@@ -87,6 +87,79 @@ def test_mana_tap_and_spend():
     assert steps[-1]["players"][0]["mana_pool"]["G"] == 0
 
 
+def test_tap_or_untap_and_untap_step_flip_tapped_state():
+    """Basic single-player coverage for the three non-mana tap-kind events
+    (previously zero coverage at all): "tap_or_untap" (set_tapped's own
+    kind, game.effects.shared) flips tapped either direction per
+    now_tapped, and "untap_step" flips every listed permanent to untapped
+    in one batch."""
+    events = [
+        _ev("turn_start", phase=None),
+        _ev("zone_move", phase="main1", permanent=["Wellwisher", 0], from_zone="hand", to_zone="battlefield",
+            tapped=False, card_type="CREATURE", power=1, toughness=1),
+        _ev("tap_or_untap", phase="upkeep", permanent=["Wellwisher", 0], owner_idx=0, now_tapped=True, reason="activate"),
+    ]
+    steps = GameReducer(events).run()
+    assert steps[-1]["players"][0]["battlefield"][0]["tapped"] is True
+
+    events += [_ev("untap_step", phase="untap", untapped=[["Wellwisher", 0]])]
+    steps = GameReducer(events).run()
+    assert steps[-1]["players"][0]["battlefield"][0]["tapped"] is False
+
+
+def test_legacy_tap_and_untap_kinds_still_replay():
+    """"tap" and "untap" are no longer emitted by the engine (superseded by
+    the general "tap_or_untap"), but their handlers must stay wired --
+    already-committed log files can contain them, and replaying history
+    must never break."""
+    events = [
+        _ev("turn_start", phase=None),
+        _ev("zone_move", phase="main1", permanent=["Forest", 0], from_zone="hand", to_zone="battlefield",
+            tapped=False, card_type="LAND"),
+        _ev("tap", phase="main1", permanent=["Forest", 0], reason="activate"),
+    ]
+    steps = GameReducer(events).run()
+    assert steps[-1]["players"][0]["battlefield"][0]["tapped"] is True
+
+    events += [_ev("untap", phase="main1", permanent=["Forest", 0], reason="quirion_ranger")]
+    steps = GameReducer(events).run()
+    assert steps[-1]["players"][0]["battlefield"][0]["tapped"] is False
+
+
+def test_tap_or_untap_owner_idx_disambiguates_same_name_slot_collision():
+    """The bug set_tapped/owner_idx exists to close: two players' first copy
+    of the same card legitimately share a (name, slot) key (slots are
+    assigned independently per player, game.effects.casting's used_slots).
+    Without an explicit owner, _find_perm's dual-battlefield scan (player 0
+    first) would silently flip the WRONG player's permanent in any mirror
+    match -- e.g. two players each with their own Forest in slot 0."""
+    events = [
+        _ev("turn_start", phase=None),
+        _ev("zone_move", active_idx=0, phase="main1", permanent=["Forest", 0], from_zone="hand", to_zone="battlefield",
+            tapped=False, card_type="LAND"),
+        _ev("zone_move", active_idx=1, phase="main1", permanent=["Forest", 0], from_zone="hand", to_zone="battlefield",
+            tapped=False, card_type="LAND"),
+        _ev("tap_or_untap", phase="main1", permanent=["Forest", 0], owner_idx=1, now_tapped=True, reason="activate"),
+    ]
+    steps = GameReducer(events).run()
+    assert steps[-1]["players"][0]["battlefield"][0]["tapped"] is False  # untouched
+    assert steps[-1]["players"][1]["battlefield"][0]["tapped"] is True  # the one actually tapped
+
+
+def test_tap_or_untap_without_owner_idx_falls_back_to_dual_scan():
+    """An event predating the owner_idx field (an already-committed old log)
+    must still replay via the old best-effort dual-battlefield scan --
+    adding owner_idx must never break history that doesn't have it."""
+    events = [
+        _ev("turn_start", phase=None),
+        _ev("zone_move", active_idx=1, phase="main1", permanent=["Forest", 0], from_zone="hand", to_zone="battlefield",
+            tapped=False, card_type="LAND"),
+        _ev("tap_or_untap", phase="main1", permanent=["Forest", 0], now_tapped=True, reason="activate"),
+    ]
+    steps = GameReducer(events).run()
+    assert steps[-1]["players"][1]["battlefield"][0]["tapped"] is True
+
+
 def test_attack_flag_clears_after_declare_blockers():
     """A phase_change with nothing real in it collapses away (see
     test_empty_phases_collapse), so each phase here needs its own real event

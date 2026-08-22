@@ -423,6 +423,22 @@ class GameReducer:
         self._emit(e, "impulse_exile", f"P{p.idx} exiles {', '.join(names) or '?'} (impulse draw)")
 
     def _set_tapped(self, e, tapped):
+        owner_idx = e.get("owner_idx")
+        if owner_idx is not None:
+            # Unambiguous: two players' same-named permanents can legitimately
+            # share a (name, slot) key (slots are assigned independently per
+            # player), so an explicit owner beats scanning both battlefields.
+            key = tuple(e["permanent"])
+            entry = self.players[owner_idx].battlefield.get(key)
+            if entry is not None:
+                entry["tapped"] = tapped
+                return key
+            return None
+        # No owner_idx -- an older log predating this field. Fall back to the
+        # best-effort dual-battlefield scan (player 0 first); this can still
+        # pick the wrong player's permanent on a name+slot collision, but
+        # that's an accepted limitation of already-committed historical data,
+        # not something fixable after the fact.
         p, key = self._find_perm(e["permanent"])
         if key is not None:
             p.battlefield[key]["tapped"] = tapped
