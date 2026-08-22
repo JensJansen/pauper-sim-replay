@@ -1,11 +1,5 @@
-"""Self-check for the replay viewer's event-stream reducer (replay_engine.py).
-
-Fabricated event logs (mirrors real GameState.log_event field shapes, from
-the pauper_sim engine this repo was split out of) -- exercises the pieces
-most likely to silently misrender: mulligan netting, cast-then-resolve,
-mana, combat flag lifecycle, a countered spell, a state-based death, and
-the same-phase-recast identity fix for the Lava Dart double-copy bug.
-"""
+"""Self-check for the replay viewer's event-stream reducer (replay_engine.py)
+using fabricated event logs that mirror real GameState.log_event shapes."""
 from replay_engine import GameReducer, list_games, reduce_game
 
 
@@ -15,11 +9,9 @@ def _ev(kind, active_idx=0, turn_player_idx=0, turn=1, phase="main1", **fields):
 
 
 def test_mulligan_rounds_are_individually_visible():
-    """Owner directive (2026-08-02): no opening-hand netting -- every
-    mulligan-round draw, reject, and bottom-card pick is its own step, real
-    event shapes (mulligan_take rejects the whole hand at once, cards=[...];
-    mulligan_bottom is logged once per bottomed card, card=<single name>,
-    per game/resolution/handlers_mulligan.py)."""
+    """Every mulligan-round draw, reject, and bottom-card pick is its own
+    step. mulligan_take rejects the whole hand at once (cards=[...]);
+    mulligan_bottom is logged once per bottomed card (card=<single name>)."""
     events = [
         _ev("zone_move", phase=None, cards=["A", "B", "C", "D", "E", "F", "G"],
             from_zone="library", to_zone="hand", reason="draw"),
@@ -33,9 +25,7 @@ def test_mulligan_rounds_are_individually_visible():
     steps = GameReducer(events).run()
     kinds = [s["kind"] for s in steps]
     assert kinds == ["zone_move", "zone_move", "zone_move", "zone_move", "turn_start"]
-    # after the re-draw, before bottoming N:
     assert sorted(steps[2]["players"][0]["hand"]) == ["H", "I", "J", "K", "L", "M", "N"]
-    # after bottoming N, at turn_start -- the actual kept hand:
     assert sorted(steps[-1]["players"][0]["hand"]) == ["H", "I", "J", "K", "L", "M"]
     assert steps[-1]["players"][0]["library_remaining"] == 60 - 6
 
@@ -88,11 +78,8 @@ def test_mana_tap_and_spend():
 
 
 def test_tap_or_untap_and_untap_step_flip_tapped_state():
-    """Basic single-player coverage for the three non-mana tap-kind events
-    (previously zero coverage at all): "tap_or_untap" (set_tapped's own
-    kind, game.effects.shared) flips tapped either direction per
-    now_tapped, and "untap_step" flips every listed permanent to untapped
-    in one batch."""
+    """"tap_or_untap" flips tapped either direction per now_tapped;
+    "untap_step" flips every listed permanent to untapped in one batch."""
     events = [
         _ev("turn_start", phase=None),
         _ev("zone_move", phase="main1", permanent=["Wellwisher", 0], from_zone="hand", to_zone="battlefield",
@@ -108,10 +95,8 @@ def test_tap_or_untap_and_untap_step_flip_tapped_state():
 
 
 def test_legacy_tap_and_untap_kinds_still_replay():
-    """"tap" and "untap" are no longer emitted by the engine (superseded by
-    the general "tap_or_untap"), but their handlers must stay wired --
-    already-committed log files can contain them, and replaying history
-    must never break."""
+    """"tap"/"untap" are superseded by "tap_or_untap" but their handlers
+    must stay wired: already-committed logs can still contain them."""
     events = [
         _ev("turn_start", phase=None),
         _ev("zone_move", phase="main1", permanent=["Forest", 0], from_zone="hand", to_zone="battlefield",
@@ -127,12 +112,9 @@ def test_legacy_tap_and_untap_kinds_still_replay():
 
 
 def test_tap_or_untap_owner_idx_disambiguates_same_name_slot_collision():
-    """The bug set_tapped/owner_idx exists to close: two players' first copy
-    of the same card legitimately share a (name, slot) key (slots are
-    assigned independently per player, game.effects.casting's used_slots).
-    Without an explicit owner, _find_perm's dual-battlefield scan (player 0
-    first) would silently flip the WRONG player's permanent in any mirror
-    match -- e.g. two players each with their own Forest in slot 0."""
+    """Two players' first copy of the same card can share a (name, slot) key.
+    Without an explicit owner, the dual-battlefield scan would silently flip
+    the wrong player's permanent in a mirror match."""
     events = [
         _ev("turn_start", phase=None),
         _ev("zone_move", active_idx=0, phase="main1", permanent=["Forest", 0], from_zone="hand", to_zone="battlefield",
@@ -142,14 +124,13 @@ def test_tap_or_untap_owner_idx_disambiguates_same_name_slot_collision():
         _ev("tap_or_untap", phase="main1", permanent=["Forest", 0], owner_idx=1, now_tapped=True, reason="activate"),
     ]
     steps = GameReducer(events).run()
-    assert steps[-1]["players"][0]["battlefield"][0]["tapped"] is False  # untouched
-    assert steps[-1]["players"][1]["battlefield"][0]["tapped"] is True  # the one actually tapped
+    assert steps[-1]["players"][0]["battlefield"][0]["tapped"] is False
+    assert steps[-1]["players"][1]["battlefield"][0]["tapped"] is True
 
 
 def test_tap_or_untap_without_owner_idx_falls_back_to_dual_scan():
-    """An event predating the owner_idx field (an already-committed old log)
-    must still replay via the old best-effort dual-battlefield scan --
-    adding owner_idx must never break history that doesn't have it."""
+    """An event predating owner_idx must still replay via the best-effort
+    dual-battlefield scan."""
     events = [
         _ev("turn_start", phase=None),
         _ev("zone_move", active_idx=1, phase="main1", permanent=["Forest", 0], from_zone="hand", to_zone="battlefield",
@@ -161,9 +142,8 @@ def test_tap_or_untap_without_owner_idx_falls_back_to_dual_scan():
 
 
 def test_attack_flag_clears_after_declare_blockers():
-    """A phase_change with nothing real in it collapses away (see
-    test_empty_phases_collapse), so each phase here needs its own real event
-    (life_change, arbitrary choice) to surface its own phase_change step."""
+    """Each phase here needs its own real event (life_change) to surface its
+    own phase_change step -- an empty one collapses away."""
     events = [
         _ev("turn_start", phase=None),
         _ev("zone_move", phase="main1", permanent=["Grizzly Bears", 0], from_zone="hand", to_zone="battlefield",
@@ -211,9 +191,8 @@ def test_state_based_death_moves_to_graveyard():
 
 
 def test_same_phase_flashback_does_not_duplicate_card():
-    """Identity-tracking check for a real Lava Dart bug: a card recast in
-    the SAME phase it just resolved must reuse that resolution, not spawn a
-    phantom second copy stuck on the stack."""
+    """A card recast in the same phase it just resolved must reuse that
+    resolution, not spawn a phantom second copy stuck on the stack."""
     events = [
         _ev("turn_start", phase=None),
         _ev("zone_move", phase="main1", card="Lava Dart", from_zone="hand", to_zone="stack", controller=0),
@@ -229,10 +208,7 @@ def test_same_phase_flashback_does_not_duplicate_card():
 
 
 def test_library_remaining_nets_correctly_across_a_mulligan():
-    """DEFAULT_DECK_SIZE=60, net of every draw/mulligan_take/mulligan_bottom:
-    draw 7 (+7), mulligan_take all 7 back (-7), draw 7 more (+7), bottom 1
-    (-1) -> 6 net so far, +1 more in-game draw -> 7 -> 60 - 7 = 53.
-    Owner-authorized simplification: mill/put-back (Brainstorm-style, not a
+    """Owner-authorized simplification: mill/put-back (Brainstorm-style, not a
     mulligan) still don't move this counter."""
     events = [
         _ev("zone_move", phase=None, cards=["A", "B", "C", "D", "E", "F", "G"],
@@ -252,9 +228,8 @@ def test_library_remaining_nets_correctly_across_a_mulligan():
 
 
 def test_aura_attached_resolves_cross_player_target():
-    """A Pacifism-style aura (controlled by P1) enchanting P0's creature must
-    resolve "enchanting" to the TARGET's controller, not the aura's -- the
-    viewer nests the aura under P0's creature even though P1 controls it."""
+    """A Pacifism-style aura controlled by P1, enchanting P0's creature,
+    resolves "enchanting" to the target's controller, not the aura's."""
     events = [
         _ev("turn_start", phase=None),
         _ev("zone_move", active_idx=0, phase="main1", permanent=["Grizzly Bears", 0], from_zone="hand",
@@ -269,11 +244,9 @@ def test_aura_attached_resolves_cross_player_target():
 
 
 def test_decision_weights_step_formats_candidates_and_flushes_with_a_following_action():
-    """rl/agent.py and rl/mulligan.py log structured facts (fixed_label a
-    plain string, pointer_identity a {name, slot, controller} fact, never a
-    baked string) -- this handler does the label formatting. decision_weights
-    is buffered like phase_change (2026-08-19): it only surfaces once a real
-    action follows in the same phase, which also flushes the phase header."""
+    """decision_weights is buffered like phase_change: it only surfaces once
+    a real action follows in the same phase, which also flushes the phase
+    header."""
     events = [
         _ev("turn_start", phase=None),
         _ev("phase_change", phase="main1"),  # buffered until something real flushes it
@@ -300,17 +273,11 @@ def test_decision_weights_step_formats_candidates_and_flushes_with_a_following_a
 
 
 def test_decision_only_phase_collapses_like_an_empty_one():
-    """The exact case this change fixes (owner directive, 2026-08-19,
-    superseding the immediate-flush behavior above): the agent had a real
-    decision (more than one legal option -- rl/agent.py's
-    _log_decision_weights fires regardless of the outcome) but chose to
-    pass, and nothing else happened in the phase. Previously the
-    decision_weights step alone flushed an otherwise-empty phase_change; now
-    it's buffered right alongside it, and both disappear together, same as
-    a phase with no decisions in it at all."""
+    """A decision_weights step with no following real action disappears
+    along with its phase header, same as a phase with no decisions at all."""
     events = [
         _ev("turn_start", phase=None),
-        _ev("phase_change", phase="main1"),  # would-be-empty, but a decision happens in it
+        _ev("phase_change", phase="main1"),
         _ev("decision_weights", phase="main1", network="main", chosen_index=0, value_estimate=0.1,
             pointer_kind=None,
             candidates=[{"index": 0, "probability": 0.9, "fixed_label": "Pass", "pointer_identity": None}]),
@@ -327,16 +294,14 @@ def test_decision_only_phase_collapses_like_an_empty_one():
 
 
 def test_pass_produces_no_step_regardless_of_stack():
-    """Priority passes are pure engine machinery -- whatever they lead to
-    (a stack item resolving, a phase advancing) already gets its own step,
-    so "pass" itself must never appear in the scrubber timeline."""
+    """"pass" itself must never appear in the scrubber timeline."""
     events = [
         _ev("turn_start", phase=None),
-        _ev("pass", phase="main1"),  # stack empty here -- leads to a phase change
+        _ev("pass", phase="main1"),
         _ev("phase_change", phase="combat_start"),
         _ev("zone_move", phase="main1", card="Lightning Bolt", from_zone="hand", to_zone="stack", controller=0),
         _ev("pass", phase="main1"),
-        _ev("pass", phase="main1", active_idx=1),  # stack non-empty -- leads to a resolution
+        _ev("pass", phase="main1", active_idx=1),
         _ev("zone_move", phase="main1", card="Lightning Bolt", from_zone="stack", reason="resolve"),
     ]
     steps = GameReducer(events).run()
@@ -346,18 +311,16 @@ def test_pass_produces_no_step_regardless_of_stack():
 
 
 def test_empty_phases_collapse():
-    """A phase with nothing but priority passes in it (upkeep, end_combat)
-    is skipped entirely -- straight through to whichever phase actually has
-    something happen in it -- while a phase with a real event still shows
-    its own phase_change step."""
+    """A phase with nothing but priority passes in it is skipped entirely;
+    a phase with a real event still shows its own phase_change step."""
     events = [
         _ev("turn_start", phase=None),
-        _ev("phase_change", phase="upkeep"),          # empty -- collapses away
+        _ev("phase_change", phase="upkeep"),
         _ev("phase_change", phase="draw"),
         _ev("zone_move", phase="draw", card="Island", from_zone="library", to_zone="hand", reason="draw"),
-        _ev("phase_change", phase="main1"),            # empty -- collapses away
-        _ev("phase_change", phase="combat_start"),      # empty -- collapses away
-        _ev("phase_change", phase="declare_attackers"),  # empty (log ends before anything happens in it)
+        _ev("phase_change", phase="main1"),
+        _ev("phase_change", phase="combat_start"),
+        _ev("phase_change", phase="declare_attackers"),
     ]
     steps = GameReducer(events).run()
     kinds_and_phases = [(s["kind"], s.get("phase")) for s in steps]
@@ -377,11 +340,6 @@ def test_list_games_labels_from_matchup_meta():
 
 
 def test_list_games_labels_round_robin_games_by_their_own_pairing():
-    # A round-robin --eval log holds many different pairings in one file --
-    # meta has no single matchup to fall back to, so each game must be
-    # labeled from its OWN deck_a/deck_b (run_league.py's _write_event_log).
-    # Two games of the SAME pairing (a double round-robin) must disambiguate
-    # rather than producing two identical, unindexable labels.
     doc = {"meta": {"mode": "eval", "matchup": None, "decks": ["dmir_terror", "elves"]},
            "games": [
                {"game_index": 0, "deck_a": "dmir_terror", "deck_b": "dmir_terror",

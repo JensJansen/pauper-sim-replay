@@ -1,24 +1,9 @@
-"""Local web UI for this repo's game-review tooling: the replay viewer
-(/, static/replay.html) -- pick a --log event-log JSON file from disk, or
-browse whatever *.json files are already sitting under logs/ (any depth,
-/api/replay/runs, local-only), and step through a logged game's board
-state. The backend parses the raw log directly (replay_engine.py) -- no
-intermediate replay file format, and no required filename or folder
-convention: any JSON file under logs/ is a candidate, valid or not --
-an invalid one just fails to load with a normal error, same as a bad file
-picked by hand.
+"""Local Flask app for the replay viewer: serves static/replay.html and an
+API to browse logs/ and reduce a logged game's events into board-state
+snapshots (replay_engine.py). Local-only: no auth, binds to localhost.
+See app_public.py for the publicly-hostable subset.
 
-Local single-user tool: no auth, binds to localhost only. See README's
-"Game replay viewer" section. Training runs are launched from the
-pauper_sim repo (this repo is attached there as a git submodule at
-src/webapp/) -- point run_league.py's --log at a path inside THIS repo's
-own logs/ (e.g. --log ../../src/webapp/logs/<run>/event_log.json from
-pauper_sim's src/) so a run lands somewhere this app can find it. This app
-has no training-launch surface of its own; see app_public.py for the
-publicly-hostable subset of this same viewer.
-
-Run: python app.py   (from this directory -- paths are anchored to this
-file, not to cwd).
+Run: python app.py (paths are anchored to this file, not to cwd).
 """
 import json
 from pathlib import Path
@@ -39,14 +24,8 @@ def replay_page():
 
 @app.get("/api/replay/runs")
 def replay_runs():
-    """Server-side log browser -- local-only (app_public.py has no equivalent,
-    see its own docstring). Every *.json file under logs/ at any depth,
-    newest first, named by its path relative to LOGS_DIR -- no fixed
-    filename or folder convention required, just however a --log PATH (or
-    a hand-copied file) ended up there. Cheap even for many/large files:
-    only stats each one, never opens it -- an invalid log is caught later,
-    when actually opened, the same way a bad file picked by hand already
-    is."""
+    """List every *.json file under logs/ (any depth), newest first, named by
+    path relative to LOGS_DIR. Only stats each file, never opens it."""
     runs = []
     for event_path in LOGS_DIR.rglob("*.json"):
         stat = event_path.stat()
@@ -58,9 +37,8 @@ def replay_runs():
 
 @app.get("/api/replay/runs/<path:name>/raw")
 def replay_run_raw(name):
-    # <path:name> allows "/" (any nesting depth) so a ".." segment must be
-    # rejected explicitly here -- resolve() collapses it, then confirm the
-    # result actually landed inside LOGS_DIR rather than escaping it.
+    # Reject a ".." escape: resolve() collapses it, then check the result
+    # is still inside LOGS_DIR.
     path = (LOGS_DIR / name).resolve()
     if LOGS_DIR.resolve() not in path.parents or not path.is_file():
         return jsonify({"error": "not found"}), 404
@@ -69,10 +47,8 @@ def replay_run_raw(name):
 
 @app.post("/api/replay/games")
 def replay_games():
-    """Body: {"content": <raw log JSON text, read client-side from a user-picked
-    file>}. Returns the game index for that file (label + event count per
-    game) without reducing any board state -- cheap even for a multi-
-    thousand-game round-robin --eval log."""
+    """Body: {"content": <raw log JSON text>}. Returns the game index (label +
+    event count per game) without reducing any board state."""
     body = request.get_json(force=True)
     try:
         doc = json.loads(body["content"])

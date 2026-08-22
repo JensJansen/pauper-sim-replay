@@ -1,70 +1,38 @@
-"""Fold an engine event-stream game log (GameState.log_event format, see
-game/state.py) directly into a sequence of board-state snapshots for the
-replay viewer -- no intermediate file format, no protobuf, the webapp reads
-the raw JSON log itself.
+"""Folds an engine event-stream game log (GameState.log_event format, see
+game/state.py) into a sequence of board-state snapshots for the replay
+viewer. Reads the raw JSON log directly -- no intermediate file format.
 
-Event-kind interpretation (name-based zone identity tracking via pop-by-name,
-DFC face reverts, aura-orphan handling, countered-spell routing, same-phase-
-recast/pending-resolution handling -- each one fixing a real bug found
-against real logged games, e.g. the Lava Dart flashback identity bug). The
-stack is tracked as ONE shared ordered list (top = last), matching the real
-GameState.stack -- true LIFO order across both players is exactly the kind
-of fidelity this viewer exists for. The pregame mulligan sequence is NOT
-netted into one summary step -- see "pregame steps" below.
+The stack is tracked as one shared ordered list (top = last), matching
+GameState.stack, so cross-player LIFO order is preserved.
 
-**Pregame steps (owner directive, 2026-08-02): every mulligan-round draw,
-reject, and bottom-card pick is its own step**, not collapsed into one
-"opening hands" summary. Each is a genuine, separate decision (its own
-mulligan-model forward pass -- see rl/mulligan.py's decide()), which is
-exactly the kind of thing this viewer exists to make visible, not hide --
-the opposite reasoning from "pass" below, which IS collapsed because it
-carries no decision of its own. library_draws (see DEFAULT_DECK_SIZE)
-increments on every draw and gives the count back on every mulligan
-take/bottom put-back, so it still nets to the right remaining count across
-an arbitrary number of mulligan rounds.
+Every mulligan-round draw, reject, and bottom-card pick gets its own step
+(not collapsed into one "opening hands" summary) -- each is its own
+mulligan-model forward pass (rl/model/mulligan.py's decide()). library_draws
+(see DEFAULT_DECK_SIZE) increments on every draw and gives the count back on
+every mulligan take/bottom put-back, netting to the right remaining count
+across any number of mulligan rounds.
 
 Event kinds with no board-visible effect (priority_flip, resolution_begin/
-complete, combat_damage/fight_damage -- superseded by life_change, which
-fires for the same damage with the total already computed, trigger_fired,
-pump/explore/animated -- the log entry doesn't carry enough to render
-unambiguously, undercity/initiative/goad/ward status, ...) still produce a
-step (so the scrubber timeline never silently skips an event) but don't
-mutate board state. A creature's resulting power/toughness from any of
-those (a pump, a +1/+1 counter, an attached/orphaned Aura, an animate
-threshold) DOES show up, one step later: stats_changed (game.effects.
-state_based._log_stat_changes) recomputes every creature's effective stats
-before each priority round and logs the delta, which _handle_stats_changed
-below applies to the battlefield entry's live power/toughness (kept
-alongside its base_power/base_toughness from zone-entry, so the viewer can
-tell buffed/debuffed apart from printed).
+complete, combat_damage/fight_damage -- superseded by life_change, trigger_
+fired, pump/explore/animated, undercity/initiative/goad/ward status, ...)
+still produce a step, so the scrubber never skips an event, but don't mutate
+board state. A creature's resulting power/toughness from any of those shows
+up one step later via stats_changed (game.effects.state_based.
+_log_stat_changes recomputes every creature's effective stats before each
+priority round and logs the delta); _handle_stats_changed applies that to
+the battlefield entry's live power/toughness, kept alongside base_power/
+base_toughness from zone-entry so buffed/debuffed is distinguishable from
+printed.
 
-"pass" is the one exception, owner-authorized (2026-08-02): a priority pass
-carries no information the viewer doesn't already show via whatever happens
-next -- the stack's top item resolving (its own zone_move step) or the
-phase advancing (its own phase_change step) -- so it's dropped rather than
-given a step, cutting a large fraction of a typical game's step count that
-was pure priority-passing noise.
-
-Phases with nothing but passes in them (both players decline to act, so the
-phase does nothing but end) are collapsed too, same day's authorization: a
-phase_change is buffered rather than appended immediately, since whether
-it's worth showing isn't known until either a real event during that phase
-flushes it, or the next phase_change/turn_start discards it unflushed --
-an empty phase, skipped straight through to whatever comes next. See
-GameReducer._emit.
-
-decision_weights is buffered the same way (owner directive, 2026-08-19,
-superseding the 2026-08-02 "always show a real decision, even a pass" call
-for this specific case): the network logs one whenever a decision had more
-than one legal option, REGARDLESS of whether the chosen action was pass
-(rl/agent.py's _log_decision_weights) -- so "the agent considered acting
-and passed anyway" was flushing an otherwise-empty phase's header on its
-own, defeating the collapse above every time either player merely had an
-option to decline. Queued decision_weights steps ride along with the
-phase's own buffered header: shown together if a real action follows later
-in the same phase, discarded together if it doesn't. A decision that led to
-a genuine board change still always shows (the action's own step flushes
-both); only pass-only phases disappear.
+"pass" produces no step: whatever it leads to (a stack item resolving, a
+phase advancing) already gets its own step. A phase_change is buffered
+rather than appended immediately (GameReducer._emit): a real event during
+that phase flushes it, otherwise the next phase_change/turn_start discards
+it as an empty, pass-only phase. decision_weights steps are buffered
+alongside the pending phase header the same way -- a network logs one
+whenever a decision had more than one legal option, even if the chosen
+action was pass, so they're shown together with the phase header if a real
+action follows in the same phase, and discarded together if it doesn't.
 """
 # The event-stream format never states a deck's true size. Approximate
 # "cards remaining": assume a real 60-card constructed deck, decrement once
@@ -90,12 +58,9 @@ def _norm_zone(z):
 
 
 def _format_candidate_label(c):
-    """A decision_weights candidate's display string. rl/agent.py and
-    rl/mulligan.py deliberately log structured facts (fixed_label a plain
-    string already; pointer_identity a {name, slot, controller} fact),
-    never a baked string, so the formatting work happens here -- once, in
-    the viewer -- same "log facts, format them in replay_engine.py" pattern
-    every other event kind in this file already follows."""
+    """A decision_weights candidate's display string. Candidates carry
+    structured facts (fixed_label or a pointer_identity dict), not a
+    pre-baked string; formatting happens here."""
     if c.get("fixed_label") is not None:
         return c["fixed_label"]
     pid = c.get("pointer_identity")
@@ -151,13 +116,6 @@ class GameReducer:
         self.steps = []
         self._pending_phase_step = None  # buffered phase_change step, see _emit
         self._pending_decision_steps = []  # buffered decision_weights steps, same phase, see _emit
-        # Owner directive (2026-08-02): show every individual mulligan-round
-        # draw, reject, and bottom-card pick as its own step -- these are
-        # real per-decision moments (each is its own mulligan-model forward
-        # pass, see rl/mulligan.py), not bookkeeping to collapse away like
-        # "pass". Deliberately NOT netted into one "opening hands" summary
-        # (a past design here) -- that hid exactly the keep-vs-mulligan and
-        # which-cards-to-bottom decisions this viewer exists to surface.
         self.main_events = events
 
     def other(self, p):
@@ -166,21 +124,12 @@ class GameReducer:
     # ------------------------------------------------------------------
 
     def _emit(self, e, kind, description, extra=None):
-        """A phase_change is buffered, not appended, since we don't yet know
-        whether its phase will contain a real action: the next real event
-        flushes it (the phase gets shown after all), while the next
-        phase_change/turn_start with nothing having flushed it discards it
-        instead -- an empty, priority-passing-only phase, skipped for
-        brevity per the owner's request. turn_start is never itself
-        buffered (always shown) but also discards a still-pending phase --
-        the previous phase ending with nothing in it is exactly the empty
-        case this is meant to collapse.
-
-        decision_weights is buffered right alongside it, queued rather than
-        appended, for the same reason -- see this module's docstring. extra:
-        kind-specific fields merged onto the step (only decision_weights
-        uses this -- candidates/chosen_index/value_estimate/network/
-        pointer_kind)."""
+        """Buffers phase_change and decision_weights steps rather than
+        appending them immediately (see module docstring); appends
+        everything else, flushing any pending phase/decision steps first.
+        turn_start always appends and discards a still-pending phase without
+        flushing it. extra: kind-specific fields merged onto the step (only
+        decision_weights uses this)."""
         step = {
             "kind": kind,
             "turn": e.get("turn"),
@@ -194,9 +143,6 @@ class GameReducer:
         if extra:
             step.update(extra)
         if kind == "phase_change":
-            # A new phase starting means the OLD phase is done -- whatever was
-            # still buffered from it (header + any pass-only decisions) never
-            # got flushed by a real event, so it's discarded together here.
             self._pending_phase_step = step
             self._pending_decision_steps = []
             return
@@ -327,10 +273,9 @@ class GameReducer:
         if aura is not None:
             target_p, target_key = self._find_perm(e["target"])
             if target_key is not None:
-                # Resolved to the target's controller here (not just name/slot,
-                # which can collide across the two players' battlefields) so the
-                # viewer can nest the aura under the right permanent even when
-                # it enchants an opponent's (e.g. Pacifism-style).
+                # Keyed by the target's controller (not just name/slot, which
+                # can collide across battlefields) so a Pacifism-style aura
+                # nests under the right permanent even on an opponent's.
                 aura["enchanting"] = {"controller_idx": target_p.idx, "name": target_key[0], "slot": target_key[1]}
         self._emit(e, "aura_attached", f"P{aura_p.idx} attaches {e['aura'][0]} to {e['target'][0]}")
 
@@ -425,20 +370,17 @@ class GameReducer:
     def _set_tapped(self, e, tapped):
         owner_idx = e.get("owner_idx")
         if owner_idx is not None:
-            # Unambiguous: two players' same-named permanents can legitimately
-            # share a (name, slot) key (slots are assigned independently per
-            # player), so an explicit owner beats scanning both battlefields.
+            # Two players' battlefields assign slots independently, so the
+            # same (name, slot) key can legitimately exist for both -- an
+            # explicit owner is needed to disambiguate.
             key = tuple(e["permanent"])
             entry = self.players[owner_idx].battlefield.get(key)
             if entry is not None:
                 entry["tapped"] = tapped
                 return key
             return None
-        # No owner_idx -- an older log predating this field. Fall back to the
-        # best-effort dual-battlefield scan (player 0 first); this can still
-        # pick the wrong player's permanent on a name+slot collision, but
-        # that's an accepted limitation of already-committed historical data,
-        # not something fixable after the fact.
+        # No owner_idx (older log format): best-effort dual-battlefield scan,
+        # which can pick the wrong player's permanent on a name+slot collision.
         p, key = self._find_perm(e["permanent"])
         if key is not None:
             p.battlefield[key]["tapped"] = tapped
@@ -481,12 +423,9 @@ class GameReducer:
         self._emit(e, "transform", f"{from_name} transforms into {to_card or '?'}")
 
     def _handle_stats_changed(self, e):
-        """game.effects.state_based._log_stat_changes: a creature's effective
-        power/toughness (counters, until-EOT pump, Auras, animate/transform,
-        static-self boosts -- see that function's docstring) moved off
-        whatever was last shown. Updates the LIVE power/toughness only --
-        base_power/base_toughness (set at zone-entry/transform) stay put, so
-        the viewer can tell buffed/debuffed apart from printed."""
+        """Updates a creature's live power/toughness only -- base_power/
+        base_toughness (set at zone-entry/transform) stay put, so buffed/
+        debuffed can be told apart from printed."""
         p, key = self._find_perm(e["permanent"])
         name = key[0] if key is not None else e["permanent"][0]
         if key is not None:
@@ -500,11 +439,8 @@ class GameReducer:
         self._emit(e, "reveal", f"P{p.idx} reveals {e.get('card') or '?'} off the top of their library")
 
     def _handle_decision_weights(self, e):
-        """Non-board-mutating (like the unhandled-kind fallback): carries the
-        agent's top-5 candidate actions through to the step dict for the
-        viewer's decision panel, formatting each candidate's label here (see
-        _format_candidate_label). See todo/game_visualization.md's
-        "Decision-point overlay" section."""
+        """Non-board-mutating: carries the agent's candidate actions into the
+        step dict for the viewer's decision panel."""
         candidates = [
             {"index": c.get("index"), "probability": c.get("probability"), "label": _format_candidate_label(c)}
             for c in (e.get("candidates") or [])
@@ -581,10 +517,7 @@ class GameReducer:
             entry = {
                 "name": name, "tapped": bool(e.get("tapped")),
                 "power": e.get("power"), "toughness": e.get("toughness"),
-                # Printed stats at zone-entry, kept alongside the live
-                # "power"/"toughness" (which stats_changed updates as counters/
-                # Auras/pump come and go) so the viewer can highlight a
-                # creature that's currently buffed/debuffed off its base.
+                # Printed stats at zone-entry; stats_changed updates live power/toughness separately.
                 "base_power": e.get("power"), "base_toughness": e.get("toughness"),
                 "is_token": is_token, "card_type": e.get("card_type"),
                 "attacking": False, "blocking": None, "front_name": None,
@@ -603,14 +536,11 @@ class GameReducer:
         return f"P{p.idx}: {name} → {to_zone or '?'}"
 
     def _pop_named_source(self, p, name, from_zone):
-        """Best-effort remove `name` from wherever the log says it came from,
-        so a card's origin zone stops showing it as still present. Falls
-        through silently if untracked (straight from the hidden library --
-        nothing to remove). The candidate-pool search order for a
-        from_zone=None cast (Flashback/Escape/Madness/Plot/Adventure/an
-        eagerly-discarded alt cost/a copy -- the log doesn't distinguish
-        these further) is what avoids the Lava Dart double-copy bug this
-        class of lookup is prone to."""
+        """Removes `name` from wherever the log says it came from. Silently
+        no-ops if untracked (e.g. straight from the hidden library). The
+        from_zone=None search order (exile, then pending_resolution, then
+        graveyard) matters: it's what a same-phase flashback/recast needs to
+        find the right existing copy instead of spawning a duplicate."""
         if from_zone == "hand":
             pop_by_name(p.hand, name)
         elif from_zone == "stack":
@@ -637,9 +567,8 @@ class GameReducer:
             return
 
         if from_zone == "stack" and to_zone is None:
-            # Resolution marker only, no destination yet: claimed by a
-            # battlefield entry or a same-phase recast for the same name,
-            # else flushed to graveyard at the next turn/phase boundary.
+            # Resolved off the stack, no destination yet -- goes to
+            # pending_resolution until claimed or flushed to graveyard.
             p = self.players[e["active_idx"]]
             if self._pop_stack(name) is not None:
                 p.pending_resolution.append({"name": name})
@@ -655,9 +584,6 @@ class GameReducer:
         if reason == "draw":
             p.library_draws += 1
         elif reason in ("mulligan_take", "mulligan_bottom"):
-            # A mulligan reject/bottom returns a drawn card to the library --
-            # give the count back so a multi-mulligan pregame still nets to
-            # the real kept-hand size, not an inflated one.
             p.library_draws = max(0, p.library_draws - 1)
 
     _HANDLERS = {
@@ -694,23 +620,12 @@ class GameReducer:
 
 
 def list_games(doc):
-    """Lightweight per-game index for the file-picker step: label + event
-    count, no board-state reduction (cheap even for a multi-thousand-game
-    round-robin --eval log).
-
-    Prefers each game's own deck_a/deck_b (run_league.py's _write_event_log,
-    2026-08 on) to label it directly as "A vs B" -- a round-robin log holds
-    many different pairings in one file, so a single file-level label can't
-    describe every game. A per-pairing occurrence counter disambiguates
-    repeat games of the same pairing (a double round-robin plays each one
-    twice) as "(game 1)"/"(game 2)" instead of two identical, unindexable
-    labels. Falls back to the old file-level meta (matchup/deck_a, else a
-    bare "game N") for logs written before per-game pairing existed.
-
-    header/detail split the label into the two pieces the game-picker UI
-    renders on separate lines (participants as the prominent line, game
-    number + event count as the secondary one); label is header+detail
-    joined back into one string, kept for callers that just want text."""
+    """Per-game index for the file-picker: label + event count, no board-
+    state reduction. Prefers each game's own deck_a/deck_b to label it "A vs
+    B", disambiguating repeat games of the same pairing as "(game 1)"/
+    "(game 2)"; falls back to file-level meta (matchup/deck_a, else "game N")
+    when per-game pairing isn't present. header/detail split the label into
+    the two lines the game-picker UI renders; label is both joined."""
     meta = doc.get("meta") or {}
     matchup = meta.get("matchup")
     if meta.get("config_name"):

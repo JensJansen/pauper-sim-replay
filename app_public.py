@@ -1,17 +1,6 @@
-"""Public-hostable subset of app.py: the /replay log viewer.
-
-app.py itself has no training-launch surface either (training runs are
-launched from the pauper_sim repo directly, this repo's own submodule
-parent -- CLI or the `/train` skill, never through this app). This file
-now also serves app.py's server-side log browser (/api/replay/runs*,
-LOGS_DIR-backed) -- the "local machine's own files" privacy concern that
-used to rule it out here doesn't apply to a deployed instance: LOGS_DIR
-only ever holds whatever got committed to THIS repo, and this repo is
-already public, so listing it exposes nothing that isn't already visible
-on GitHub. Hosting it needs only requirements-public.txt. See app.py's
-module docstring for the full local tool and its own /api/replay/runs*
-docstrings (identical here). Deploy entrypoint for Render/Fly/etc:
-gunicorn app_public:app (see render.yaml).
+"""Public-hostable subset of app.py: the /replay log viewer, routes serving
+LOGS_DIR (only ever holds files committed to this already-public repo).
+Deploy entrypoint for Render/Fly/etc: gunicorn app_public:app (render.yaml).
 """
 import json
 from pathlib import Path
