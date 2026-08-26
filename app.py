@@ -3,18 +3,29 @@ two tools below. Local-only: no auth, binds to localhost. See app_public.py
 for the publicly-hostable equivalent -- same routes, identical except for
 which logs/ it can see (this machine's vs. whatever's committed).
 
+logs/ has two independent, sibling subdirectories -- each tool only ever
+reads its own:
 - "/replay" -- the game-log replay viewer (static/replay.html) and an API to
-  browse logs/ and reduce a logged game's events into board-state snapshots
-  (replay_engine.py).
+  browse logs/replays/ and reduce a logged game's events into board-state
+  snapshots (replay_engine.py). A file doesn't have to live under
+  logs/replays/ to be viewable, though -- "Open new file" reads any
+  correctly-shaped JSON from disk client-side, no server route involved, so
+  e.g. a validation check's own output (checkpoints/<league>/checks/
+  primary_vs_primary_round_robin_<N>games.json in the parent repo -- see
+  validation/round_robin_primary.py, which embeds a "games" key in that
+  exact file) opens here directly with zero wiring on this end.
 - "/stats" -- static/stats.html, a validation-metrics dashboard reading
-  logs/validation/. That's a manually-refreshed COPY of the parent
-  pauper_sim repo's checkpoints/<league>/ (metrics.jsonl, progress.json, and
-  every checks/*.json -- never the multi-GB live/archive/mulligan .pt
-  weights), made because checkpoints/ itself is gitignored at the pauper_sim
-  root and this submodule has no other way to ship real data with itself.
-  TODO(validation autologging): have src/validation/_common.py write here
-  directly (or a sync step call it after each run) instead of this being a
-  manual copy -- see logs/validation/README.md.
+  logs/validation/. That's a COPY of the parent pauper_sim repo's
+  checkpoints/<league>/ (metrics.jsonl, progress.json, and every
+  checks/*.json -- never the multi-GB live/archive/mulligan .pt weights,
+  and never a check's embedded "games" key either -- see
+  validation/_common.py write_league_json's own docstring), kept current
+  automatically: src/validation/_common.py and rl/league/league_runner.py
+  (both in the parent repo) mirror every write here as they make it,
+  best-effort, whenever this submodule is checked out -- see
+  webapp_mirror.py there and logs/validation/README.md here. Made because
+  checkpoints/ itself is gitignored at the pauper_sim root and this
+  submodule has no other way to ship real data with itself.
 
 Run: python app.py (paths are anchored to this file, not to cwd).
 """
@@ -27,8 +38,9 @@ from flask import Flask, jsonify, request, send_from_directory
 
 from replay_engine import list_games, reduce_game
 
-LOGS_DIR = Path(__file__).resolve().parent / "logs"
-VALIDATION_DIR = LOGS_DIR / "validation"
+WEBAPP_LOGS_DIR = Path(__file__).resolve().parent / "logs"
+REPLAY_LOGS_DIR = WEBAPP_LOGS_DIR / "replays"
+VALIDATION_DIR = WEBAPP_LOGS_DIR / "validation"
 CHECK_FILE_RE = re.compile(r"(.+)_(\d+)games\.json$")
 
 app = Flask(__name__, static_folder="static", static_url_path="")
@@ -51,12 +63,14 @@ def stats_page():
 
 @app.get("/api/replay/runs")
 def replay_runs():
-    """List every *.json file under logs/ (any depth), newest first, named by
-    path relative to LOGS_DIR. Only stats each file, never opens it."""
+    """List every *.json file under logs/replays/ (any depth), newest first,
+    named by path relative to REPLAY_LOGS_DIR. Only stats each file, never
+    opens it. Scoped to replays/ specifically (not all of logs/) so a
+    validation checks/*.json never shows up here as if it were a game log."""
     runs = []
-    for event_path in LOGS_DIR.rglob("*.json"):
+    for event_path in REPLAY_LOGS_DIR.rglob("*.json"):
         stat = event_path.stat()
-        name = event_path.relative_to(LOGS_DIR).as_posix()
+        name = event_path.relative_to(REPLAY_LOGS_DIR).as_posix()
         runs.append({"name": name, "mtime": stat.st_mtime, "size_kb": stat.st_size / 1024})
     runs.sort(key=lambda r: r["mtime"], reverse=True)
     return jsonify(runs)
@@ -65,9 +79,9 @@ def replay_runs():
 @app.get("/api/replay/runs/<path:name>/raw")
 def replay_run_raw(name):
     # Reject a ".." escape: resolve() collapses it, then check the result
-    # is still inside LOGS_DIR.
-    path = (LOGS_DIR / name).resolve()
-    if LOGS_DIR.resolve() not in path.parents or not path.is_file():
+    # is still inside REPLAY_LOGS_DIR.
+    path = (REPLAY_LOGS_DIR / name).resolve()
+    if REPLAY_LOGS_DIR.resolve() not in path.parents or not path.is_file():
         return jsonify({"error": "not found"}), 404
     return send_from_directory(path.parent, path.name)
 

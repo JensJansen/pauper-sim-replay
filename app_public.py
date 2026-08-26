@@ -13,8 +13,9 @@ from flask import Flask, jsonify, request, send_from_directory
 
 from replay_engine import list_games, reduce_game
 
-LOGS_DIR = Path(__file__).resolve().parent / "logs"
-VALIDATION_DIR = LOGS_DIR / "validation"
+WEBAPP_LOGS_DIR = Path(__file__).resolve().parent / "logs"
+REPLAY_LOGS_DIR = WEBAPP_LOGS_DIR / "replays"
+VALIDATION_DIR = WEBAPP_LOGS_DIR / "validation"
 CHECK_FILE_RE = re.compile(r"(.+)_(\d+)games\.json$")
 
 app = Flask(__name__, static_folder="static", static_url_path="")
@@ -38,9 +39,9 @@ def stats_page():
 @app.get("/api/replay/runs")
 def replay_runs():
     runs = []
-    for event_path in LOGS_DIR.rglob("*.json"):
+    for event_path in REPLAY_LOGS_DIR.rglob("*.json"):
         stat = event_path.stat()
-        name = event_path.relative_to(LOGS_DIR).as_posix()
+        name = event_path.relative_to(REPLAY_LOGS_DIR).as_posix()
         runs.append({"name": name, "mtime": stat.st_mtime, "size_kb": stat.st_size / 1024})
     runs.sort(key=lambda r: r["mtime"], reverse=True)
     return jsonify(runs)
@@ -48,8 +49,8 @@ def replay_runs():
 
 @app.get("/api/replay/runs/<path:name>/raw")
 def replay_run_raw(name):
-    path = (LOGS_DIR / name).resolve()
-    if LOGS_DIR.resolve() not in path.parents or not path.is_file():
+    path = (REPLAY_LOGS_DIR / name).resolve()
+    if REPLAY_LOGS_DIR.resolve() not in path.parents or not path.is_file():
         return jsonify({"error": "not found"}), 404
     return send_from_directory(path.parent, path.name)
 

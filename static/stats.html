@@ -54,10 +54,18 @@
 
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
   .grid-3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .grid-wide { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
   .card { background: #1b1e24; border: 1px solid #2a2d33; border-radius: 8px; padding: 10px 12px; }
   .card-title { font-size: 12px; color: #b8c0d0; display: flex; justify-content: space-between; margin-bottom: 4px; }
   .card-value { color: #fff; font-weight: 600; }
   .card svg { display: block; width: 100%; height: auto; }
+
+  .chart-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 10px; }
+  .legend-item { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #9aa0aa; }
+  .legend-swatch { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+  .legend-line { width: 14px; height: 0; border-top: 2px dashed #666; flex: none; }
+
+  .ref-labels { display: flex; flex-wrap: wrap; gap: 3px 10px; font-size: 11px; margin-bottom: 6px; }
 
   .bar-row { margin-bottom: 8px; }
   .bar-label { font-size: 12px; margin-bottom: 3px; display: flex; justify-content: space-between; gap: 6px; }
@@ -69,13 +77,26 @@
   .data-table th { color: #888; font-weight: 500; text-transform: uppercase; font-size: 10px; letter-spacing: .03em; }
   .status-warn { color: #fab219; }
 
-  .matrix-wrap { overflow-x: auto; }
-  table.matrix { border-collapse: collapse; font-size: 11px; white-space: nowrap; }
-  table.matrix th, table.matrix td { padding: 4px 8px; text-align: center; font-variant-numeric: tabular-nums; }
+  table.matrix { border-collapse: collapse; font-size: 14px; width: 100%; table-layout: fixed; }
+  table.matrix th, table.matrix td { padding: 8px 6px; text-align: center; font-variant-numeric: tabular-nums; overflow-wrap: break-word; }
+  table.matrix th { font-size: 12px; }
   table.matrix thead th { color: #888; font-weight: 500; }
   table.matrix tbody th { text-align: right; color: #b8c0d0; font-weight: 500; }
   td.matrix-cell { color: #e8eaf0; border-radius: 3px; }
   td.matrix-empty { color: #444; }
+  /* block so the win%/win-loss sub-value sits on its own line under the deck
+     name -- combined with table-layout:fixed's colgroup widths, this keeps
+     column widths constant when the toggle switches text length */
+  .matrix-sub { display: block; color: #6c7280; font-weight: 400; font-size: 11px; }
+
+  .toggle-switch { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; color: #d8dbe0; user-select: none; }
+  .toggle-switch input { display: none; }
+  .toggle-switch .toggle-label { color: #666; }
+  .toggle-switch .toggle-label.on { color: #d8dbe0; }
+  .toggle-track { width: 32px; height: 18px; background: #262a31; border: 1px solid #3a3f47; border-radius: 10px; position: relative; flex: none; }
+  .toggle-track::after { content: ''; position: absolute; top: 1px; left: 1px; width: 14px; height: 14px; background: #9aa0aa; border-radius: 50%; transition: left .15s, background .15s; }
+  .toggle-switch input:checked + .toggle-track { background: #22344f; border-color: #3a6df0; }
+  .toggle-switch input:checked + .toggle-track::after { left: 15px; background: #6a9dff; }
 
   #chart-tip {
     display: none; position: fixed; z-index: 100; pointer-events: none;
@@ -100,6 +121,7 @@
   <button class="tab-btn" data-tab="ppo">PPO Diagnostics</button>
   <button class="tab-btn" data-tab="mulligan">Mulligan</button>
   <button class="tab-btn" data-tab="roundrobin">Round Robin</button>
+  <button class="tab-btn" data-tab="manaburn">Mana Burn</button>
 </div>
 
 <main id="main">
@@ -108,6 +130,7 @@
   <div class="tab-panel" id="panel-ppo"></div>
   <div class="tab-panel" id="panel-mulligan"></div>
   <div class="tab-panel" id="panel-roundrobin"></div>
+  <div class="tab-panel" id="panel-manaburn"></div>
 </main>
 
 <div id="chart-tip"></div>
@@ -115,6 +138,12 @@
 <script>
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+// Same as escapeHtml, but offers a wrap point after each underscore -- deck
+// names are snake_case, so tight columns wrap at word boundaries instead of
+// splitting a word in half.
+function wrapDeckName(s) {
+  return String(s).split('_').map(escapeHtml).join('_<wbr>');
 }
 
 async function fetchJson(url) {
@@ -162,7 +191,7 @@ function winRateBarList(rows) {
 // tooltip is handled by one delegated listener (attachChartTooltips) reading
 // the data-* attributes set here, rather than per-chart handlers.
 function sparkline(points, opts = {}) {
-  const w = 210, h = 52, pad = 4;
+  const w = opts.w || 210, h = opts.h || 52, pad = 4;
   if (!points.length) return `<svg width="${w}" height="${h}"></svg>`;
   const xs = points.map(p => p.x);
   const xMin = Math.min(...xs), xMax = Math.max(...xs);
@@ -173,16 +202,58 @@ function sparkline(points, opts = {}) {
   const sy = y => h - pad - (y - yMin) / (yMax - yMin) * (h - 2 * pad);
   const d = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${sx(p.x).toFixed(1)},${sy(p.y).toFixed(1)}`).join(' ');
   const color = opts.color || '#6a9dff';
-  let ref = '';
+  // opts.refY: single unlabeled default-gray reference line (e.g. PPO's target_kl).
+  // opts.refLines: [{y, color, dash}] -- named/colored reference lines (e.g.
+  // win rate vs a fixed opponent), meant to be identified by a legend outside
+  // the chart rather than in-svg text, same as refY already is via toolbar hints.
+  let refSvg = '';
   if (opts.refY != null && opts.refY >= yMin && opts.refY <= yMax) {
-    ref = `<line x1="${pad}" y1="${sy(opts.refY).toFixed(1)}" x2="${w - pad}" y2="${sy(opts.refY).toFixed(1)}" stroke="#3a3f47" stroke-width="1" stroke-dasharray="3,3"/>`;
+    refSvg += `<line x1="${pad}" y1="${sy(opts.refY).toFixed(1)}" x2="${w - pad}" y2="${sy(opts.refY).toFixed(1)}" stroke="#3a3f47" stroke-width="1" stroke-dasharray="3,3"/>`;
+  }
+  for (const rl of opts.refLines || []) {
+    if (rl.y < yMin || rl.y > yMax) continue;
+    refSvg += `<line x1="${pad}" y1="${sy(rl.y).toFixed(1)}" x2="${w - pad}" y2="${sy(rl.y).toFixed(1)}" stroke="${rl.color}" stroke-width="1.5" stroke-dasharray="${rl.dash || '4,3'}"/>`;
   }
   const last = points[points.length - 1];
   return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"
-      data-points='${JSON.stringify(points).replace(/'/g, '&#39;')}' data-xmin="${xMin}" data-xmax="${xMax}" data-pad="${pad}">
-    ${ref}
+      data-points='${JSON.stringify(points).replace(/'/g, '&#39;')}' data-xmin="${xMin}" data-xmax="${xMax}" data-padl="${pad}" data-padr="${pad}">
+    ${refSvg}
     <path d="${d}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
     <circle cx="${sx(last.x).toFixed(1)}" cy="${sy(last.y).toFixed(1)}" r="3" fill="${color}" stroke="#1b1e24" stroke-width="1.5"/>
+  </svg>`;
+}
+
+// Sparkline variant for 2+ overlaid series sharing one y-scale -- series:
+// [{points, color, label}]. Left-padded for a 3-tick y-axis (min/mid/max) so
+// overlaid lines can be read against an actual scale, not just relative shape.
+function overlaySparkline(series, opts = {}) {
+  const w = 210, h = 52, padL = 24, padR = 4, padY = 4;
+  const allPoints = series.flatMap(s => s.points);
+  if (!allPoints.length) return `<svg width="${w}" height="${h}"></svg>`;
+  const xs = allPoints.map(p => p.x);
+  const xMin = Math.min(...xs), xMax = Math.max(...xs);
+  let yMin = opts.yMin ?? Math.min(...allPoints.map(p => p.y));
+  let yMax = opts.yMax ?? Math.max(...allPoints.map(p => p.y));
+  if (yMin === yMax) { yMin -= 1; yMax += 1; }
+  const sx = x => xMax === xMin ? padL : padL + (x - xMin) / (xMax - xMin) * (w - padL - padR);
+  const sy = y => h - padY - (y - yMin) / (yMax - yMin) * (h - 2 * padY);
+
+  const axis = [yMin, (yMin + yMax) / 2, yMax].map(v => `
+    <line x1="${padL}" y1="${sy(v).toFixed(1)}" x2="${w - padR}" y2="${sy(v).toFixed(1)}" stroke="#23262c" stroke-width="1"/>
+    <text x="0" y="${(sy(v) + 3).toFixed(1)}" font-size="8" fill="#666">${v.toFixed(1)}</text>`).join('');
+
+  const lines = series.filter(s => s.points.length).map(s => {
+    const d = s.points.map((p, i) => `${i === 0 ? 'M' : 'L'}${sx(p.x).toFixed(1)},${sy(p.y).toFixed(1)}`).join(' ');
+    const last = s.points[s.points.length - 1];
+    return `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${sx(last.x).toFixed(1)}" cy="${sy(last.y).toFixed(1)}" r="2.5" fill="${s.color}" stroke="#1b1e24" stroke-width="1.5"/>`;
+  }).join('');
+
+  const dataPoints = series.flatMap(s => s.points.map(p => ({ ...p, yLabel: `${s.label}: ${p.yLabel}` })));
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"
+      data-points='${JSON.stringify(dataPoints).replace(/'/g, '&#39;')}' data-xmin="${xMin}" data-xmax="${xMax}" data-padl="${padL}" data-padr="${padR}">
+    ${axis}
+    ${lines}
   </svg>`;
 }
 
@@ -214,10 +285,11 @@ function attachChartTooltips(root) {
     const svg = e.target.closest('svg[data-points]');
     if (!svg) { tip.style.display = 'none'; return; }
     const points = JSON.parse(svg.dataset.points);
-    const xMin = +svg.dataset.xmin, xMax = +svg.dataset.xmax, pad = +svg.dataset.pad;
+    const xMin = +svg.dataset.xmin, xMax = +svg.dataset.xmax;
+    const padL = +svg.dataset.padl, padR = +svg.dataset.padr;
     const rect = svg.getBoundingClientRect();
     const relX = e.clientX - rect.left;
-    const frac = xMax === xMin ? 0 : (relX - pad) / (rect.width - 2 * pad);
+    const frac = xMax === xMin ? 0 : (relX - padL) / (rect.width - padL - padR);
     const targetX = xMin + frac * (xMax - xMin);
     let nearest = points[0];
     for (const p of points) if (Math.abs(p.x - targetX) < Math.abs(nearest.x - targetX)) nearest = p;
@@ -290,43 +362,60 @@ function renderOverview() {
 }
 
 // ---- Win Rates ----
+const VS_HISTORY_REF = [
+  { key: 'active_oldest', color: '#5fce7a', dash: '6,3', label: 'vs active-oldest' },
+  { key: 'archive_oldest', color: '#c77dff', dash: '2,2', label: 'vs archive-oldest' },
+];
 let winRateMode = 'primary_vs_primary_round_robin';
 function renderWinRates() {
   const el = document.getElementById('panel-winrates');
   const records = metrics[winRateMode] || [];
+
+  // latest active-oldest/archive-oldest snapshot per deck -- these are single
+  // current values (not a trend), so they're drawn as horizontal reference
+  // lines across the deck's win-rate-over-time chart rather than their own series.
+  const vhByDeck = new Map();
+  for (const [deck, rs] of byDeck(metrics.vs_history || [])) {
+    const latestCum = Math.max(...rs.map(r => r.cumulative_games));
+    vhByDeck.set(deck, Object.fromEntries(VS_HISTORY_REF.map(ref =>
+      [ref.key, rs.find(r => r.cumulative_games === latestCum && r.label === ref.key && r.win_rate != null) || null])));
+  }
+
   const cards = [...byDeck(records)].sort((a, b) => a[0].localeCompare(b[0])).map(([deck, rs]) => {
     const points = rs.filter(r => r.win_rate != null).map(r => ({
       x: r.cumulative_games, y: r.win_rate,
       label: `${r.cumulative_games.toLocaleString()} games`, yLabel: `${(r.win_rate * 100).toFixed(1)}% win rate`,
     }));
     const latest = points[points.length - 1];
+    const vh = vhByDeck.get(deck) || {};
+    const refLines = [{ y: 0.5, color: '#666', dash: '3,3' }];
+    const refLabels = [];
+    for (const ref of VS_HISTORY_REF) {
+      const r = vh[ref.key];
+      if (!r) continue;
+      refLines.push({ y: r.win_rate, color: ref.color, dash: ref.dash });
+      refLabels.push(`<span style="color:${ref.color}">${ref.label} ${(r.win_rate * 100).toFixed(0)}%
+        <span class="hint">(${r.live_wins}/${r.games} @ ${r.cumulative_games.toLocaleString()}g)</span></span>`);
+    }
     return `<div class="card">
       <div class="card-title">${escapeHtml(deck)} <span class="card-value">${latest ? (latest.y * 100).toFixed(1) + '%' : '—'}</span></div>
-      ${sparkline(points, { yMin: 0, yMax: 1, refY: 0.5 })}
+      ${refLabels.length ? `<div class="ref-labels">${refLabels.join('')}</div>` : ''}
+      ${sparkline(points, { yMin: 0, yMax: 1, refLines, w: 300, h: 110 })}
     </div>`;
   }).join('');
-
-  const vh = metrics.vs_history || [];
-  const vhRows = [];
-  for (const [deck, rs] of byDeck(vh)) {
-    const latestCum = Math.max(...rs.map(r => r.cumulative_games));
-    for (const label of ['active_oldest', 'archive_oldest']) {
-      const r = rs.find(r => r.cumulative_games === latestCum && r.label === label);
-      if (r && r.win_rate != null) {
-        vhRows.push({ label: `${deck} vs ${label.replace('_', ' ')}`, rate: r.win_rate, sub: `${r.live_wins}/${r.games} @ ${r.cumulative_games.toLocaleString()}g` });
-      }
-    }
-  }
-  vhRows.sort((a, b) => a.label.localeCompare(b.label));
 
   el.innerHTML = `
     <div class="toolbar">
       <button class="chip${winRateMode === 'primary_vs_primary_round_robin' ? ' active' : ''}" data-mode="primary_vs_primary_round_robin">Primary vs primary</button>
       <button class="chip${winRateMode === 'primary_vs_training_round_robin' ? ' active' : ''}" data-mode="primary_vs_training_round_robin">Primary vs training</button>
     </div>
-    <div class="grid">${cards || '<p class="hint">no data yet</p>'}</div>
-    <h2>Vs snapshot history — current build vs its own archived/active-oldest past selves</h2>
-    ${winRateBarList(vhRows)}`;
+    <div class="chart-legend">
+      <span class="legend-item"><span class="legend-swatch" style="background:#6a9dff"></span>Win rate trend</span>
+      <span class="legend-item"><span class="legend-line" style="border-color:#666"></span>50% breakeven</span>
+      <span class="legend-item"><span class="legend-line" style="border-color:#5fce7a"></span>vs active-oldest</span>
+      <span class="legend-item"><span class="legend-line" style="border-color:#c77dff"></span>vs archive-oldest</span>
+    </div>
+    <div class="grid grid-wide">${cards || '<p class="hint">no data yet</p>'}</div>`;
   attachChartTooltips(el);
   el.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => { winRateMode = b.dataset.mode; renderWinRates(); }));
 }
@@ -430,6 +519,11 @@ async function renderMulligan() {
 // ---- Round Robin ----
 let rrMode = 'primary_vs_primary_round_robin';
 let rrSnapshotGames = null;
+let rrValueMode = 'rate'; // 'rate' (win %) or 'record' (wins/games), toggled across the whole tab
+function rrFormat(t) {
+  if (!t || !t.games) return '—';
+  return rrValueMode === 'record' ? `${t.wins}/${t.games}` : `${((t.wins / t.games) * 100).toFixed(0)}%`;
+}
 async function renderRoundRobin() {
   const el = document.getElementById('panel-roundrobin');
   const snapshots = checksIndex.filter(c => c.check === rrMode && c.deck === null).sort((a, b) => b.cumulative_games - a.cumulative_games);
@@ -452,55 +546,108 @@ async function renderRoundRobin() {
   // primary-vs-training pairings are already a full Cartesian product (every
   // primary deck against every training deck), so no mirroring there.
   const cellFor = new Map();
+  const rowTotals = new Map(rowDecks.map(d => [d, { wins: 0, games: 0 }]));
+  const colTotals = new Map(colDecks.map(d => [d, { wins: 0, games: 0 }]));
   for (const p of detail.pairings) {
     cellFor.set(`${p[aKey]}|${p[bKey]}`, { games: p.games, wins: p[aWinsKey] });
-    if (!isTraining) cellFor.set(`${p[bKey]}|${p[aKey]}`, { games: p.games, wins: p[bWinsKey] });
+    rowTotals.get(p[aKey]).wins += p[aWinsKey]; rowTotals.get(p[aKey]).games += p.games;
+    colTotals.get(p[bKey]).wins += p[bWinsKey]; colTotals.get(p[bKey]).games += p.games;
+    if (!isTraining) {
+      cellFor.set(`${p[bKey]}|${p[aKey]}`, { games: p.games, wins: p[bWinsKey] });
+      rowTotals.get(p[bKey]).wins += p[bWinsKey]; rowTotals.get(p[bKey]).games += p.games;
+      colTotals.get(p[aKey]).wins += p[aWinsKey]; colTotals.get(p[aKey]).games += p.games;
+    }
   }
 
+  const gutterPct = 16; // row-header column width -- the heading below is indented to match, so it sits over the data columns, not the row-label gutter
   const matrix = `<table class="matrix">
-    <thead><tr><th></th>${colDecks.map(d => `<th>${escapeHtml(d)}</th>`).join('')}</tr></thead>
-    <tbody>${rowDecks.map(a => `<tr><th>${escapeHtml(a)}</th>${colDecks.map(b => {
+    <colgroup><col style="width:${gutterPct}%">${colDecks.map(() => '<col>').join('')}</colgroup>
+    <thead><tr><th></th>${colDecks.map(d => `<th>${wrapDeckName(d)}<span class="matrix-sub">${rrFormat(colTotals.get(d))}</span></th>`).join('')}</tr></thead>
+    <tbody>${rowDecks.map(a => `<tr><th>${wrapDeckName(a)}<span class="matrix-sub">${rrFormat(rowTotals.get(a))}</span></th>${colDecks.map(b => {
       const cell = cellFor.get(`${a}|${b}`);
       if (!cell || !cell.games) return '<td class="matrix-empty">—</td>';
       const rate = cell.wins / cell.games;
       const alpha = (0.12 + rate * 0.75).toFixed(2);
-      return `<td class="matrix-cell" style="background:rgba(58,109,240,${alpha})" title="${escapeHtml(a)} vs ${escapeHtml(b)}: ${cell.wins}/${cell.games} (${(rate * 100).toFixed(0)}%)">${(rate * 100).toFixed(0)}%</td>`;
+      const label = rrValueMode === 'record' ? `${cell.wins}/${cell.games}` : `${(rate * 100).toFixed(0)}%`;
+      return `<td class="matrix-cell" style="background:rgba(58,109,240,${alpha})" title="${escapeHtml(a)} vs ${escapeHtml(b)}: ${cell.wins}/${cell.games} (${(rate * 100).toFixed(0)}%)">${label}</td>`;
     }).join('')}</tr>`).join('')}</tbody>
   </table>`;
 
-  const totals = isTraining ? detail.primary_totals : detail.deck_totals;
-  const totalsRows = totals ? Object.entries(totals).filter(([, t]) => t.win_rate != null)
-    .sort((a, b) => b[1].win_rate - a[1].win_rate)
-    .map(([deck, t]) => ({ label: deck, rate: t.win_rate, sub: `${t.wins}/${t.games}` })) : [];
-
-  let manaSection = '';
-  if (isTraining && detail.mana_burnt_by_deck) {
-    const rows = Object.entries(detail.mana_burnt_by_deck).map(([label, m]) =>
-      `<tr><td>${escapeHtml(label)}</td><td>${m.mana_burnt_total_per_game.toFixed(2)}</td><td>${m.mana_burnt_total_single_pip_per_game.toFixed(2)}</td><td>${m.games}</td></tr>`).join('');
-    manaSection = `<h2>Mana burnt per game — primary/&lt;deck&gt; and training/&lt;deck&gt;</h2>
-      <table class="data-table">
-        <thead><tr><th>Side / deck</th><th>Total burnt/game</th><th>Single-pip burnt/game</th><th>Games</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>`;
-  }
-
   el.innerHTML = `
-    <div class="toolbar">
+    <div class="toolbar" style="margin-left:${gutterPct}%">
       <button class="chip${rrMode === 'primary_vs_primary_round_robin' ? ' active' : ''}" data-mode="primary_vs_primary_round_robin">Primary vs primary</button>
       <button class="chip${rrMode === 'primary_vs_training_round_robin' ? ' active' : ''}" data-mode="primary_vs_training_round_robin">Primary vs training</button>
-      <label class="hint" style="margin-left:auto">Snapshot</label>
+      <label class="toggle-switch" style="margin-left:auto">
+        <span class="toggle-label${rrValueMode === 'rate' ? ' on' : ''}">Win %</span>
+        <input type="checkbox" id="rr-value-toggle"${rrValueMode === 'record' ? ' checked' : ''}>
+        <span class="toggle-track"></span>
+        <span class="toggle-label${rrValueMode === 'record' ? ' on' : ''}">Win-loss</span>
+      </label>
+      <label class="hint">Snapshot</label>
       <select id="rr-snap-select">${snapshots.map(s => `<option value="${s.cumulative_games}"${s.cumulative_games === rrSnapshotGames ? ' selected' : ''}>${s.cumulative_games.toLocaleString()} games</option>`).join('')}</select>
     </div>
-    <h2>Pairing win rate — row's win % vs column</h2>
-    <div class="matrix-wrap">${matrix}</div>
-    ${totalsRows.length ? `<h2>Totals</h2>${winRateBarList(totalsRows)}` : ''}
-    ${manaSection}`;
+    <h2 style="margin-left:${gutterPct}%">Pairing win rate — row's win % vs column</h2>
+    ${matrix}`;
   el.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => { rrMode = b.dataset.mode; rrSnapshotGames = null; renderRoundRobin(); }));
   document.getElementById('rr-snap-select').addEventListener('change', e => { rrSnapshotGames = Number(e.target.value); renderRoundRobin(); });
+  document.getElementById('rr-value-toggle').addEventListener('change', e => { rrValueMode = e.target.checked ? 'record' : 'rate'; renderRoundRobin(); });
+}
+
+// ---- Mana Burn ----
+// mana_burnt_by_deck only exists on primary_vs_training_round_robin snapshots
+// (round_robin_training.py) -- one point per snapshot, so the trend needs
+// every snapshot's detail, not just the latest (fetchCheckDetail caches, so
+// revisiting this tab after the first load is free). training/<deck> is the
+// training-league opponent pool, not a primary league deck -- only the
+// primary/<deck> side belongs on this page.
+const MANA_BURN_SERIES = [
+  { key: 'mana_burnt_total_per_game', label: 'Total burnt/game', color: '#eda100' },
+  { key: 'mana_burnt_total_single_pip_per_game', label: 'Single-pip burnt/game', color: '#6a9dff' },
+];
+async function renderManaBurn() {
+  const el = document.getElementById('panel-manaburn');
+  const snapshots = checksIndex.filter(c => c.check === 'primary_vs_training_round_robin' && c.deck === null)
+    .sort((a, b) => a.cumulative_games - b.cumulative_games);
+  if (!snapshots.length) { el.innerHTML = '<p class="hint">no primary_vs_training_round_robin checks yet -- mana burn is only tracked there</p>'; return; }
+  el.innerHTML = '<p class="hint">loading…</p>';
+  const details = await Promise.all(snapshots.map(fetchCheckDetail));
+
+  const byDeckSeries = new Map(); // deck -> { key: [points] }
+  details.forEach((detail, i) => {
+    for (const [label, m] of Object.entries(detail.mana_burnt_by_deck || {})) {
+      if (!label.startsWith('primary/')) continue;
+      const deck = label.slice('primary/'.length);
+      if (!byDeckSeries.has(deck)) byDeckSeries.set(deck, Object.fromEntries(MANA_BURN_SERIES.map(s => [s.key, []])));
+      const perKey = byDeckSeries.get(deck);
+      for (const s of MANA_BURN_SERIES) {
+        perKey[s.key].push({
+          x: snapshots[i].cumulative_games, y: m[s.key],
+          label: `${snapshots[i].cumulative_games.toLocaleString()} games`, yLabel: m[s.key].toFixed(2),
+        });
+      }
+    }
+  });
+
+  const cards = [...byDeckSeries.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([deck, perKey]) => {
+    const series = MANA_BURN_SERIES.map(s => ({ points: perKey[s.key], color: s.color, label: s.label }));
+    const latest = s => s.points[s.points.length - 1]?.y;
+    return `<div class="card">
+      <div class="card-title">${escapeHtml(deck)}
+        <span class="card-value">${series.map(s => latest(s)?.toFixed(2) ?? '—').join(' / ')}</span>
+      </div>
+      ${overlaySparkline(series, { yMin: 0 })}
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="chart-legend">${MANA_BURN_SERIES.map(s => `<span class="legend-item"><span class="legend-swatch" style="background:${s.color}"></span>${s.label}</span>`).join('')}</div>
+    <h2>Mana burnt per game — primary/&lt;deck&gt;, by cumulative games</h2>
+    <div class="grid">${cards || '<p class="hint">no data yet</p>'}</div>`;
+  attachChartTooltips(el);
 }
 
 // ---- tabs & league switching ----
-const TAB_RENDERERS = { overview: renderOverview, winrates: renderWinRates, ppo: renderPpo, mulligan: renderMulligan, roundrobin: renderRoundRobin };
+const TAB_RENDERERS = { overview: renderOverview, winrates: renderWinRates, ppo: renderPpo, mulligan: renderMulligan, roundrobin: renderRoundRobin, manaburn: renderManaBurn };
 let activeTab = 'overview';
 function renderActiveTab() { TAB_RENDERERS[activeTab](); }
 

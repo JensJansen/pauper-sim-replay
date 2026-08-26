@@ -341,6 +341,12 @@ let allGames = [];
 let filteredGames = [];
 let gamesPage = 0;
 let selectedGameIndex = null;
+// Distinguishes "nothing opened yet" from "opened a file that parsed fine
+// but has zero games" (e.g. a validation checks/*.json picked by mistake --
+// same shape check as list_games itself, just no games in it) -- both used
+// to render identically as "load a log file first", which looked exactly
+// like the file picker had silently failed. See renderGameList.
+let fileLoaded = false;
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -528,6 +534,7 @@ async function loadContent(content, label) {
     fileContent = content;
     const data = await postJson('/api/replay/games', { content: fileContent });
     allGames = data.games;
+    fileLoaded = true;
     selectedGameIndex = null;
     const search = document.getElementById('game-search');
     search.disabled = allGames.length === 0;
@@ -588,7 +595,12 @@ function renderGameList() {
   const listEl = document.getElementById('game-list');
   const pagerEl = document.getElementById('game-pager');
   if (!allGames.length) {
-    listEl.innerHTML = '<p class="hint">— load a log file first —</p>';
+    listEl.innerHTML = fileLoaded
+      // A file loaded and parsed, it just has no games in it -- most likely
+      // the wrong kind of file (e.g. a validation checks/*.json, which has
+      // no "games" key at all) rather than a --log event-log JSON.
+      ? '<p class="hint">This file loaded, but has 0 games — is it a --log event-log JSON, not something else?</p>'
+      : '<p class="hint">— load a log file first —</p>';
     pagerEl.style.display = 'none';
     return;
   }
