@@ -1,11 +1,13 @@
-"""Self-check for the /api/stats/* routes in app.py: metrics.jsonl grouping,
-checks/*.jsonl discovery (league-level vs per-deck) via the virtual
-per-snapshot path, and the path-traversal guard shared with replay_run_raw."""
+"""Self-check for the /api/stats/* routes in app.py and app_public.py:
+metrics.jsonl grouping, checks/*.jsonl discovery (league-level vs per-deck)
+via the virtual per-snapshot path, and the path-traversal guard shared with
+replay_run_raw. Parametrized over both Flask apps -- they carry identical
+route logic (app_public.py is the public deploy entrypoint per render.yaml,
+app.py the local-only one), and nothing else pins them to stay identical."""
+import importlib
 import json
 
 import pytest
-
-import app as app_module
 
 
 def _write_jsonl(path, *records):
@@ -15,8 +17,13 @@ def _write_jsonl(path, *records):
             f.write(json.dumps(r) + "\n")
 
 
+@pytest.fixture(params=["app", "app_public"])
+def app_module(request):
+    return importlib.import_module(request.param)
+
+
 @pytest.fixture
-def client(tmp_path, monkeypatch):
+def client(tmp_path, monkeypatch, app_module):
     monkeypatch.setattr(app_module, "VALIDATION_DIR", tmp_path)
     league_dir = tmp_path / "test-league"
     league_dir.mkdir()
@@ -76,7 +83,7 @@ def test_check_detail_404_for_a_cumulative_games_with_no_matching_line(client):
     assert resp.status_code == 404
 
 
-def test_check_detail_returns_the_last_line_on_a_replayed_cadence_point(tmp_path, monkeypatch):
+def test_check_detail_returns_the_last_line_on_a_replayed_cadence_point(tmp_path, monkeypatch, app_module):
     """A crash-and-resume can re-run the same cadence point, appending a
     second line for the same cumulative_games -- the freshest write (the
     last line) must win."""
@@ -97,10 +104,12 @@ def test_check_detail_returns_the_last_line_on_a_replayed_cadence_point(tmp_path
         assert len([x for x in checks if x["check"] == "vs_history"]) == 1
 
 
-def test_check_detail_skips_a_malformed_trailing_line(tmp_path, monkeypatch):
+def test_check_detail_skips_a_malformed_trailing_line(tmp_path, monkeypatch, app_module):
     """An interrupted append (process killed mid-write) can leave a
     truncated last line -- the reader must skip it, not 500, and still
-    return the last VALID matching record."""
+    return the last VALID matching record. The listing must also skip it,
+    not merely the detail route -- otherwise the listing advertises a
+    snapshot the detail route then 404s on."""
     monkeypatch.setattr(app_module, "VALIDATION_DIR", tmp_path)
     league_dir = tmp_path / "truncated-league"
     league_dir.mkdir()
@@ -114,3 +123,6 @@ def test_check_detail_skips_a_malformed_trailing_line(tmp_path, monkeypatch):
     with app_module.app.test_client() as c:
         detail = c.get("/api/stats/leagues/truncated-league/checks/checks/vs_history_50games.json").get_json()
         assert detail == {"cumulative_games": 50, "attempt": "good"}
+
+        checks = c.get("/api/stats/leagues/truncated-league/checks").get_json()
+        assert [x["cumulative_games"] for x in checks] == [50]
