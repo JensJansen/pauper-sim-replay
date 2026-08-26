@@ -1,0 +1,28 @@
+{
+  "check": "vs_history",
+  "primary_league": "main-league",
+  "deck": "grixis_affinity",
+  "cumulative_games": 9120,
+  "milestones": [
+    {
+      "label": "archive_oldest",
+      "snapshot_id": 0,
+      "is_archive": true,
+      "games": 50,
+      "live_wins": 40,
+      "snapshot_wins": 10,
+      "no_winner": 0,
+      "paired": true
+    },
+    {
+      "label": "active_oldest",
+      "snapshot_id": 18,
+      "is_archive": false,
+      "games": 50,
+      "live_wins": 36,
+      "snapshot_wins": 14,
+      "no_winner": 0,
+      "paired": true
+    }
+  ]
+}

@@ -1,0 +1,540 @@
+<title>Validation Stats</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font: 14px/1.4 -apple-system, Segoe UI, sans-serif;
+    background: #14161a; color: #d8dbe0;
+  }
+  header {
+    display: flex; align-items: center; gap: 12px; height: 72px;
+    padding: 0 20px; border-bottom: 1px solid #2a2d33;
+  }
+  header h1 { margin: 0; font-size: 18px; }
+  header p { margin: 0; color: #888; font-size: 12px; }
+  header nav { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  header nav a { color: #6a9dff; text-decoration: none; font-size: 12px; }
+  header nav a:hover { text-decoration: underline; }
+  header select {
+    padding: 6px 8px; background: #0e1013; border: 1px solid #34383f; border-radius: 5px;
+    color: #e8eaf0; font-size: 12px;
+  }
+
+  main { padding: 16px 20px 40px; max-width: 1200px; margin: 0 auto; }
+  main.loading { opacity: .5; }
+  h2 { margin: 22px 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: #9aa0aa; }
+  .hint { color: #666; font-size: 12px; }
+
+  .tabs { display: flex; gap: 4px; padding: 10px 20px 0; border-bottom: 1px solid #2a2d33; }
+  .tab-btn {
+    cursor: pointer; border: 1px solid transparent; border-bottom: none; background: none;
+    color: #9aa0aa; padding: 8px 14px; font-size: 13px; border-radius: 6px 6px 0 0;
+  }
+  .tab-btn:hover { color: #d8dbe0; }
+  .tab-btn.active { color: #fff; background: #1b1e24; border-color: #2a2d33; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+  .chip {
+    cursor: pointer; border: 1px solid #3a3f47; border-radius: 14px; background: #262a31;
+    color: #d8dbe0; padding: 5px 12px; font-size: 12px;
+  }
+  .chip:hover { background: #2f343c; }
+  .chip.active { background: #22344f; border-color: #3a6df0; color: #fff; }
+  .toolbar select {
+    padding: 5px 8px; background: #0e1013; border: 1px solid #34383f; border-radius: 5px;
+    color: #e8eaf0; font-size: 12px;
+  }
+
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 10px; }
+  .tile { background: #1b1e24; border: 1px solid #2a2d33; border-radius: 8px; padding: 12px 14px; }
+  .tile-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: .03em; }
+  .tile-value { font-size: 22px; font-weight: 600; margin-top: 4px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+  .grid-3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .card { background: #1b1e24; border: 1px solid #2a2d33; border-radius: 8px; padding: 10px 12px; }
+  .card-title { font-size: 12px; color: #b8c0d0; display: flex; justify-content: space-between; margin-bottom: 4px; }
+  .card-value { color: #fff; font-weight: 600; }
+  .card svg { display: block; width: 100%; height: auto; }
+
+  .bar-row { margin-bottom: 8px; }
+  .bar-label { font-size: 12px; margin-bottom: 3px; display: flex; justify-content: space-between; gap: 6px; }
+  .bar-track { background: #0e1013; border: 1px solid #34383f; border-radius: 4px; height: 8px; overflow: hidden; }
+  .bar-fill { height: 100%; }
+
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 10px; }
+  .data-table th, .data-table td { text-align: left; padding: 6px 10px; border-bottom: 1px solid #2a2d33; font-variant-numeric: tabular-nums; }
+  .data-table th { color: #888; font-weight: 500; text-transform: uppercase; font-size: 10px; letter-spacing: .03em; }
+  .status-warn { color: #fab219; }
+
+  .matrix-wrap { overflow-x: auto; }
+  table.matrix { border-collapse: collapse; font-size: 11px; white-space: nowrap; }
+  table.matrix th, table.matrix td { padding: 4px 8px; text-align: center; font-variant-numeric: tabular-nums; }
+  table.matrix thead th { color: #888; font-weight: 500; }
+  table.matrix tbody th { text-align: right; color: #b8c0d0; font-weight: 500; }
+  td.matrix-cell { color: #e8eaf0; border-radius: 3px; }
+  td.matrix-empty { color: #444; }
+
+  #chart-tip {
+    display: none; position: fixed; z-index: 100; pointer-events: none;
+    background: #1b1e24; border: 1px solid #3a3f47; border-radius: 5px;
+    padding: 4px 8px; font-size: 11px; color: #fff; box-shadow: 0 4px 14px #000a;
+  }
+</style>
+
+<header>
+  <h1>Validation Stats</h1>
+  <p>Metrics exported during training runs, by league.</p>
+  <nav>
+    <select id="league-select"></select>
+    <a href="/">Home</a>
+    <a href="/replay">Game Replay</a>
+  </nav>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="overview">Overview</button>
+  <button class="tab-btn" data-tab="winrates">Win Rates</button>
+  <button class="tab-btn" data-tab="ppo">PPO Diagnostics</button>
+  <button class="tab-btn" data-tab="mulligan">Mulligan</button>
+  <button class="tab-btn" data-tab="roundrobin">Round Robin</button>
+</div>
+
+<main id="main">
+  <div class="tab-panel active" id="panel-overview"><p class="hint">loading…</p></div>
+  <div class="tab-panel" id="panel-winrates"></div>
+  <div class="tab-panel" id="panel-ppo"></div>
+  <div class="tab-panel" id="panel-mulligan"></div>
+  <div class="tab-panel" id="panel-roundrobin"></div>
+</main>
+
+<div id="chart-tip"></div>
+
+<script>
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+async function fetchJson(url) {
+  const res = await fetch(url);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || res.statusText);
+  return data;
+}
+
+function checkPath(name, path) {
+  return `/api/stats/leagues/${encodeURIComponent(name)}/checks/${path.split('/').map(encodeURIComponent).join('/')}`;
+}
+
+function byDeck(records) {
+  const m = new Map();
+  for (const r of records) {
+    if (!m.has(r.deck)) m.set(r.deck, []);
+    m.get(r.deck).push(r);
+  }
+  return m;
+}
+
+function latestByDeck(records) {
+  const out = new Map();
+  for (const [deck, rs] of byDeck(records)) out.set(deck, rs[rs.length - 1]);
+  return out;
+}
+
+// Win/loss rate list: a horizontal bar per row, value as text (the bar is a
+// secondary read, never the only one) -- green/red only reinforce the >=50%
+// breakeven line already spelled out in the percentage label.
+function winRateBarList(rows) {
+  if (!rows.length) return '<p class="hint">no data yet</p>';
+  return rows.map(r => {
+    const pct = Math.round(r.rate * 100);
+    const color = r.rate >= 0.5 ? '#5fce7a' : '#e08080';
+    return `<div class="bar-row">
+      <div class="bar-label"><span>${escapeHtml(r.label)}</span><span>${pct}%${r.sub ? ` <span class="hint">(${escapeHtml(r.sub)})</span>` : ''}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// A small multiples sparkline. points: [{x, y, label, yLabel}]. Hover
+// tooltip is handled by one delegated listener (attachChartTooltips) reading
+// the data-* attributes set here, rather than per-chart handlers.
+function sparkline(points, opts = {}) {
+  const w = 210, h = 52, pad = 4;
+  if (!points.length) return `<svg width="${w}" height="${h}"></svg>`;
+  const xs = points.map(p => p.x);
+  const xMin = Math.min(...xs), xMax = Math.max(...xs);
+  let yMin = opts.yMin ?? Math.min(...points.map(p => p.y));
+  let yMax = opts.yMax ?? Math.max(...points.map(p => p.y));
+  if (yMin === yMax) { yMin -= 1; yMax += 1; }
+  const sx = x => xMax === xMin ? w / 2 : pad + (x - xMin) / (xMax - xMin) * (w - 2 * pad);
+  const sy = y => h - pad - (y - yMin) / (yMax - yMin) * (h - 2 * pad);
+  const d = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${sx(p.x).toFixed(1)},${sy(p.y).toFixed(1)}`).join(' ');
+  const color = opts.color || '#6a9dff';
+  let ref = '';
+  if (opts.refY != null && opts.refY >= yMin && opts.refY <= yMax) {
+    ref = `<line x1="${pad}" y1="${sy(opts.refY).toFixed(1)}" x2="${w - pad}" y2="${sy(opts.refY).toFixed(1)}" stroke="#3a3f47" stroke-width="1" stroke-dasharray="3,3"/>`;
+  }
+  const last = points[points.length - 1];
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"
+      data-points='${JSON.stringify(points).replace(/'/g, '&#39;')}' data-xmin="${xMin}" data-xmax="${xMax}" data-pad="${pad}">
+    ${ref}
+    <path d="${d}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${sx(last.x).toFixed(1)}" cy="${sy(last.y).toFixed(1)}" r="3" fill="${color}" stroke="#1b1e24" stroke-width="1.5"/>
+  </svg>`;
+}
+
+// Small bar chart for a handful of ordered categories (e.g. opening land
+// count 0-7). Native <title> gives a free hover tooltip -- no JS needed for
+// a chart this small.
+function barChart(items, opts = {}) {
+  const w = 230, h = 100, pad = 20, gap = 4;
+  const yMax = opts.yMax ?? Math.max(...items.map(i => i.value), 0.0001);
+  const bw = (w - pad * 2 - gap * (items.length - 1)) / items.length;
+  const bars = items.map((it, i) => {
+    const bh = Math.max(1, (it.value / yMax) * (h - pad * 2));
+    const x = pad + i * (bw + gap);
+    const y = h - pad - bh;
+    const valueLabel = opts.fmt ? opts.fmt(it.value) : it.value;
+    return `<g>
+      <rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="2" fill="#6a9dff">
+        <title>${escapeHtml(it.label)}: ${escapeHtml(String(valueLabel))}</title>
+      </rect>
+      <text x="${(x + bw / 2).toFixed(1)}" y="${h - 4}" text-anchor="middle" font-size="9" fill="#777">${escapeHtml(it.label)}</text>
+    </g>`;
+  }).join('');
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${bars}</svg>`;
+}
+
+function attachChartTooltips(root) {
+  const tip = document.getElementById('chart-tip');
+  root.addEventListener('mousemove', e => {
+    const svg = e.target.closest('svg[data-points]');
+    if (!svg) { tip.style.display = 'none'; return; }
+    const points = JSON.parse(svg.dataset.points);
+    const xMin = +svg.dataset.xmin, xMax = +svg.dataset.xmax, pad = +svg.dataset.pad;
+    const rect = svg.getBoundingClientRect();
+    const relX = e.clientX - rect.left;
+    const frac = xMax === xMin ? 0 : (relX - pad) / (rect.width - 2 * pad);
+    const targetX = xMin + frac * (xMax - xMin);
+    let nearest = points[0];
+    for (const p of points) if (Math.abs(p.x - targetX) < Math.abs(nearest.x - targetX)) nearest = p;
+    tip.style.display = 'block';
+    tip.style.left = `${e.clientX + 14}px`;
+    tip.style.top = `${e.clientY + 14}px`;
+    tip.textContent = `${nearest.yLabel} — ${nearest.label}`;
+  });
+  root.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+}
+
+// ---- state ----
+let leagues = [];
+let currentLeague = null;
+let metrics = {};       // metrics.jsonl grouped by `kind`
+let checksIndex = [];   // every checks/*.json, see /api/stats/leagues/<league>/checks
+const detailCache = new Map();
+
+async function fetchCheckDetail(snap) {
+  if (!detailCache.has(snap.path)) {
+    detailCache.set(snap.path, await fetchJson(checkPath(currentLeague, snap.path)));
+  }
+  return detailCache.get(snap.path);
+}
+
+// ---- Overview ----
+function renderOverview() {
+  const el = document.getElementById('panel-overview');
+  const rr = metrics.primary_vs_primary_round_robin || [];
+  const ppo = metrics.ppo || [];
+  const sessionStarts = metrics.session_start || [];
+  const latestRR = latestByDeck(rr);
+  const latestPpo = latestByDeck(ppo);
+  const cumGames = rr.length ? rr[rr.length - 1].cumulative_games
+    : (sessionStarts.length ? sessionStarts[sessionStarts.length - 1].cumulative_games : 0);
+
+  const tiles = `<div class="tiles">
+    <div class="tile"><div class="tile-label">Cumulative games</div><div class="tile-value">${cumGames.toLocaleString()}</div></div>
+    <div class="tile"><div class="tile-label">Decks tracked</div><div class="tile-value">${latestRR.size}</div></div>
+    <div class="tile"><div class="tile-label">Training sessions</div><div class="tile-value">${sessionStarts.length}</div></div>
+    <div class="tile"><div class="tile-label">PPO updates logged</div><div class="tile-value">${ppo.length.toLocaleString()}</div></div>
+  </div>`;
+
+  const winRows = [...latestRR.entries()]
+    .filter(([, r]) => r.win_rate != null)
+    .sort((a, b) => b[1].win_rate - a[1].win_rate)
+    .map(([deck, r]) => ({ label: deck, rate: r.win_rate, sub: `${r.wins}/${r.games} @ ${r.cumulative_games.toLocaleString()}g` }));
+
+  const ppoRows = [...latestPpo.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([deck, r]) => {
+    const klBad = r.approx_kl > r.target_kl;
+    const evBad = r.explained_variance < 0.2;
+    return `<tr>
+      <td>${escapeHtml(deck)}</td>
+      <td>${r.entropy.toFixed(3)}</td>
+      <td class="${klBad ? 'status-warn' : ''}">${r.approx_kl.toFixed(4)}${klBad ? ' ⚠ over target' : ''}</td>
+      <td>${(r.clip_fraction * 100).toFixed(1)}%</td>
+      <td class="${evBad ? 'status-warn' : ''}">${r.explained_variance.toFixed(2)}${evBad ? ' ⚠ low' : ''}</td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    ${tiles}
+    <h2>Latest primary-vs-primary win rate</h2>
+    ${winRateBarList(winRows)}
+    <h2>PPO health — latest update per deck</h2>
+    <table class="data-table">
+      <thead><tr><th>Deck</th><th>Entropy</th><th>Approx KL</th><th>Clip fraction</th><th>Explained variance</th></tr></thead>
+      <tbody>${ppoRows || '<tr><td colspan="5" class="hint">no PPO data yet</td></tr>'}</tbody>
+    </table>`;
+}
+
+// ---- Win Rates ----
+let winRateMode = 'primary_vs_primary_round_robin';
+function renderWinRates() {
+  const el = document.getElementById('panel-winrates');
+  const records = metrics[winRateMode] || [];
+  const cards = [...byDeck(records)].sort((a, b) => a[0].localeCompare(b[0])).map(([deck, rs]) => {
+    const points = rs.filter(r => r.win_rate != null).map(r => ({
+      x: r.cumulative_games, y: r.win_rate,
+      label: `${r.cumulative_games.toLocaleString()} games`, yLabel: `${(r.win_rate * 100).toFixed(1)}% win rate`,
+    }));
+    const latest = points[points.length - 1];
+    return `<div class="card">
+      <div class="card-title">${escapeHtml(deck)} <span class="card-value">${latest ? (latest.y * 100).toFixed(1) + '%' : '—'}</span></div>
+      ${sparkline(points, { yMin: 0, yMax: 1, refY: 0.5 })}
+    </div>`;
+  }).join('');
+
+  const vh = metrics.vs_history || [];
+  const vhRows = [];
+  for (const [deck, rs] of byDeck(vh)) {
+    const latestCum = Math.max(...rs.map(r => r.cumulative_games));
+    for (const label of ['active_oldest', 'archive_oldest']) {
+      const r = rs.find(r => r.cumulative_games === latestCum && r.label === label);
+      if (r && r.win_rate != null) {
+        vhRows.push({ label: `${deck} vs ${label.replace('_', ' ')}`, rate: r.win_rate, sub: `${r.live_wins}/${r.games} @ ${r.cumulative_games.toLocaleString()}g` });
+      }
+    }
+  }
+  vhRows.sort((a, b) => a.label.localeCompare(b.label));
+
+  el.innerHTML = `
+    <div class="toolbar">
+      <button class="chip${winRateMode === 'primary_vs_primary_round_robin' ? ' active' : ''}" data-mode="primary_vs_primary_round_robin">Primary vs primary</button>
+      <button class="chip${winRateMode === 'primary_vs_training_round_robin' ? ' active' : ''}" data-mode="primary_vs_training_round_robin">Primary vs training</button>
+    </div>
+    <div class="grid">${cards || '<p class="hint">no data yet</p>'}</div>
+    <h2>Vs snapshot history — current build vs its own archived/active-oldest past selves</h2>
+    ${winRateBarList(vhRows)}`;
+  attachChartTooltips(el);
+  el.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => { winRateMode = b.dataset.mode; renderWinRates(); }));
+}
+
+// ---- PPO Diagnostics ----
+const PPO_METRICS = [
+  { key: 'entropy', label: 'Entropy', fmt: v => v.toFixed(3) },
+  { key: 'policy_loss', label: 'Policy loss', fmt: v => v.toFixed(3) },
+  { key: 'value_loss', label: 'Value loss', fmt: v => v.toFixed(3) },
+  { key: 'approx_kl', label: 'Approx KL', fmt: v => v.toFixed(4), ref: 'target_kl' },
+  { key: 'clip_fraction', label: 'Clip fraction', fmt: v => (v * 100).toFixed(1) + '%' },
+  { key: 'explained_variance', label: 'Explained variance', fmt: v => v.toFixed(2) },
+  { key: 'adv_std', label: 'Advantage std', fmt: v => v.toFixed(3) },
+];
+let ppoMetricKey = 'entropy';
+function renderPpo() {
+  const el = document.getElementById('panel-ppo');
+  const spec = PPO_METRICS.find(m => m.key === ppoMetricKey);
+  const records = metrics.ppo || [];
+  const cards = [...byDeck(records)].sort((a, b) => a[0].localeCompare(b[0])).map(([deck, rs]) => {
+    const points = rs.map(r => ({
+      x: r.cumulative_games, y: r[spec.key],
+      label: `iter ${r.iteration} · ${r.cumulative_games.toLocaleString()}g`, yLabel: spec.fmt(r[spec.key]),
+    }));
+    const latest = rs[rs.length - 1];
+    return `<div class="card">
+      <div class="card-title">${escapeHtml(deck)} <span class="card-value">${spec.fmt(latest[spec.key])}</span></div>
+      ${sparkline(points, { refY: spec.ref ? latest[spec.ref] : undefined })}
+    </div>`;
+  }).join('');
+
+  const mulliganRecords = metrics.mulligan || [];
+  const mulliganCards = [...byDeck(mulliganRecords)].sort((a, b) => a[0].localeCompare(b[0])).map(([deck, rs]) => {
+    const points = rs.map(r => ({ x: r.cumulative_games, y: r.loss, label: `${r.cumulative_games.toLocaleString()}g`, yLabel: `loss ${r.loss.toFixed(4)}` }));
+    const latest = rs[rs.length - 1];
+    return `<div class="card">
+      <div class="card-title">${escapeHtml(deck)} <span class="card-value">${latest.loss.toFixed(4)}</span></div>
+      ${sparkline(points, { color: '#eda100' })}
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="toolbar">
+      <label class="hint">Metric</label>
+      <select id="ppo-metric-select">${PPO_METRICS.map(m => `<option value="${m.key}"${m.key === ppoMetricKey ? ' selected' : ''}>${m.label}</option>`).join('')}</select>
+      ${ppoMetricKey === 'approx_kl' ? '<span class="hint">dashed line = that update’s target_kl</span>' : ''}
+    </div>
+    <div class="grid">${cards || '<p class="hint">no PPO data yet</p>'}</div>
+    <h2>Mulligan-net training loss</h2>
+    <div class="grid">${mulliganCards || '<p class="hint">no mulligan-net data yet</p>'}</div>`;
+  attachChartTooltips(el);
+  document.getElementById('ppo-metric-select').addEventListener('change', e => { ppoMetricKey = e.target.value; renderPpo(); });
+}
+
+// ---- Mulligan ----
+let mulliganSnapshotGames = null;
+let mulliganDeck = null;
+async function renderMulligan() {
+  const el = document.getElementById('panel-mulligan');
+  const snapshots = checksIndex.filter(c => c.check === 'mulligan_audit' && c.deck === null).sort((a, b) => b.cumulative_games - a.cumulative_games);
+  if (!snapshots.length) { el.innerHTML = '<p class="hint">no mulligan_audit checks yet</p>'; return; }
+  if (mulliganSnapshotGames == null || !snapshots.some(s => s.cumulative_games === mulliganSnapshotGames)) mulliganSnapshotGames = snapshots[0].cumulative_games;
+  const snap = snapshots.find(s => s.cumulative_games === mulliganSnapshotGames);
+  const detail = await fetchCheckDetail(snap);
+
+  const decks = Object.keys(detail.decks).sort();
+  if (!mulliganDeck || !decks.includes(mulliganDeck)) mulliganDeck = decks[0];
+  const d = detail.decks[mulliganDeck];
+  const landCounts = Object.keys(d.by_land_count).sort((a, b) => +a - +b);
+
+  const keepBars = barChart(landCounts.map(lc => ({ label: lc, value: d.by_land_count[lc].keep_rate })), { yMax: 1, fmt: v => `${(v * 100).toFixed(0)}%` });
+  const winBars = barChart(landCounts.map(lc => ({ label: lc, value: d.by_land_count[lc].win_rate_after_keep })), { yMax: 1, fmt: v => `${(v * 100).toFixed(0)}%` });
+  const entropyBars = barChart(landCounts.map(lc => ({ label: lc, value: d.by_land_count[lc].avg_entropy_bits })), { fmt: v => v.toFixed(2) });
+
+  const probeRows = Object.keys(d.probe_hands).sort((a, b) => +a - +b).map(lc => {
+    const p = d.probe_hands[lc];
+    return `<tr><td>${lc}</td><td>${(p.p_mulligan_mean * 100).toFixed(1)}%</td><td>±${(p.p_mulligan_spread * 100).toFixed(1)}%</td><td>${p.entropy_bits_mean.toFixed(2)}</td><td>${p.n}</td></tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="toolbar">
+      <label class="hint">Snapshot</label>
+      <select id="mulligan-snap-select">${snapshots.map(s => `<option value="${s.cumulative_games}"${s.cumulative_games === mulliganSnapshotGames ? ' selected' : ''}>${s.cumulative_games.toLocaleString()} games</option>`).join('')}</select>
+      <label class="hint">Deck</label>
+      <select id="mulligan-deck-select">${decks.map(dk => `<option value="${escapeHtml(dk)}"${dk === mulliganDeck ? ' selected' : ''}>${escapeHtml(dk)}</option>`).join('')}</select>
+    </div>
+    <div class="grid grid-3">
+      <div class="card"><div class="card-title">Keep rate by opening land count</div>${keepBars}</div>
+      <div class="card"><div class="card-title">Win rate after keep, by land count</div>${winBars}</div>
+      <div class="card"><div class="card-title">Decision entropy (bits), by land count</div>${entropyBars}</div>
+    </div>
+    <h2>Probe hands (synthetic, seeded) — P(mulligan) by land count</h2>
+    <table class="data-table">
+      <thead><tr><th>Lands</th><th>P(mulligan)</th><th>Spread</th><th>Entropy (bits)</th><th>n</th></tr></thead>
+      <tbody>${probeRows}</tbody>
+    </table>`;
+  document.getElementById('mulligan-snap-select').addEventListener('change', e => { mulliganSnapshotGames = Number(e.target.value); renderMulligan(); });
+  document.getElementById('mulligan-deck-select').addEventListener('change', e => { mulliganDeck = e.target.value; renderMulligan(); });
+}
+
+// ---- Round Robin ----
+let rrMode = 'primary_vs_primary_round_robin';
+let rrSnapshotGames = null;
+async function renderRoundRobin() {
+  const el = document.getElementById('panel-roundrobin');
+  const snapshots = checksIndex.filter(c => c.check === rrMode && c.deck === null).sort((a, b) => b.cumulative_games - a.cumulative_games);
+  if (!snapshots.length) { el.innerHTML = '<p class="hint">no round robin checks yet</p>'; return; }
+  if (rrSnapshotGames == null || !snapshots.some(s => s.cumulative_games === rrSnapshotGames)) rrSnapshotGames = snapshots[0].cumulative_games;
+  const snap = snapshots.find(s => s.cumulative_games === rrSnapshotGames);
+  const detail = await fetchCheckDetail(snap);
+
+  const isTraining = rrMode === 'primary_vs_training_round_robin';
+  const aKey = isTraining ? 'primary_deck' : 'deck_a';
+  const bKey = isTraining ? 'training_deck' : 'deck_b';
+  const aWinsKey = isTraining ? 'primary_wins' : 'a_wins';
+  const bWinsKey = isTraining ? 'training_wins' : 'b_wins';
+
+  const rowDecks = [...new Set(detail.pairings.map(p => p[aKey]))].sort();
+  const colDecks = [...new Set(detail.pairings.map(p => p[bKey]))].sort();
+  // primary-vs-primary is an unordered round robin -- each pair only plays
+  // once (deck_a/deck_b, not also the reverse), so the same record covers
+  // both a-vs-b and b-vs-a; mirror it so the matrix isn't half-empty. The
+  // primary-vs-training pairings are already a full Cartesian product (every
+  // primary deck against every training deck), so no mirroring there.
+  const cellFor = new Map();
+  for (const p of detail.pairings) {
+    cellFor.set(`${p[aKey]}|${p[bKey]}`, { games: p.games, wins: p[aWinsKey] });
+    if (!isTraining) cellFor.set(`${p[bKey]}|${p[aKey]}`, { games: p.games, wins: p[bWinsKey] });
+  }
+
+  const matrix = `<table class="matrix">
+    <thead><tr><th></th>${colDecks.map(d => `<th>${escapeHtml(d)}</th>`).join('')}</tr></thead>
+    <tbody>${rowDecks.map(a => `<tr><th>${escapeHtml(a)}</th>${colDecks.map(b => {
+      const cell = cellFor.get(`${a}|${b}`);
+      if (!cell || !cell.games) return '<td class="matrix-empty">—</td>';
+      const rate = cell.wins / cell.games;
+      const alpha = (0.12 + rate * 0.75).toFixed(2);
+      return `<td class="matrix-cell" style="background:rgba(58,109,240,${alpha})" title="${escapeHtml(a)} vs ${escapeHtml(b)}: ${cell.wins}/${cell.games} (${(rate * 100).toFixed(0)}%)">${(rate * 100).toFixed(0)}%</td>`;
+    }).join('')}</tr>`).join('')}</tbody>
+  </table>`;
+
+  const totals = isTraining ? detail.primary_totals : detail.deck_totals;
+  const totalsRows = totals ? Object.entries(totals).filter(([, t]) => t.win_rate != null)
+    .sort((a, b) => b[1].win_rate - a[1].win_rate)
+    .map(([deck, t]) => ({ label: deck, rate: t.win_rate, sub: `${t.wins}/${t.games}` })) : [];
+
+  let manaSection = '';
+  if (isTraining && detail.mana_burnt_by_deck) {
+    const rows = Object.entries(detail.mana_burnt_by_deck).map(([label, m]) =>
+      `<tr><td>${escapeHtml(label)}</td><td>${m.mana_burnt_total_per_game.toFixed(2)}</td><td>${m.mana_burnt_total_single_pip_per_game.toFixed(2)}</td><td>${m.games}</td></tr>`).join('');
+    manaSection = `<h2>Mana burnt per game — primary/&lt;deck&gt; and training/&lt;deck&gt;</h2>
+      <table class="data-table">
+        <thead><tr><th>Side / deck</th><th>Total burnt/game</th><th>Single-pip burnt/game</th><th>Games</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  el.innerHTML = `
+    <div class="toolbar">
+      <button class="chip${rrMode === 'primary_vs_primary_round_robin' ? ' active' : ''}" data-mode="primary_vs_primary_round_robin">Primary vs primary</button>
+      <button class="chip${rrMode === 'primary_vs_training_round_robin' ? ' active' : ''}" data-mode="primary_vs_training_round_robin">Primary vs training</button>
+      <label class="hint" style="margin-left:auto">Snapshot</label>
+      <select id="rr-snap-select">${snapshots.map(s => `<option value="${s.cumulative_games}"${s.cumulative_games === rrSnapshotGames ? ' selected' : ''}>${s.cumulative_games.toLocaleString()} games</option>`).join('')}</select>
+    </div>
+    <h2>Pairing win rate — row's win % vs column</h2>
+    <div class="matrix-wrap">${matrix}</div>
+    ${totalsRows.length ? `<h2>Totals</h2>${winRateBarList(totalsRows)}` : ''}
+    ${manaSection}`;
+  el.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => { rrMode = b.dataset.mode; rrSnapshotGames = null; renderRoundRobin(); }));
+  document.getElementById('rr-snap-select').addEventListener('change', e => { rrSnapshotGames = Number(e.target.value); renderRoundRobin(); });
+}
+
+// ---- tabs & league switching ----
+const TAB_RENDERERS = { overview: renderOverview, winrates: renderWinRates, ppo: renderPpo, mulligan: renderMulligan, roundrobin: renderRoundRobin };
+let activeTab = 'overview';
+function renderActiveTab() { TAB_RENDERERS[activeTab](); }
+
+async function loadLeague(name) {
+  currentLeague = name;
+  detailCache.clear();
+  document.getElementById('main').classList.add('loading');
+  try {
+    [metrics, checksIndex] = await Promise.all([
+      fetchJson(`/api/stats/leagues/${encodeURIComponent(name)}/metrics`),
+      fetchJson(`/api/stats/leagues/${encodeURIComponent(name)}/checks`),
+    ]);
+    renderActiveTab();
+  } finally {
+    document.getElementById('main').classList.remove('loading');
+  }
+}
+
+async function init() {
+  leagues = await fetchJson('/api/stats/leagues');
+  if (!leagues.length) {
+    document.getElementById('main').innerHTML = '<p class="hint">No checkpoints/&lt;league&gt;/metrics.jsonl found yet — run training first.</p>';
+    return;
+  }
+  const sel = document.getElementById('league-select');
+  sel.innerHTML = leagues.map(l => `<option value="${escapeHtml(l.name)}">${escapeHtml(l.name)}</option>`).join('');
+  sel.addEventListener('change', () => loadLeague(sel.value));
+  document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => {
+    activeTab = b.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(x => x.classList.toggle('active', x === b));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === `panel-${activeTab}`));
+    renderActiveTab();
+  }));
+  await loadLeague(leagues[0].name);
+}
+init();
+</script>

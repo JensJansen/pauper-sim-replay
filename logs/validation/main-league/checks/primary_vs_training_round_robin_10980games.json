@@ -1,0 +1,1416 @@
+{
+  "check": "primary_vs_training_round_robin",
+  "primary_league": "main-league",
+  "training_league": "main-league-training",
+  "primary_roster": [
+    "mono_red_madness",
+    "rakdos_madness",
+    "spy_combo",
+    "boggles",
+    "monster_tron",
+    "dmir_terror",
+    "elves",
+    "grixis_affinity",
+    "jund_wildfire",
+    "mono_blue_terror",
+    "mono_red_rally"
+  ],
+  "training_roster": [
+    "boggles",
+    "dmir_terror",
+    "elves",
+    "grixis_affinity",
+    "jund_wildfire",
+    "mono_blue_terror",
+    "mono_red_madness",
+    "mono_red_rally",
+    "monster_tron",
+    "rakdos_madness",
+    "spy_combo"
+  ],
+  "games_per_pairing": 50,
+  "seed": null,
+  "cumulative_games": 10980,
+  "elapsed_ms": 530647.2964286804,
+  "pairings": [
+    {
+      "primary_deck": "mono_red_madness",
+      "training_deck": "boggles",
+      "games": 50,
+      "primary_wins": 18,
+      "training_wins": 32,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 16,
+      "training_mana_burnt_total": 120
+    },
+    {
+      "primary_deck": "mono_red_madness",
+      "training_deck": "dmir_terror",
+      "games": 50,
+      "primary_wins": 28,
+      "training_wins": 22,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 13,
+      "training_mana_burnt_total": 109
+    },
+    {
+      "primary_deck": "mono_red_madness",
+      "training_deck": "elves",
+      "games": 50,
+      "primary_wins": 27,
+      "training_wins": 23,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 14,
+      "training_mana_burnt_total": 92
+    },
+    {
+      "primary_deck": "mono_red_madness",
+      "training_deck": "grixis_affinity",
+      "games": 50,
+      "primary_wins": 19,
+      "training_wins": 31,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 29,
+      "training_mana_burnt_total": 87
+    },
+    {
+      "primary_deck": "mono_red_madness",
+      "training_deck": "jund_wildfire",
+      "games": 50,
+      "primary_wins": 46,
+      "training_wins": 4,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 18,
+      "training_mana_burnt_total": 65
+    },
+    {
+      "primary_deck": "mono_red_madness",
+      "training_deck": "mono_blue_terror",
+      "games": 50,
+      "primary_wins": 8,
+      "training_wins": 42,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 6,
+      "training_mana_burnt_total": 3
+    },
+    {
+      "primary_deck": "mono_red_madness",
+      "training_deck": "mono_red_madness",
+      "games": 50,
+      "primary_wins": 20,
+      "training_wins": 30,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 3,
+      "training_mana_burnt_total": 7
+    },
+    {
+      "primary_deck": "mono_red_madness",
+      "training_deck": "mono_red_rally",
+      "games": 50,
+      "primary_wins": 14,
+      "training_wins": 36,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 10,
+      "training_mana_burnt_total": 32
+    },
+    {
+      "primary_deck": "mono_red_madness",
+      "training_deck": "monster_tron",
+      "games": 50,
+      "primary_wins": 21,
+      "training_wins": 29,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 13,
+      "training_mana_burnt_total": 283
+    },
+    {
+      "primary_deck": "mono_red_madness",
+      "training_deck": "rakdos_madness",
+      "games": 50,
+      "primary_wins": 25,
+      "training_wins": 25,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 4,
+      "training_mana_burnt_total": 46
+    },
+    {
+      "primary_deck": "mono_red_madness",
+      "training_deck": "spy_combo",
+      "games": 50,
+      "primary_wins": 34,
+      "training_wins": 16,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 7,
+      "training_mana_burnt_total": 31
+    },
+    {
+      "primary_deck": "rakdos_madness",
+      "training_deck": "boggles",
+      "games": 50,
+      "primary_wins": 9,
+      "training_wins": 41,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 157,
+      "training_mana_burnt_total": 156
+    },
+    {
+      "primary_deck": "rakdos_madness",
+      "training_deck": "dmir_terror",
+      "games": 50,
+      "primary_wins": 29,
+      "training_wins": 21,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 234,
+      "training_mana_burnt_total": 178
+    },
+    {
+      "primary_deck": "rakdos_madness",
+      "training_deck": "elves",
+      "games": 50,
+      "primary_wins": 28,
+      "training_wins": 22,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 159,
+      "training_mana_burnt_total": 162
+    },
+    {
+      "primary_deck": "rakdos_madness",
+      "training_deck": "grixis_affinity",
+      "games": 50,
+      "primary_wins": 22,
+      "training_wins": 28,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 267,
+      "training_mana_burnt_total": 102
+    },
+    {
+      "primary_deck": "rakdos_madness",
+      "training_deck": "jund_wildfire",
+      "games": 50,
+      "primary_wins": 43,
+      "training_wins": 7,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 382,
+      "training_mana_burnt_total": 114
+    },
+    {
+      "primary_deck": "rakdos_madness",
+      "training_deck": "mono_blue_terror",
+      "games": 50,
+      "primary_wins": 9,
+      "training_wins": 41,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 234,
+      "training_mana_burnt_total": 4
+    },
+    {
+      "primary_deck": "rakdos_madness",
+      "training_deck": "mono_red_madness",
+      "games": 50,
+      "primary_wins": 19,
+      "training_wins": 31,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 124,
+      "training_mana_burnt_total": 25
+    },
+    {
+      "primary_deck": "rakdos_madness",
+      "training_deck": "mono_red_rally",
+      "games": 50,
+      "primary_wins": 3,
+      "training_wins": 47,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 154,
+      "training_mana_burnt_total": 61
+    },
+    {
+      "primary_deck": "rakdos_madness",
+      "training_deck": "monster_tron",
+      "games": 50,
+      "primary_wins": 19,
+      "training_wins": 31,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 341,
+      "training_mana_burnt_total": 685
+    },
+    {
+      "primary_deck": "rakdos_madness",
+      "training_deck": "rakdos_madness",
+      "games": 50,
+      "primary_wins": 10,
+      "training_wins": 40,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 196,
+      "training_mana_burnt_total": 72
+    },
+    {
+      "primary_deck": "rakdos_madness",
+      "training_deck": "spy_combo",
+      "games": 50,
+      "primary_wins": 30,
+      "training_wins": 20,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 235,
+      "training_mana_burnt_total": 68
+    },
+    {
+      "primary_deck": "spy_combo",
+      "training_deck": "boggles",
+      "games": 50,
+      "primary_wins": 14,
+      "training_wins": 36,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 160,
+      "training_mana_burnt_total": 426
+    },
+    {
+      "primary_deck": "spy_combo",
+      "training_deck": "dmir_terror",
+      "games": 50,
+      "primary_wins": 24,
+      "training_wins": 26,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 226,
+      "training_mana_burnt_total": 51
+    },
+    {
+      "primary_deck": "spy_combo",
+      "training_deck": "elves",
+      "games": 50,
+      "primary_wins": 19,
+      "training_wins": 31,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 278,
+      "training_mana_burnt_total": 141
+    },
+    {
+      "primary_deck": "spy_combo",
+      "training_deck": "grixis_affinity",
+      "games": 50,
+      "primary_wins": 26,
+      "training_wins": 24,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 163,
+      "training_mana_burnt_total": 75
+    },
+    {
+      "primary_deck": "spy_combo",
+      "training_deck": "jund_wildfire",
+      "games": 50,
+      "primary_wins": 34,
+      "training_wins": 16,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 596,
+      "training_mana_burnt_total": 159
+    },
+    {
+      "primary_deck": "spy_combo",
+      "training_deck": "mono_blue_terror",
+      "games": 50,
+      "primary_wins": 8,
+      "training_wins": 42,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 118,
+      "training_mana_burnt_total": 0
+    },
+    {
+      "primary_deck": "spy_combo",
+      "training_deck": "mono_red_madness",
+      "games": 50,
+      "primary_wins": 15,
+      "training_wins": 35,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 113,
+      "training_mana_burnt_total": 13
+    },
+    {
+      "primary_deck": "spy_combo",
+      "training_deck": "mono_red_rally",
+      "games": 50,
+      "primary_wins": 16,
+      "training_wins": 34,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 73,
+      "training_mana_burnt_total": 66
+    },
+    {
+      "primary_deck": "spy_combo",
+      "training_deck": "monster_tron",
+      "games": 50,
+      "primary_wins": 21,
+      "training_wins": 29,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 269,
+      "training_mana_burnt_total": 395
+    },
+    {
+      "primary_deck": "spy_combo",
+      "training_deck": "rakdos_madness",
+      "games": 50,
+      "primary_wins": 28,
+      "training_wins": 22,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 192,
+      "training_mana_burnt_total": 74
+    },
+    {
+      "primary_deck": "spy_combo",
+      "training_deck": "spy_combo",
+      "games": 50,
+      "primary_wins": 26,
+      "training_wins": 24,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 356,
+      "training_mana_burnt_total": 77
+    },
+    {
+      "primary_deck": "boggles",
+      "training_deck": "boggles",
+      "games": 50,
+      "primary_wins": 24,
+      "training_wins": 26,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 119,
+      "training_mana_burnt_total": 154
+    },
+    {
+      "primary_deck": "boggles",
+      "training_deck": "dmir_terror",
+      "games": 50,
+      "primary_wins": 40,
+      "training_wins": 10,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 112,
+      "training_mana_burnt_total": 105
+    },
+    {
+      "primary_deck": "boggles",
+      "training_deck": "elves",
+      "games": 50,
+      "primary_wins": 29,
+      "training_wins": 21,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 132,
+      "training_mana_burnt_total": 146
+    },
+    {
+      "primary_deck": "boggles",
+      "training_deck": "grixis_affinity",
+      "games": 50,
+      "primary_wins": 31,
+      "training_wins": 19,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 131,
+      "training_mana_burnt_total": 97
+    },
+    {
+      "primary_deck": "boggles",
+      "training_deck": "jund_wildfire",
+      "games": 50,
+      "primary_wins": 45,
+      "training_wins": 5,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 145,
+      "training_mana_burnt_total": 37
+    },
+    {
+      "primary_deck": "boggles",
+      "training_deck": "mono_blue_terror",
+      "games": 50,
+      "primary_wins": 21,
+      "training_wins": 29,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 87,
+      "training_mana_burnt_total": 7
+    },
+    {
+      "primary_deck": "boggles",
+      "training_deck": "mono_red_madness",
+      "games": 50,
+      "primary_wins": 38,
+      "training_wins": 12,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 92,
+      "training_mana_burnt_total": 8
+    },
+    {
+      "primary_deck": "boggles",
+      "training_deck": "mono_red_rally",
+      "games": 50,
+      "primary_wins": 22,
+      "training_wins": 28,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 68,
+      "training_mana_burnt_total": 72
+    },
+    {
+      "primary_deck": "boggles",
+      "training_deck": "monster_tron",
+      "games": 50,
+      "primary_wins": 38,
+      "training_wins": 12,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 161,
+      "training_mana_burnt_total": 263
+    },
+    {
+      "primary_deck": "boggles",
+      "training_deck": "rakdos_madness",
+      "games": 50,
+      "primary_wins": 33,
+      "training_wins": 17,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 61,
+      "training_mana_burnt_total": 37
+    },
+    {
+      "primary_deck": "boggles",
+      "training_deck": "spy_combo",
+      "games": 50,
+      "primary_wins": 34,
+      "training_wins": 16,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 134,
+      "training_mana_burnt_total": 55
+    },
+    {
+      "primary_deck": "monster_tron",
+      "training_deck": "boggles",
+      "games": 50,
+      "primary_wins": 14,
+      "training_wins": 36,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 297,
+      "training_mana_burnt_total": 198
+    },
+    {
+      "primary_deck": "monster_tron",
+      "training_deck": "dmir_terror",
+      "games": 50,
+      "primary_wins": 28,
+      "training_wins": 22,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 1442,
+      "training_mana_burnt_total": 208
+    },
+    {
+      "primary_deck": "monster_tron",
+      "training_deck": "elves",
+      "games": 50,
+      "primary_wins": 23,
+      "training_wins": 27,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 565,
+      "training_mana_burnt_total": 388
+    },
+    {
+      "primary_deck": "monster_tron",
+      "training_deck": "grixis_affinity",
+      "games": 50,
+      "primary_wins": 29,
+      "training_wins": 21,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 642,
+      "training_mana_burnt_total": 182
+    },
+    {
+      "primary_deck": "monster_tron",
+      "training_deck": "jund_wildfire",
+      "games": 50,
+      "primary_wins": 43,
+      "training_wins": 7,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 1012,
+      "training_mana_burnt_total": 356
+    },
+    {
+      "primary_deck": "monster_tron",
+      "training_deck": "mono_blue_terror",
+      "games": 50,
+      "primary_wins": 14,
+      "training_wins": 36,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 807,
+      "training_mana_burnt_total": 18
+    },
+    {
+      "primary_deck": "monster_tron",
+      "training_deck": "mono_red_madness",
+      "games": 50,
+      "primary_wins": 28,
+      "training_wins": 22,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 463,
+      "training_mana_burnt_total": 22
+    },
+    {
+      "primary_deck": "monster_tron",
+      "training_deck": "mono_red_rally",
+      "games": 50,
+      "primary_wins": 12,
+      "training_wins": 38,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 175,
+      "training_mana_burnt_total": 84
+    },
+    {
+      "primary_deck": "monster_tron",
+      "training_deck": "monster_tron",
+      "games": 50,
+      "primary_wins": 21,
+      "training_wins": 29,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 1449,
+      "training_mana_burnt_total": 1256
+    },
+    {
+      "primary_deck": "monster_tron",
+      "training_deck": "rakdos_madness",
+      "games": 50,
+      "primary_wins": 29,
+      "training_wins": 21,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 347,
+      "training_mana_burnt_total": 94
+    },
+    {
+      "primary_deck": "monster_tron",
+      "training_deck": "spy_combo",
+      "games": 50,
+      "primary_wins": 28,
+      "training_wins": 22,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 300,
+      "training_mana_burnt_total": 99
+    },
+    {
+      "primary_deck": "dmir_terror",
+      "training_deck": "boggles",
+      "games": 50,
+      "primary_wins": 20,
+      "training_wins": 30,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 6,
+      "training_mana_burnt_total": 279
+    },
+    {
+      "primary_deck": "dmir_terror",
+      "training_deck": "dmir_terror",
+      "games": 50,
+      "primary_wins": 23,
+      "training_wins": 27,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 101,
+      "training_mana_burnt_total": 124
+    },
+    {
+      "primary_deck": "dmir_terror",
+      "training_deck": "elves",
+      "games": 50,
+      "primary_wins": 17,
+      "training_wins": 33,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 72,
+      "training_mana_burnt_total": 721
+    },
+    {
+      "primary_deck": "dmir_terror",
+      "training_deck": "grixis_affinity",
+      "games": 50,
+      "primary_wins": 32,
+      "training_wins": 18,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 19,
+      "training_mana_burnt_total": 132
+    },
+    {
+      "primary_deck": "dmir_terror",
+      "training_deck": "jund_wildfire",
+      "games": 50,
+      "primary_wins": 47,
+      "training_wins": 3,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 35,
+      "training_mana_burnt_total": 138
+    },
+    {
+      "primary_deck": "dmir_terror",
+      "training_deck": "mono_blue_terror",
+      "games": 50,
+      "primary_wins": 9,
+      "training_wins": 41,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 64,
+      "training_mana_burnt_total": 0
+    },
+    {
+      "primary_deck": "dmir_terror",
+      "training_deck": "mono_red_madness",
+      "games": 50,
+      "primary_wins": 20,
+      "training_wins": 30,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 10,
+      "training_mana_burnt_total": 28
+    },
+    {
+      "primary_deck": "dmir_terror",
+      "training_deck": "mono_red_rally",
+      "games": 50,
+      "primary_wins": 8,
+      "training_wins": 42,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 12,
+      "training_mana_burnt_total": 77
+    },
+    {
+      "primary_deck": "dmir_terror",
+      "training_deck": "monster_tron",
+      "games": 50,
+      "primary_wins": 20,
+      "training_wins": 30,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 81,
+      "training_mana_burnt_total": 1169
+    },
+    {
+      "primary_deck": "dmir_terror",
+      "training_deck": "rakdos_madness",
+      "games": 50,
+      "primary_wins": 24,
+      "training_wins": 26,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 26,
+      "training_mana_burnt_total": 115
+    },
+    {
+      "primary_deck": "dmir_terror",
+      "training_deck": "spy_combo",
+      "games": 50,
+      "primary_wins": 27,
+      "training_wins": 23,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 11,
+      "training_mana_burnt_total": 97
+    },
+    {
+      "primary_deck": "elves",
+      "training_deck": "boggles",
+      "games": 50,
+      "primary_wins": 19,
+      "training_wins": 31,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 102,
+      "training_mana_burnt_total": 280
+    },
+    {
+      "primary_deck": "elves",
+      "training_deck": "dmir_terror",
+      "games": 50,
+      "primary_wins": 26,
+      "training_wins": 24,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 64,
+      "training_mana_burnt_total": 112
+    },
+    {
+      "primary_deck": "elves",
+      "training_deck": "elves",
+      "games": 50,
+      "primary_wins": 32,
+      "training_wins": 18,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 590,
+      "training_mana_burnt_total": 386
+    },
+    {
+      "primary_deck": "elves",
+      "training_deck": "grixis_affinity",
+      "games": 50,
+      "primary_wins": 30,
+      "training_wins": 20,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 205,
+      "training_mana_burnt_total": 168
+    },
+    {
+      "primary_deck": "elves",
+      "training_deck": "jund_wildfire",
+      "games": 50,
+      "primary_wins": 44,
+      "training_wins": 6,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 129,
+      "training_mana_burnt_total": 120
+    },
+    {
+      "primary_deck": "elves",
+      "training_deck": "mono_blue_terror",
+      "games": 50,
+      "primary_wins": 18,
+      "training_wins": 32,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 102,
+      "training_mana_burnt_total": 4
+    },
+    {
+      "primary_deck": "elves",
+      "training_deck": "mono_red_madness",
+      "games": 50,
+      "primary_wins": 24,
+      "training_wins": 26,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 70,
+      "training_mana_burnt_total": 32
+    },
+    {
+      "primary_deck": "elves",
+      "training_deck": "mono_red_rally",
+      "games": 50,
+      "primary_wins": 9,
+      "training_wins": 41,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 54,
+      "training_mana_burnt_total": 92
+    },
+    {
+      "primary_deck": "elves",
+      "training_deck": "monster_tron",
+      "games": 50,
+      "primary_wins": 29,
+      "training_wins": 21,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 239,
+      "training_mana_burnt_total": 584
+    },
+    {
+      "primary_deck": "elves",
+      "training_deck": "rakdos_madness",
+      "games": 50,
+      "primary_wins": 28,
+      "training_wins": 22,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 166,
+      "training_mana_burnt_total": 78
+    },
+    {
+      "primary_deck": "elves",
+      "training_deck": "spy_combo",
+      "games": 50,
+      "primary_wins": 33,
+      "training_wins": 17,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 75,
+      "training_mana_burnt_total": 52
+    },
+    {
+      "primary_deck": "grixis_affinity",
+      "training_deck": "boggles",
+      "games": 50,
+      "primary_wins": 19,
+      "training_wins": 31,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 123,
+      "training_mana_burnt_total": 289
+    },
+    {
+      "primary_deck": "grixis_affinity",
+      "training_deck": "dmir_terror",
+      "games": 50,
+      "primary_wins": 24,
+      "training_wins": 26,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 257,
+      "training_mana_burnt_total": 86
+    },
+    {
+      "primary_deck": "grixis_affinity",
+      "training_deck": "elves",
+      "games": 50,
+      "primary_wins": 18,
+      "training_wins": 32,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 152,
+      "training_mana_burnt_total": 389
+    },
+    {
+      "primary_deck": "grixis_affinity",
+      "training_deck": "grixis_affinity",
+      "games": 50,
+      "primary_wins": 27,
+      "training_wins": 23,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 281,
+      "training_mana_burnt_total": 212
+    },
+    {
+      "primary_deck": "grixis_affinity",
+      "training_deck": "jund_wildfire",
+      "games": 50,
+      "primary_wins": 43,
+      "training_wins": 7,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 106,
+      "training_mana_burnt_total": 100
+    },
+    {
+      "primary_deck": "grixis_affinity",
+      "training_deck": "mono_blue_terror",
+      "games": 50,
+      "primary_wins": 8,
+      "training_wins": 42,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 248,
+      "training_mana_burnt_total": 2
+    },
+    {
+      "primary_deck": "grixis_affinity",
+      "training_deck": "mono_red_madness",
+      "games": 50,
+      "primary_wins": 30,
+      "training_wins": 20,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 121,
+      "training_mana_burnt_total": 34
+    },
+    {
+      "primary_deck": "grixis_affinity",
+      "training_deck": "mono_red_rally",
+      "games": 50,
+      "primary_wins": 17,
+      "training_wins": 33,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 109,
+      "training_mana_burnt_total": 146
+    },
+    {
+      "primary_deck": "grixis_affinity",
+      "training_deck": "monster_tron",
+      "games": 50,
+      "primary_wins": 19,
+      "training_wins": 31,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 258,
+      "training_mana_burnt_total": 580
+    },
+    {
+      "primary_deck": "grixis_affinity",
+      "training_deck": "rakdos_madness",
+      "games": 50,
+      "primary_wins": 23,
+      "training_wins": 27,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 180,
+      "training_mana_burnt_total": 80
+    },
+    {
+      "primary_deck": "grixis_affinity",
+      "training_deck": "spy_combo",
+      "games": 50,
+      "primary_wins": 31,
+      "training_wins": 19,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 86,
+      "training_mana_burnt_total": 94
+    },
+    {
+      "primary_deck": "jund_wildfire",
+      "training_deck": "boggles",
+      "games": 50,
+      "primary_wins": 6,
+      "training_wins": 44,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 54,
+      "training_mana_burnt_total": 176
+    },
+    {
+      "primary_deck": "jund_wildfire",
+      "training_deck": "dmir_terror",
+      "games": 50,
+      "primary_wins": 8,
+      "training_wins": 42,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 230,
+      "training_mana_burnt_total": 45
+    },
+    {
+      "primary_deck": "jund_wildfire",
+      "training_deck": "elves",
+      "games": 50,
+      "primary_wins": 5,
+      "training_wins": 45,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 181,
+      "training_mana_burnt_total": 214
+    },
+    {
+      "primary_deck": "jund_wildfire",
+      "training_deck": "grixis_affinity",
+      "games": 50,
+      "primary_wins": 9,
+      "training_wins": 41,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 396,
+      "training_mana_burnt_total": 239
+    },
+    {
+      "primary_deck": "jund_wildfire",
+      "training_deck": "jund_wildfire",
+      "games": 50,
+      "primary_wins": 36,
+      "training_wins": 14,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 437,
+      "training_mana_burnt_total": 272
+    },
+    {
+      "primary_deck": "jund_wildfire",
+      "training_deck": "mono_blue_terror",
+      "games": 50,
+      "primary_wins": 2,
+      "training_wins": 48,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 263,
+      "training_mana_burnt_total": 0
+    },
+    {
+      "primary_deck": "jund_wildfire",
+      "training_deck": "mono_red_madness",
+      "games": 50,
+      "primary_wins": 13,
+      "training_wins": 37,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 150,
+      "training_mana_burnt_total": 100
+    },
+    {
+      "primary_deck": "jund_wildfire",
+      "training_deck": "mono_red_rally",
+      "games": 50,
+      "primary_wins": 0,
+      "training_wins": 50,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 62,
+      "training_mana_burnt_total": 30
+    },
+    {
+      "primary_deck": "jund_wildfire",
+      "training_deck": "monster_tron",
+      "games": 50,
+      "primary_wins": 4,
+      "training_wins": 46,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 266,
+      "training_mana_burnt_total": 1243
+    },
+    {
+      "primary_deck": "jund_wildfire",
+      "training_deck": "rakdos_madness",
+      "games": 50,
+      "primary_wins": 4,
+      "training_wins": 46,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 169,
+      "training_mana_burnt_total": 70
+    },
+    {
+      "primary_deck": "jund_wildfire",
+      "training_deck": "spy_combo",
+      "games": 50,
+      "primary_wins": 20,
+      "training_wins": 30,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 175,
+      "training_mana_burnt_total": 165
+    },
+    {
+      "primary_deck": "mono_blue_terror",
+      "training_deck": "boggles",
+      "games": 50,
+      "primary_wins": 30,
+      "training_wins": 20,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 8,
+      "training_mana_burnt_total": 289
+    },
+    {
+      "primary_deck": "mono_blue_terror",
+      "training_deck": "dmir_terror",
+      "games": 50,
+      "primary_wins": 39,
+      "training_wins": 11,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 31,
+      "training_mana_burnt_total": 126
+    },
+    {
+      "primary_deck": "mono_blue_terror",
+      "training_deck": "elves",
+      "games": 50,
+      "primary_wins": 28,
+      "training_wins": 22,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 4,
+      "training_mana_burnt_total": 863
+    },
+    {
+      "primary_deck": "mono_blue_terror",
+      "training_deck": "grixis_affinity",
+      "games": 50,
+      "primary_wins": 42,
+      "training_wins": 8,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 0,
+      "training_mana_burnt_total": 144
+    },
+    {
+      "primary_deck": "mono_blue_terror",
+      "training_deck": "jund_wildfire",
+      "games": 50,
+      "primary_wins": 47,
+      "training_wins": 3,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 0,
+      "training_mana_burnt_total": 109
+    },
+    {
+      "primary_deck": "mono_blue_terror",
+      "training_deck": "mono_blue_terror",
+      "games": 50,
+      "primary_wins": 32,
+      "training_wins": 18,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 38,
+      "training_mana_burnt_total": 3
+    },
+    {
+      "primary_deck": "mono_blue_terror",
+      "training_deck": "mono_red_madness",
+      "games": 50,
+      "primary_wins": 30,
+      "training_wins": 20,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 1,
+      "training_mana_burnt_total": 31
+    },
+    {
+      "primary_deck": "mono_blue_terror",
+      "training_deck": "mono_red_rally",
+      "games": 50,
+      "primary_wins": 18,
+      "training_wins": 32,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 1,
+      "training_mana_burnt_total": 94
+    },
+    {
+      "primary_deck": "mono_blue_terror",
+      "training_deck": "monster_tron",
+      "games": 50,
+      "primary_wins": 29,
+      "training_wins": 21,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 21,
+      "training_mana_burnt_total": 729
+    },
+    {
+      "primary_deck": "mono_blue_terror",
+      "training_deck": "rakdos_madness",
+      "games": 50,
+      "primary_wins": 32,
+      "training_wins": 18,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 1,
+      "training_mana_burnt_total": 51
+    },
+    {
+      "primary_deck": "mono_blue_terror",
+      "training_deck": "spy_combo",
+      "games": 50,
+      "primary_wins": 35,
+      "training_wins": 15,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 0,
+      "training_mana_burnt_total": 70
+    },
+    {
+      "primary_deck": "mono_red_rally",
+      "training_deck": "boggles",
+      "games": 50,
+      "primary_wins": 37,
+      "training_wins": 13,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 110,
+      "training_mana_burnt_total": 188
+    },
+    {
+      "primary_deck": "mono_red_rally",
+      "training_deck": "dmir_terror",
+      "games": 50,
+      "primary_wins": 45,
+      "training_wins": 5,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 152,
+      "training_mana_burnt_total": 143
+    },
+    {
+      "primary_deck": "mono_red_rally",
+      "training_deck": "elves",
+      "games": 50,
+      "primary_wins": 43,
+      "training_wins": 7,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 226,
+      "training_mana_burnt_total": 122
+    },
+    {
+      "primary_deck": "mono_red_rally",
+      "training_deck": "grixis_affinity",
+      "games": 50,
+      "primary_wins": 36,
+      "training_wins": 14,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 224,
+      "training_mana_burnt_total": 98
+    },
+    {
+      "primary_deck": "mono_red_rally",
+      "training_deck": "jund_wildfire",
+      "games": 50,
+      "primary_wins": 47,
+      "training_wins": 3,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 129,
+      "training_mana_burnt_total": 35
+    },
+    {
+      "primary_deck": "mono_red_rally",
+      "training_deck": "mono_blue_terror",
+      "games": 50,
+      "primary_wins": 29,
+      "training_wins": 21,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 310,
+      "training_mana_burnt_total": 44
+    },
+    {
+      "primary_deck": "mono_red_rally",
+      "training_deck": "mono_red_madness",
+      "games": 50,
+      "primary_wins": 41,
+      "training_wins": 9,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 94,
+      "training_mana_burnt_total": 10
+    },
+    {
+      "primary_deck": "mono_red_rally",
+      "training_deck": "mono_red_rally",
+      "games": 50,
+      "primary_wins": 21,
+      "training_wins": 29,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 195,
+      "training_mana_burnt_total": 67
+    },
+    {
+      "primary_deck": "mono_red_rally",
+      "training_deck": "monster_tron",
+      "games": 50,
+      "primary_wins": 28,
+      "training_wins": 22,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 194,
+      "training_mana_burnt_total": 208
+    },
+    {
+      "primary_deck": "mono_red_rally",
+      "training_deck": "rakdos_madness",
+      "games": 50,
+      "primary_wins": 46,
+      "training_wins": 4,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 128,
+      "training_mana_burnt_total": 36
+    },
+    {
+      "primary_deck": "mono_red_rally",
+      "training_deck": "spy_combo",
+      "games": 50,
+      "primary_wins": 40,
+      "training_wins": 10,
+      "no_winner": 0,
+      "primary_mana_burnt_total": 90,
+      "training_mana_burnt_total": 41
+    }
+  ],
+  "mana_burnt_by_deck": {
+    "primary/mono_red_madness": {
+      "games": 550,
+      "mana_burnt_total_per_game": 0.24181818181818182,
+      "mana_burnt_total_single_pip_per_game": 0.22727272727272727
+    },
+    "training/boggles": {
+      "games": 550,
+      "mana_burnt_total_per_game": 4.6454545454545455,
+      "mana_burnt_total_single_pip_per_game": 3.44
+    },
+    "training/dmir_terror": {
+      "games": 550,
+      "mana_burnt_total_per_game": 2.34,
+      "mana_burnt_total_single_pip_per_game": 2.34
+    },
+    "training/elves": {
+      "games": 550,
+      "mana_burnt_total_per_game": 6.589090909090909,
+      "mana_burnt_total_single_pip_per_game": 4.136363636363637
+    },
+    "training/grixis_affinity": {
+      "games": 550,
+      "mana_burnt_total_per_game": 2.792727272727273,
+      "mana_burnt_total_single_pip_per_game": 2.7436363636363637
+    },
+    "training/jund_wildfire": {
+      "games": 550,
+      "mana_burnt_total_per_game": 2.7363636363636363,
+      "mana_burnt_total_single_pip_per_game": 2.247272727272727
+    },
+    "training/mono_blue_terror": {
+      "games": 550,
+      "mana_burnt_total_per_game": 0.15454545454545454,
+      "mana_burnt_total_single_pip_per_game": 0.15272727272727274
+    },
+    "training/mono_red_madness": {
+      "games": 550,
+      "mana_burnt_total_per_game": 0.5636363636363636,
+      "mana_burnt_total_single_pip_per_game": 0.5472727272727272
+    },
+    "training/mono_red_rally": {
+      "games": 550,
+      "mana_burnt_total_per_game": 1.4927272727272727,
+      "mana_burnt_total_single_pip_per_game": 1.1745454545454546
+    },
+    "training/monster_tron": {
+      "games": 550,
+      "mana_burnt_total_per_game": 13.445454545454545,
+      "mana_burnt_total_single_pip_per_game": 2.321818181818182
+    },
+    "training/rakdos_madness": {
+      "games": 550,
+      "mana_burnt_total_per_game": 1.3690909090909091,
+      "mana_burnt_total_single_pip_per_game": 1.1163636363636364
+    },
+    "training/spy_combo": {
+      "games": 550,
+      "mana_burnt_total_per_game": 1.5436363636363637,
+      "mana_burnt_total_single_pip_per_game": 1.0345454545454544
+    },
+    "primary/rakdos_madness": {
+      "games": 550,
+      "mana_burnt_total_per_game": 4.514545454545455,
+      "mana_burnt_total_single_pip_per_game": 4.265454545454546
+    },
+    "primary/spy_combo": {
+      "games": 550,
+      "mana_burnt_total_per_game": 4.625454545454545,
+      "mana_burnt_total_single_pip_per_game": 1.5
+    },
+    "primary/boggles": {
+      "games": 550,
+      "mana_burnt_total_per_game": 2.2581818181818183,
+      "mana_burnt_total_single_pip_per_game": 1.2727272727272727
+    },
+    "primary/monster_tron": {
+      "games": 550,
+      "mana_burnt_total_per_game": 13.634545454545455,
+      "mana_burnt_total_single_pip_per_game": 2.727272727272727
+    },
+    "primary/dmir_terror": {
+      "games": 550,
+      "mana_burnt_total_per_game": 0.7945454545454546,
+      "mana_burnt_total_single_pip_per_game": 0.7945454545454546
+    },
+    "primary/elves": {
+      "games": 550,
+      "mana_burnt_total_per_game": 3.2654545454545456,
+      "mana_burnt_total_single_pip_per_game": 1.6854545454545455
+    },
+    "primary/grixis_affinity": {
+      "games": 550,
+      "mana_burnt_total_per_game": 3.4927272727272727,
+      "mana_burnt_total_single_pip_per_game": 3.4472727272727273
+    },
+    "primary/jund_wildfire": {
+      "games": 550,
+      "mana_burnt_total_per_game": 4.332727272727273,
+      "mana_burnt_total_single_pip_per_game": 3.5454545454545454
+    },
+    "primary/mono_blue_terror": {
+      "games": 550,
+      "mana_burnt_total_per_game": 0.19090909090909092,
+      "mana_burnt_total_single_pip_per_game": 0.19090909090909092
+    },
+    "primary/mono_red_rally": {
+      "games": 550,
+      "mana_burnt_total_per_game": 3.367272727272727,
+      "mana_burnt_total_single_pip_per_game": 2.9927272727272727
+    }
+  },
+  "primary_totals": {
+    "mono_red_madness": {
+      "wins": 260,
+      "games": 550,
+      "win_rate": 0.4727272727272727
+    },
+    "rakdos_madness": {
+      "wins": 221,
+      "games": 550,
+      "win_rate": 0.4018181818181818
+    },
+    "spy_combo": {
+      "wins": 231,
+      "games": 550,
+      "win_rate": 0.42
+    },
+    "boggles": {
+      "wins": 355,
+      "games": 550,
+      "win_rate": 0.6454545454545455
+    },
+    "monster_tron": {
+      "wins": 269,
+      "games": 550,
+      "win_rate": 0.4890909090909091
+    },
+    "dmir_terror": {
+      "wins": 247,
+      "games": 550,
+      "win_rate": 0.4490909090909091
+    },
+    "elves": {
+      "wins": 292,
+      "games": 550,
+      "win_rate": 0.5309090909090909
+    },
+    "grixis_affinity": {
+      "wins": 259,
+      "games": 550,
+      "win_rate": 0.4709090909090909
+    },
+    "jund_wildfire": {
+      "wins": 107,
+      "games": 550,
+      "win_rate": 0.19454545454545455
+    },
+    "mono_blue_terror": {
+      "wins": 362,
+      "games": 550,
+      "win_rate": 0.6581818181818182
+    },
+    "mono_red_rally": {
+      "wins": 413,
+      "games": 550,
+      "win_rate": 0.7509090909090909
+    }
+  }
+}

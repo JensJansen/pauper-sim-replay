@@ -1,0 +1,128 @@
+{
+  "check": "mulligan_audit",
+  "primary_league": "main-league",
+  "deck": "mono_red_madness",
+  "cumulative_games": 7680,
+  "by_land_count": {
+    "0": {
+      "kept": 78,
+      "mulliganed": 0,
+      "keep_rate": 1.0,
+      "avg_p_keep_when_kept": 0.5261224569418491,
+      "avg_entropy_bits": 0.9979217143190788,
+      "win_rate_after_keep": 0.2564102564102564,
+      "wins": 20,
+      "losses": 58
+    },
+    "1": {
+      "kept": 292,
+      "mulliganed": 0,
+      "keep_rate": 1.0,
+      "avg_p_keep_when_kept": 0.5279709455901629,
+      "avg_entropy_bits": 0.9976359789772317,
+      "win_rate_after_keep": 0.4178082191780822,
+      "wins": 122,
+      "losses": 170
+    },
+    "2": {
+      "kept": 380,
+      "mulliganed": 0,
+      "keep_rate": 1.0,
+      "avg_p_keep_when_kept": 0.52790410691186,
+      "avg_entropy_bits": 0.9976557099477993,
+      "win_rate_after_keep": 0.46578947368421053,
+      "wins": 177,
+      "losses": 203
+    },
+    "3": {
+      "kept": 263,
+      "mulliganed": 0,
+      "keep_rate": 1.0,
+      "avg_p_keep_when_kept": 0.5271859823977539,
+      "avg_entropy_bits": 0.9977674398703552,
+      "win_rate_after_keep": 0.43346007604562736,
+      "wins": 114,
+      "losses": 149
+    },
+    "4": {
+      "kept": 107,
+      "mulliganed": 0,
+      "keep_rate": 1.0,
+      "avg_p_keep_when_kept": 0.5263355357624661,
+      "avg_entropy_bits": 0.9978954693313156,
+      "win_rate_after_keep": 0.48598130841121495,
+      "wins": 52,
+      "losses": 55
+    },
+    "5": {
+      "kept": 27,
+      "mulliganed": 0,
+      "keep_rate": 1.0,
+      "avg_p_keep_when_kept": 0.5290038916799757,
+      "avg_entropy_bits": 0.9974894459298818,
+      "win_rate_after_keep": 0.37037037037037035,
+      "wins": 10,
+      "losses": 17
+    },
+    "6": {
+      "kept": 3,
+      "mulliganed": 0,
+      "keep_rate": 1.0,
+      "avg_p_keep_when_kept": 0.5284711321194967,
+      "avg_entropy_bits": 0.9975726763857972,
+      "win_rate_after_keep": 0.6666666666666666,
+      "wins": 2,
+      "losses": 1
+    }
+  },
+  "probe_hands": {
+    "0": {
+      "p_mulligan_mean": 0.46819399297237396,
+      "p_mulligan_spread": 0.01813569664955139,
+      "entropy_bits_mean": 0.9969509651638858,
+      "n": 6
+    },
+    "1": {
+      "p_mulligan_mean": 0.46729179720083874,
+      "p_mulligan_spread": 0.015874743461608887,
+      "entropy_bits_mean": 0.9968379542901832,
+      "n": 6
+    },
+    "2": {
+      "p_mulligan_mean": 0.47098684807618457,
+      "p_mulligan_spread": 0.012880712747573853,
+      "entropy_bits_mean": 0.9975029001373695,
+      "n": 6
+    },
+    "3": {
+      "p_mulligan_mean": 0.4696662376324336,
+      "p_mulligan_spread": 0.009037971496582031,
+      "entropy_bits_mean": 0.9973177439691124,
+      "n": 6
+    },
+    "4": {
+      "p_mulligan_mean": 0.46862932046254474,
+      "p_mulligan_spread": 0.010854601860046387,
+      "entropy_bits_mean": 0.997119380896307,
+      "n": 6
+    },
+    "5": {
+      "p_mulligan_mean": 0.4686785638332367,
+      "p_mulligan_spread": 0.008451879024505615,
+      "entropy_bits_mean": 0.9971427909527194,
+      "n": 6
+    },
+    "6": {
+      "p_mulligan_mean": 0.4709053138891856,
+      "p_mulligan_spread": 0.010432332754135132,
+      "entropy_bits_mean": 0.9975164850411994,
+      "n": 6
+    },
+    "7": {
+      "p_mulligan_mean": 0.4638732969760895,
+      "p_mulligan_spread": 0.0,
+      "entropy_bits_mean": 0.9962308823368685,
+      "n": 6
+    }
+  }
+}

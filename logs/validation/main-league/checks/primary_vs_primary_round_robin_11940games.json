@@ -1,0 +1,608 @@
+{
+  "check": "primary_vs_primary_round_robin",
+  "primary_league": "main-league",
+  "decks": [
+    "mono_red_madness",
+    "rakdos_madness",
+    "spy_combo",
+    "boggles",
+    "monster_tron",
+    "dmir_terror",
+    "elves",
+    "grixis_affinity",
+    "jund_wildfire",
+    "mono_blue_terror",
+    "mono_red_rally"
+  ],
+  "games_per_pairing": 50,
+  "seed": null,
+  "cumulative_games": 11940,
+  "elapsed_ms": 331760.59317588806,
+  "pairings": [
+    {
+      "deck_a": "mono_red_madness",
+      "deck_b": "mono_red_madness",
+      "games": 50,
+      "a_wins": 26,
+      "b_wins": 24,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "mono_red_madness",
+      "deck_b": "rakdos_madness",
+      "games": 50,
+      "a_wins": 29,
+      "b_wins": 21,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "mono_red_madness",
+      "deck_b": "spy_combo",
+      "games": 50,
+      "a_wins": 39,
+      "b_wins": 11,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "mono_red_madness",
+      "deck_b": "boggles",
+      "games": 50,
+      "a_wins": 27,
+      "b_wins": 23,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "mono_red_madness",
+      "deck_b": "monster_tron",
+      "games": 50,
+      "a_wins": 30,
+      "b_wins": 20,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "mono_red_madness",
+      "deck_b": "dmir_terror",
+      "games": 50,
+      "a_wins": 33,
+      "b_wins": 17,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "mono_red_madness",
+      "deck_b": "elves",
+      "games": 50,
+      "a_wins": 27,
+      "b_wins": 23,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "mono_red_madness",
+      "deck_b": "grixis_affinity",
+      "games": 50,
+      "a_wins": 23,
+      "b_wins": 27,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "mono_red_madness",
+      "deck_b": "jund_wildfire",
+      "games": 50,
+      "a_wins": 30,
+      "b_wins": 20,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "mono_red_madness",
+      "deck_b": "mono_blue_terror",
+      "games": 50,
+      "a_wins": 11,
+      "b_wins": 39,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "mono_red_madness",
+      "deck_b": "mono_red_rally",
+      "games": 50,
+      "a_wins": 9,
+      "b_wins": 41,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "rakdos_madness",
+      "deck_b": "rakdos_madness",
+      "games": 50,
+      "a_wins": 25,
+      "b_wins": 25,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "rakdos_madness",
+      "deck_b": "spy_combo",
+      "games": 50,
+      "a_wins": 34,
+      "b_wins": 16,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "rakdos_madness",
+      "deck_b": "boggles",
+      "games": 50,
+      "a_wins": 15,
+      "b_wins": 35,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "rakdos_madness",
+      "deck_b": "monster_tron",
+      "games": 50,
+      "a_wins": 12,
+      "b_wins": 38,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "rakdos_madness",
+      "deck_b": "dmir_terror",
+      "games": 50,
+      "a_wins": 31,
+      "b_wins": 19,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "rakdos_madness",
+      "deck_b": "elves",
+      "games": 50,
+      "a_wins": 15,
+      "b_wins": 35,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "rakdos_madness",
+      "deck_b": "grixis_affinity",
+      "games": 50,
+      "a_wins": 25,
+      "b_wins": 25,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "rakdos_madness",
+      "deck_b": "jund_wildfire",
+      "games": 50,
+      "a_wins": 29,
+      "b_wins": 21,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "rakdos_madness",
+      "deck_b": "mono_blue_terror",
+      "games": 50,
+      "a_wins": 20,
+      "b_wins": 30,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "rakdos_madness",
+      "deck_b": "mono_red_rally",
+      "games": 50,
+      "a_wins": 4,
+      "b_wins": 46,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "spy_combo",
+      "deck_b": "spy_combo",
+      "games": 50,
+      "a_wins": 24,
+      "b_wins": 26,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "spy_combo",
+      "deck_b": "boggles",
+      "games": 50,
+      "a_wins": 12,
+      "b_wins": 38,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "spy_combo",
+      "deck_b": "monster_tron",
+      "games": 50,
+      "a_wins": 15,
+      "b_wins": 35,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "spy_combo",
+      "deck_b": "dmir_terror",
+      "games": 50,
+      "a_wins": 16,
+      "b_wins": 34,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "spy_combo",
+      "deck_b": "elves",
+      "games": 50,
+      "a_wins": 19,
+      "b_wins": 31,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "spy_combo",
+      "deck_b": "grixis_affinity",
+      "games": 50,
+      "a_wins": 26,
+      "b_wins": 24,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "spy_combo",
+      "deck_b": "jund_wildfire",
+      "games": 50,
+      "a_wins": 19,
+      "b_wins": 31,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "spy_combo",
+      "deck_b": "mono_blue_terror",
+      "games": 50,
+      "a_wins": 12,
+      "b_wins": 38,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "spy_combo",
+      "deck_b": "mono_red_rally",
+      "games": 50,
+      "a_wins": 9,
+      "b_wins": 41,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "boggles",
+      "deck_b": "boggles",
+      "games": 50,
+      "a_wins": 26,
+      "b_wins": 24,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "boggles",
+      "deck_b": "monster_tron",
+      "games": 50,
+      "a_wins": 41,
+      "b_wins": 9,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "boggles",
+      "deck_b": "dmir_terror",
+      "games": 50,
+      "a_wins": 35,
+      "b_wins": 15,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "boggles",
+      "deck_b": "elves",
+      "games": 50,
+      "a_wins": 31,
+      "b_wins": 19,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "boggles",
+      "deck_b": "grixis_affinity",
+      "games": 50,
+      "a_wins": 34,
+      "b_wins": 16,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "boggles",
+      "deck_b": "jund_wildfire",
+      "games": 50,
+      "a_wins": 41,
+      "b_wins": 9,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "boggles",
+      "deck_b": "mono_blue_terror",
+      "games": 50,
+      "a_wins": 16,
+      "b_wins": 34,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "boggles",
+      "deck_b": "mono_red_rally",
+      "games": 50,
+      "a_wins": 19,
+      "b_wins": 31,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "monster_tron",
+      "deck_b": "monster_tron",
+      "games": 50,
+      "a_wins": 29,
+      "b_wins": 21,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "monster_tron",
+      "deck_b": "dmir_terror",
+      "games": 50,
+      "a_wins": 26,
+      "b_wins": 24,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "monster_tron",
+      "deck_b": "elves",
+      "games": 50,
+      "a_wins": 16,
+      "b_wins": 34,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "monster_tron",
+      "deck_b": "grixis_affinity",
+      "games": 50,
+      "a_wins": 25,
+      "b_wins": 25,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "monster_tron",
+      "deck_b": "jund_wildfire",
+      "games": 50,
+      "a_wins": 33,
+      "b_wins": 17,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "monster_tron",
+      "deck_b": "mono_blue_terror",
+      "games": 50,
+      "a_wins": 13,
+      "b_wins": 37,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "monster_tron",
+      "deck_b": "mono_red_rally",
+      "games": 50,
+      "a_wins": 8,
+      "b_wins": 42,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "dmir_terror",
+      "deck_b": "dmir_terror",
+      "games": 50,
+      "a_wins": 19,
+      "b_wins": 31,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "dmir_terror",
+      "deck_b": "elves",
+      "games": 50,
+      "a_wins": 19,
+      "b_wins": 31,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "dmir_terror",
+      "deck_b": "grixis_affinity",
+      "games": 50,
+      "a_wins": 38,
+      "b_wins": 12,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "dmir_terror",
+      "deck_b": "jund_wildfire",
+      "games": 50,
+      "a_wins": 42,
+      "b_wins": 8,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "dmir_terror",
+      "deck_b": "mono_blue_terror",
+      "games": 50,
+      "a_wins": 9,
+      "b_wins": 41,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "dmir_terror",
+      "deck_b": "mono_red_rally",
+      "games": 50,
+      "a_wins": 5,
+      "b_wins": 45,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "elves",
+      "deck_b": "elves",
+      "games": 50,
+      "a_wins": 21,
+      "b_wins": 29,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "elves",
+      "deck_b": "grixis_affinity",
+      "games": 50,
+      "a_wins": 30,
+      "b_wins": 20,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "elves",
+      "deck_b": "jund_wildfire",
+      "games": 50,
+      "a_wins": 40,
+      "b_wins": 10,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "elves",
+      "deck_b": "mono_blue_terror",
+      "games": 50,
+      "a_wins": 26,
+      "b_wins": 24,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "elves",
+      "deck_b": "mono_red_rally",
+      "games": 50,
+      "a_wins": 16,
+      "b_wins": 34,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "grixis_affinity",
+      "deck_b": "grixis_affinity",
+      "games": 50,
+      "a_wins": 27,
+      "b_wins": 23,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "grixis_affinity",
+      "deck_b": "jund_wildfire",
+      "games": 50,
+      "a_wins": 31,
+      "b_wins": 19,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "grixis_affinity",
+      "deck_b": "mono_blue_terror",
+      "games": 50,
+      "a_wins": 9,
+      "b_wins": 41,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "grixis_affinity",
+      "deck_b": "mono_red_rally",
+      "games": 50,
+      "a_wins": 11,
+      "b_wins": 39,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "jund_wildfire",
+      "deck_b": "jund_wildfire",
+      "games": 50,
+      "a_wins": 27,
+      "b_wins": 23,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "jund_wildfire",
+      "deck_b": "mono_blue_terror",
+      "games": 50,
+      "a_wins": 5,
+      "b_wins": 45,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "jund_wildfire",
+      "deck_b": "mono_red_rally",
+      "games": 50,
+      "a_wins": 6,
+      "b_wins": 44,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "mono_blue_terror",
+      "deck_b": "mono_blue_terror",
+      "games": 50,
+      "a_wins": 22,
+      "b_wins": 28,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "mono_blue_terror",
+      "deck_b": "mono_red_rally",
+      "games": 50,
+      "a_wins": 25,
+      "b_wins": 25,
+      "no_winner": 0
+    },
+    {
+      "deck_a": "mono_red_rally",
+      "deck_b": "mono_red_rally",
+      "games": 50,
+      "a_wins": 22,
+      "b_wins": 28,
+      "no_winner": 0
+    }
+  ],
+  "deck_totals": {
+    "mono_red_madness": {
+      "wins": 308,
+      "games": 550,
+      "win_rate": 0.56
+    },
+    "rakdos_madness": {
+      "wins": 256,
+      "games": 550,
+      "win_rate": 0.46545454545454545
+    },
+    "spy_combo": {
+      "wins": 205,
+      "games": 550,
+      "win_rate": 0.37272727272727274
+    },
+    "boggles": {
+      "wins": 363,
+      "games": 550,
+      "win_rate": 0.66
+    },
+    "monster_tron": {
+      "wins": 273,
+      "games": 550,
+      "win_rate": 0.49636363636363634
+    },
+    "dmir_terror": {
+      "wins": 272,
+      "games": 550,
+      "win_rate": 0.49454545454545457
+    },
+    "elves": {
+      "wins": 335,
+      "games": 550,
+      "win_rate": 0.6090909090909091
+    },
+    "grixis_affinity": {
+      "wins": 250,
+      "games": 550,
+      "win_rate": 0.45454545454545453
+    },
+    "jund_wildfire": {
+      "wins": 196,
+      "games": 550,
+      "win_rate": 0.3563636363636364
+    },
+    "mono_blue_terror": {
+      "wins": 404,
+      "games": 550,
+      "win_rate": 0.7345454545454545
+    },
+    "mono_red_rally": {
+      "wins": 438,
+      "games": 550,
+      "win_rate": 0.7963636363636364
+    }
+  }
+}

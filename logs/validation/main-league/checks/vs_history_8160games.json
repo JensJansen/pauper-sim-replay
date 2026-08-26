@@ -1,0 +1,249 @@
+{
+  "check": "vs_history",
+  "primary_league": "main-league",
+  "cumulative_games": 8160,
+  "decks": {
+    "mono_red_madness": [
+      {
+        "label": "archive_oldest",
+        "snapshot_id": 0,
+        "is_archive": true,
+        "games": 50,
+        "live_wins": 46,
+        "snapshot_wins": 4,
+        "no_winner": 0,
+        "paired": true
+      },
+      {
+        "label": "active_oldest",
+        "snapshot_id": 13,
+        "is_archive": false,
+        "games": 50,
+        "live_wins": 43,
+        "snapshot_wins": 7,
+        "no_winner": 0,
+        "paired": true
+      }
+    ],
+    "rakdos_madness": [
+      {
+        "label": "archive_oldest",
+        "snapshot_id": 0,
+        "is_archive": true,
+        "games": 50,
+        "live_wins": 43,
+        "snapshot_wins": 7,
+        "no_winner": 0,
+        "paired": true
+      },
+      {
+        "label": "active_oldest",
+        "snapshot_id": 13,
+        "is_archive": false,
+        "games": 50,
+        "live_wins": 46,
+        "snapshot_wins": 4,
+        "no_winner": 0,
+        "paired": true
+      }
+    ],
+    "spy_combo": [
+      {
+        "label": "archive_oldest",
+        "snapshot_id": 0,
+        "is_archive": true,
+        "games": 50,
+        "live_wins": 37,
+        "snapshot_wins": 13,
+        "no_winner": 0,
+        "paired": true
+      },
+      {
+        "label": "active_oldest",
+        "snapshot_id": 13,
+        "is_archive": false,
+        "games": 50,
+        "live_wins": 27,
+        "snapshot_wins": 23,
+        "no_winner": 0,
+        "paired": true
+      }
+    ],
+    "boggles": [
+      {
+        "label": "archive_oldest",
+        "snapshot_id": 0,
+        "is_archive": true,
+        "games": 50,
+        "live_wins": 49,
+        "snapshot_wins": 1,
+        "no_winner": 0,
+        "paired": true
+      },
+      {
+        "label": "active_oldest",
+        "snapshot_id": 13,
+        "is_archive": false,
+        "games": 50,
+        "live_wins": 30,
+        "snapshot_wins": 20,
+        "no_winner": 0,
+        "paired": true
+      }
+    ],
+    "monster_tron": [
+      {
+        "label": "archive_oldest",
+        "snapshot_id": 0,
+        "is_archive": true,
+        "games": 50,
+        "live_wins": 40,
+        "snapshot_wins": 10,
+        "no_winner": 0,
+        "paired": true
+      },
+      {
+        "label": "active_oldest",
+        "snapshot_id": 13,
+        "is_archive": false,
+        "games": 50,
+        "live_wins": 36,
+        "snapshot_wins": 14,
+        "no_winner": 0,
+        "paired": true
+      }
+    ],
+    "dmir_terror": [
+      {
+        "label": "archive_oldest",
+        "snapshot_id": 0,
+        "is_archive": true,
+        "games": 50,
+        "live_wins": 50,
+        "snapshot_wins": 0,
+        "no_winner": 0,
+        "paired": true
+      },
+      {
+        "label": "active_oldest",
+        "snapshot_id": 13,
+        "is_archive": false,
+        "games": 50,
+        "live_wins": 40,
+        "snapshot_wins": 10,
+        "no_winner": 0,
+        "paired": true
+      }
+    ],
+    "elves": [
+      {
+        "label": "archive_oldest",
+        "snapshot_id": 0,
+        "is_archive": true,
+        "games": 50,
+        "live_wins": 47,
+        "snapshot_wins": 3,
+        "no_winner": 0,
+        "paired": true
+      },
+      {
+        "label": "active_oldest",
+        "snapshot_id": 13,
+        "is_archive": false,
+        "games": 50,
+        "live_wins": 47,
+        "snapshot_wins": 3,
+        "no_winner": 0,
+        "paired": true
+      }
+    ],
+    "grixis_affinity": [
+      {
+        "label": "archive_oldest",
+        "snapshot_id": 0,
+        "is_archive": true,
+        "games": 50,
+        "live_wins": 4,
+        "snapshot_wins": 46,
+        "no_winner": 0,
+        "paired": true
+      },
+      {
+        "label": "active_oldest",
+        "snapshot_id": 13,
+        "is_archive": false,
+        "games": 50,
+        "live_wins": 1,
+        "snapshot_wins": 49,
+        "no_winner": 0,
+        "paired": true
+      }
+    ],
+    "jund_wildfire": [
+      {
+        "label": "archive_oldest",
+        "snapshot_id": 0,
+        "is_archive": true,
+        "games": 50,
+        "live_wins": 46,
+        "snapshot_wins": 4,
+        "no_winner": 0,
+        "paired": true
+      },
+      {
+        "label": "active_oldest",
+        "snapshot_id": 13,
+        "is_archive": false,
+        "games": 50,
+        "live_wins": 36,
+        "snapshot_wins": 14,
+        "no_winner": 0,
+        "paired": true
+      }
+    ],
+    "mono_blue_terror": [
+      {
+        "label": "archive_oldest",
+        "snapshot_id": 0,
+        "is_archive": true,
+        "games": 50,
+        "live_wins": 50,
+        "snapshot_wins": 0,
+        "no_winner": 0,
+        "paired": true
+      },
+      {
+        "label": "active_oldest",
+        "snapshot_id": 13,
+        "is_archive": false,
+        "games": 50,
+        "live_wins": 49,
+        "snapshot_wins": 1,
+        "no_winner": 0,
+        "paired": true
+      }
+    ],
+    "mono_red_rally": [
+      {
+        "label": "archive_oldest",
+        "snapshot_id": 0,
+        "is_archive": true,
+        "games": 50,
+        "live_wins": 49,
+        "snapshot_wins": 1,
+        "no_winner": 0,
+        "paired": true
+      },
+      {
+        "label": "active_oldest",
+        "snapshot_id": 13,
+        "is_archive": false,
+        "games": 50,
+        "live_wins": 30,
+        "snapshot_wins": 20,
+        "no_winner": 0,
+        "paired": true
+      }
+    ]
+  }
+}

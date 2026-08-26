@@ -1,0 +1,28 @@
+{
+  "check": "vs_history",
+  "primary_league": "main-league",
+  "deck": "mono_blue_terror",
+  "cumulative_games": 9120,
+  "milestones": [
+    {
+      "label": "archive_oldest",
+      "snapshot_id": 0,
+      "is_archive": true,
+      "games": 50,
+      "live_wins": 50,
+      "snapshot_wins": 0,
+      "no_winner": 0,
+      "paired": true
+    },
+    {
+      "label": "active_oldest",
+      "snapshot_id": 18,
+      "is_archive": false,
+      "games": 50,
+      "live_wins": 42,
+      "snapshot_wins": 8,
+      "no_winner": 0,
+      "paired": true
+    }
+  ]
+}

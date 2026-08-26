@@ -16,6 +16,9 @@
   }
   header h1 { margin: 0; font-size: 18px; }
   header p { margin: 0; color: #888; font-size: 12px; }
+  header nav { margin-left: auto; display: flex; gap: 12px; }
+  header nav a { color: #6a9dff; text-decoration: none; font-size: 12px; }
+  header nav a:hover { text-decoration: underline; }
   main { padding: 16px 20px 110px; }
   h2 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: #9aa0aa; }
   button {
@@ -235,6 +238,7 @@
 <header>
   <h1>Game Replay</h1>
   <p>Step through a logged game's board state, event by event.</p>
+  <nav><a href="/">Home</a><a href="/stats">Validation Stats</a></nav>
 </header>
 
 <main>

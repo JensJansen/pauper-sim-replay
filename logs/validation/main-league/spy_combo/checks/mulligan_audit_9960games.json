@@ -1,0 +1,80 @@
+{
+  "check": "mulligan_audit",
+  "primary_league": "main-league",
+  "deck": "spy_combo",
+  "cumulative_games": 9960,
+  "by_land_count": {
+    "0": {
+      "kept": 706,
+      "mulliganed": 0,
+      "keep_rate": 1.0,
+      "avg_p_keep_when_kept": 0.5353050510538874,
+      "avg_entropy_bits": 0.9961503846047561,
+      "win_rate_after_keep": 0.3356940509915014,
+      "wins": 237,
+      "losses": 469
+    },
+    "1": {
+      "kept": 382,
+      "mulliganed": 0,
+      "keep_rate": 1.0,
+      "avg_p_keep_when_kept": 0.5334823284473719,
+      "avg_entropy_bits": 0.9965224674375132,
+      "win_rate_after_keep": 0.5418848167539267,
+      "wins": 207,
+      "losses": 175
+    },
+    "2": {
+      "kept": 58,
+      "mulliganed": 0,
+      "keep_rate": 1.0,
+      "avg_p_keep_when_kept": 0.5317619792346296,
+      "avg_entropy_bits": 0.9969239728094278,
+      "win_rate_after_keep": 0.603448275862069,
+      "wins": 35,
+      "losses": 23
+    },
+    "3": {
+      "kept": 4,
+      "mulliganed": 0,
+      "keep_rate": 1.0,
+      "avg_p_keep_when_kept": 0.5307294130325317,
+      "avg_entropy_bits": 0.9972608006311371,
+      "win_rate_after_keep": 0.5,
+      "wins": 2,
+      "losses": 2
+    }
+  },
+  "probe_hands": {
+    "0": {
+      "p_mulligan_mean": 0.4610573848088582,
+      "p_mulligan_spread": 0.02021375298500061,
+      "entropy_bits_mean": 0.9954867839098122,
+      "n": 6
+    },
+    "1": {
+      "p_mulligan_mean": 0.4678882857163747,
+      "p_mulligan_spread": 0.012629270553588867,
+      "entropy_bits_mean": 0.9969683903251378,
+      "n": 6
+    },
+    "2": {
+      "p_mulligan_mean": 0.4674869378407796,
+      "p_mulligan_spread": 0.0074312686920166016,
+      "entropy_bits_mean": 0.9969304961394796,
+      "n": 6
+    },
+    "3": {
+      "p_mulligan_mean": 0.46798638502756756,
+      "p_mulligan_spread": 0.01828867197036743,
+      "entropy_bits_mean": 0.9969313856670712,
+      "n": 6
+    },
+    "4": {
+      "p_mulligan_mean": 0.4675506105025609,
+      "p_mulligan_spread": 0.007768779993057251,
+      "entropy_bits_mean": 0.9969329731733741,
+      "n": 6
+    }
+  }
+}

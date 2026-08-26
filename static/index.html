@@ -1,0 +1,40 @@
+<title>Pauper Sim</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font: 14px/1.4 -apple-system, Segoe UI, sans-serif;
+    background: #14161a; color: #d8dbe0;
+    display: flex; align-items: center; justify-content: center; min-height: 100vh;
+  }
+  main { text-align: center; padding: 20px; }
+  h1 { margin: 0 0 6px; font-size: 22px; }
+  p.sub { margin: 0 0 32px; color: #888; font-size: 13px; }
+  .cards { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .card {
+    display: block; width: 240px; text-decoration: none; color: inherit;
+    background: #1b1e24; border: 1px solid #2a2d33; border-radius: 10px;
+    padding: 24px 20px; transition: border-color .15s, background .15s;
+  }
+  .card:hover { border-color: #3a6df0; background: #1f232b; }
+  .card .icon { font-size: 28px; margin-bottom: 10px; }
+  .card h2 { margin: 0 0 6px; font-size: 15px; color: #fff; }
+  .card p { margin: 0; color: #888; font-size: 12px; }
+</style>
+
+<main>
+  <h1>Pauper Sim</h1>
+  <p class="sub">Magic: the Gathering engine + RL training harness</p>
+  <div class="cards">
+    <a class="card" href="/replay">
+      <div class="icon">🎬</div>
+      <h2>Game Replay</h2>
+      <p>Step through a logged game's board state, event by event.</p>
+    </a>
+    <a class="card" href="/stats">
+      <div class="icon">📊</div>
+      <h2>Validation Stats</h2>
+      <p>Win rates, PPO diagnostics, and mulligan behavior from training runs.</p>
+    </a>
+  </div>
+</main>

@@ -1,10 +1,17 @@
 # pauper-sim-replay
 
-A game-log replay viewer: step through a logged Magic: the Gathering game's
-board state one event at a time. Extracted from
+Two tools behind a landing page (`/`): a game-log replay viewer (`/replay`)
+that steps through a logged Magic: the Gathering game's board state one
+event at a time, and a validation-stats dashboard (`/stats`) for the metrics
+`run_training_pipeline.py` exports during training. Extracted from
 [pauper_sim](https://github.com/JensJansen/pauper_sim), where it's attached
-back as a git submodule at `src/webapp/` — training and the game engine
-live there; this repo only reads already-written event-log JSON.
+back as a git submodule at `src/webapp/` — training and the game engine live
+there; this repo only reads already-written data, all of it under `logs/`
+(event-log JSON for replay, a copied-in slice of `checkpoints/` for stats —
+see "Validation Stats" below).
+
+`app.py` (local) and `app_public.py` (hosted, see "Hosting") serve identical
+routes — both read the same `logs/`, so both show the same thing.
 
 ## Local use
 
@@ -12,6 +19,10 @@ live there; this repo only reads already-written event-log JSON.
 pip install -r requirements-public.txt
 python app.py          # http://127.0.0.1:5000 -- localhost only, no auth
 ```
+
+Opens on a landing page linking to both tools below.
+
+### Game Replay (`/replay`)
 
 Two ways to load a game log:
 - **Open new file** — pick any `--log` event-log JSON file from disk.
@@ -24,27 +35,43 @@ Two ways to load a game log:
   python run_league.py --matchup deck_a deck_b --log ../src/webapp/logs/<run-name>/event_log.json
   ```
 
+### Validation Stats (`/stats`)
+
+Reads `logs/validation/<league>/` — win rates, PPO training diagnostics,
+mulligan-net behavior, and round-robin/vs-history matchup data written by
+`src/validation/` in the parent pauper_sim repo. That directory is a
+**manually-refreshed copy** of pauper_sim's own (gitignored)
+`checkpoints/<league>/`, made because this submodule has no other way to
+ship real data with itself — see `logs/validation/README.md` for what's
+copied and how to refresh it. Works identically on `app.py` and
+`app_public.py` since the data travels with the repo.
+
 ## Tests
 
 ```
 pip install -r requirements-dev.txt
-pytest test_replay_engine.py
+pytest test_replay_engine.py test_stats_api.py
 ```
 
 ## Hosting
 
 `render.yaml` deploys `app_public.py` as a free-tier Render web service.
 Push to `main` and Render redeploys automatically. Anything committed under
-`logs/` deploys with it and shows up in that instance's own "Browse server
-logs" list — `app_public.py` only ever has filesystem access to files already
-committed to this repo.
+`logs/` (replay logs under `logs/`, validation data under
+`logs/validation/`) deploys with it and is public — `app_public.py` only
+ever has filesystem access to files already committed to this repo.
 
 ## Files
 
 - `replay_engine.py` — folds a raw event-log JSON doc into board-state
   snapshots. Zero imports beyond the stdlib.
-- `app.py` — local Flask entrypoint.
-- `app_public.py` — deploy entrypoint. Same routes as `app.py`; only differs
-  in which `logs/` it can see (this machine's vs. whatever's committed).
-- `static/replay.html` — the whole frontend, no build step, shared unchanged
-  by both entrypoints above.
+- `app.py` — local Flask entrypoint: `/` landing page, `/replay`, `/stats`
+  and their APIs.
+- `app_public.py` — deploy entrypoint. Identical routes to `app.py`; only
+  differs in which `logs/` it can see (this machine's vs. whatever's
+  committed).
+- `static/index.html` — the `/` landing page.
+- `static/replay.html` — the `/replay` frontend, no build step.
+- `static/stats.html` — the `/stats` frontend, no build step.
+- `logs/validation/` — committed copy of validation data; see its own
+  README.md.

@@ -1,0 +1,18 @@
+{
+  "check": "vs_history",
+  "primary_league": "main-league",
+  "deck": "spy_combo",
+  "cumulative_games": 3840,
+  "milestones": [
+    {
+      "label": "active_oldest",
+      "snapshot_id": 0,
+      "is_archive": false,
+      "games": 50,
+      "live_wins": 35,
+      "snapshot_wins": 15,
+      "no_winner": 0,
+      "paired": true
+    }
+  ]
+}
