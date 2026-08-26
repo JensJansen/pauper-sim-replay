@@ -84,6 +84,9 @@
   table.matrix tbody th { text-align: right; color: #b8c0d0; font-weight: 500; }
   td.matrix-cell { color: #e8eaf0; border-radius: 3px; }
   td.matrix-empty { color: #444; }
+  th.sortable { cursor: pointer; }
+  th.sortable:hover { color: #d8dbe0; }
+  .matrix-overall { border-left: 2px solid #3a3f47; font-weight: 600; }
   /* block so the win%/win-loss sub-value sits on its own line under the deck
      name -- combined with table-layout:fixed's colgroup widths, this keeps
      column widths constant when the toggle switches text length */
@@ -520,9 +523,15 @@ async function renderMulligan() {
 let rrMode = 'primary_vs_primary_round_robin';
 let rrSnapshotGames = null;
 let rrValueMode = 'rate'; // 'rate' (win %) or 'record' (wins/games), toggled across the whole tab
+let rrSortCol = null; // a colDeck name, 'overall', or null (alphabetical by row deck)
+let rrSortDir = 'desc';
 function rrFormat(t) {
   if (!t || !t.games) return '—';
   return rrValueMode === 'record' ? `${t.wins}/${t.games}` : `${((t.wins / t.games) * 100).toFixed(0)}%`;
+}
+function rrSortArrow(col) {
+  if (rrSortCol !== col) return '';
+  return rrSortDir === 'desc' ? ' ▾' : ' ▴';
 }
 async function renderRoundRobin() {
   const el = document.getElementById('panel-roundrobin');
@@ -559,18 +568,36 @@ async function renderRoundRobin() {
     }
   }
 
+  // "Overall" is each row deck's aggregate vs the whole field -- exactly
+  // rowTotals, already computed above (mirrored both directions for
+  // primary-vs-primary, so it's a true whole-field record, not half of one).
+  const sortValue = (a, col) => {
+    const t = col === 'overall' ? rowTotals.get(a) : cellFor.get(`${a}|${col}`);
+    return t && t.games ? t.wins / t.games : -1;
+  };
+  const sortedRowDecks = rrSortCol == null ? rowDecks : [...rowDecks].sort((a, b) => {
+    const diff = sortValue(b, rrSortCol) - sortValue(a, rrSortCol);
+    return diff !== 0 ? (rrSortDir === 'desc' ? diff : -diff) : a.localeCompare(b);
+  });
+
   const gutterPct = 16; // row-header column width -- the heading below is indented to match, so it sits over the data columns, not the row-label gutter
   const matrix = `<table class="matrix">
-    <colgroup><col style="width:${gutterPct}%">${colDecks.map(() => '<col>').join('')}</colgroup>
-    <thead><tr><th></th>${colDecks.map(d => `<th>${wrapDeckName(d)}<span class="matrix-sub">${rrFormat(colTotals.get(d))}</span></th>`).join('')}</tr></thead>
-    <tbody>${rowDecks.map(a => `<tr><th>${wrapDeckName(a)}<span class="matrix-sub">${rrFormat(rowTotals.get(a))}</span></th>${colDecks.map(b => {
-      const cell = cellFor.get(`${a}|${b}`);
-      if (!cell || !cell.games) return '<td class="matrix-empty">—</td>';
-      const rate = cell.wins / cell.games;
-      const alpha = (0.12 + rate * 0.75).toFixed(2);
-      const label = rrValueMode === 'record' ? `${cell.wins}/${cell.games}` : `${(rate * 100).toFixed(0)}%`;
-      return `<td class="matrix-cell" style="background:rgba(58,109,240,${alpha})" title="${escapeHtml(a)} vs ${escapeHtml(b)}: ${cell.wins}/${cell.games} (${(rate * 100).toFixed(0)}%)">${label}</td>`;
-    }).join('')}</tr>`).join('')}</tbody>
+    <colgroup><col style="width:${gutterPct}%">${colDecks.map(() => '<col>').join('')}<col style="width:${gutterPct}%"></colgroup>
+    <thead><tr><th></th>${colDecks.map(d => `<th class="sortable" data-sort-col="${escapeHtml(d)}">${wrapDeckName(d)}${rrSortArrow(d)}<span class="matrix-sub">${rrFormat(colTotals.get(d))}</span></th>`).join('')}
+      <th class="sortable matrix-overall" data-sort-col="overall">Overall${rrSortArrow('overall')}</th></tr></thead>
+    <tbody>${sortedRowDecks.map(a => {
+      const overall = rowTotals.get(a);
+      const overallRate = overall && overall.games ? overall.wins / overall.games : null;
+      const overallAlpha = overallRate != null ? (0.12 + overallRate * 0.75).toFixed(2) : null;
+      return `<tr><th>${wrapDeckName(a)}<span class="matrix-sub">${rrFormat(overall)}</span></th>${colDecks.map(b => {
+        const cell = cellFor.get(`${a}|${b}`);
+        if (!cell || !cell.games) return '<td class="matrix-empty">—</td>';
+        const rate = cell.wins / cell.games;
+        const alpha = (0.12 + rate * 0.75).toFixed(2);
+        const label = rrValueMode === 'record' ? `${cell.wins}/${cell.games}` : `${(rate * 100).toFixed(0)}%`;
+        return `<td class="matrix-cell" style="background:rgba(58,109,240,${alpha})" title="${escapeHtml(a)} vs ${escapeHtml(b)}: ${cell.wins}/${cell.games} (${(rate * 100).toFixed(0)}%)">${label}</td>`;
+      }).join('')}<td class="matrix-cell matrix-overall" style="background:${overallAlpha != null ? `rgba(58,109,240,${overallAlpha})` : 'none'}" title="${escapeHtml(a)} vs the field: ${rrFormat(overall)}">${rrFormat(overall)}</td></tr>`;
+    }).join('')}</tbody>
   </table>`;
 
   el.innerHTML = `
@@ -588,9 +615,15 @@ async function renderRoundRobin() {
     </div>
     <h2 style="margin-left:${gutterPct}%">Pairing win rate — row's win % vs column</h2>
     ${matrix}`;
-  el.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => { rrMode = b.dataset.mode; rrSnapshotGames = null; renderRoundRobin(); }));
+  el.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => { rrMode = b.dataset.mode; rrSnapshotGames = null; rrSortCol = null; renderRoundRobin(); }));
   document.getElementById('rr-snap-select').addEventListener('change', e => { rrSnapshotGames = Number(e.target.value); renderRoundRobin(); });
   document.getElementById('rr-value-toggle').addEventListener('change', e => { rrValueMode = e.target.checked ? 'record' : 'rate'; renderRoundRobin(); });
+  el.querySelectorAll('th.sortable').forEach(th => th.addEventListener('click', () => {
+    const col = th.dataset.sortCol;
+    rrSortDir = rrSortCol === col ? (rrSortDir === 'desc' ? 'asc' : 'desc') : 'desc';
+    rrSortCol = col;
+    renderRoundRobin();
+  }));
 }
 
 // ---- Mana Burn ----
