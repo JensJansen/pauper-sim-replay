@@ -1,0 +1,28 @@
+{
+  "check": "vs_history",
+  "primary_league": "main-league",
+  "deck": "jund_wildfire",
+  "cumulative_games": 16740,
+  "milestones": [
+    {
+      "label": "archive_oldest",
+      "snapshot_id": 0,
+      "is_archive": true,
+      "games": 50,
+      "live_wins": 3,
+      "snapshot_wins": 47,
+      "no_winner": 0,
+      "paired": true
+    },
+    {
+      "label": "active_oldest",
+      "snapshot_id": 61,
+      "is_archive": false,
+      "games": 50,
+      "live_wins": 0,
+      "snapshot_wins": 50,
+      "no_winner": 0,
+      "paired": true
+    }
+  ]
+}
