@@ -4,9 +4,23 @@ A copy of the parent pauper_sim repo's `checkpoints/<league>/` validation
 output, committed here so `/stats` has real data to show even when this
 submodule is checked out on its own (`checkpoints/` itself is gitignored at
 the pauper_sim root). Per league: `metrics.jsonl`, `progress.json`,
-`checks/*.json`, and `<deck>/checks/*.json` -- never the `live.pt` /
+`checks/*.jsonl`, and `<deck>/checks/*.jsonl` -- never the `live.pt` /
 `archive/*.pt` / `mulligan.pt` model weights, which are multi-GB and not
 needed by the stats page.
+
+Note the `checks/` shape here is NOT a copy of `checkpoints/<league>/checks/`'s
+own layout: the parent repo's canonical copy still writes one
+`<check>_<N>games.json` file per cadence tick, forever (unbounded, but it's
+gitignored local disk, not a git-size concern). The mirror consolidates
+every check's history into one growing `checks/<check>.jsonl` instead -- one
+compact line per cadence tick, self-describing via its own
+`"cumulative_games"` field -- since a new small file per tick, forever,
+committed to a public repo, doesn't scale the way an append-only file does.
+See `src/webapp_mirror.py`'s `mirror_json`/`_consolidated_check_path` in the
+parent repo for the write side, and `app.py`'s `stats_checks`/
+`stats_check_detail` here for how a per-snapshot request resolves to one
+line in the consolidated file. The old one-file-per-snapshot shape is no
+longer understood on the read side -- every league here has been migrated.
 
 ## Kept current automatically
 
@@ -54,3 +68,10 @@ for league_dir in SRC.iterdir():
 Only still useful for a from-scratch bootstrap of a league that trained
 entirely before the automatic mirroring existed, or for backfilling a gap
 left by the submodule being uninitialized for a stretch of training.
+
+Note this script predates the consolidated `checks/<check>.jsonl` format
+above -- run as written today, it reproduces the old one-file-per-cadence-
+tick shape, which `app.py` no longer reads. Don't run it as-is; either
+adapt it to append each check's payload as one line to
+`checks/<check>.jsonl` directly, or just retrain -- the automatic mirroring
+already writes in the consolidated shape.
