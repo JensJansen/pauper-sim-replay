@@ -1,0 +1,28 @@
+{
+  "check": "vs_history",
+  "primary_league": "main-league",
+  "deck": "elves",
+  "cumulative_games": 15780,
+  "milestones": [
+    {
+      "label": "archive_oldest",
+      "snapshot_id": 0,
+      "is_archive": true,
+      "games": 50,
+      "live_wins": 48,
+      "snapshot_wins": 2,
+      "no_winner": 0,
+      "paired": true
+    },
+    {
+      "label": "active_oldest",
+      "snapshot_id": 55,
+      "is_archive": false,
+      "games": 50,
+      "live_wins": 21,
+      "snapshot_wins": 29,
+      "no_winner": 0,
+      "paired": true
+    }
+  ]
+}
