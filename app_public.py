@@ -1,7 +1,7 @@
 """Public-hostable subset of app.py: same routes (landing page, "/replay",
-"/stats" and their APIs), identical except for which logs/ it can see (this
-already-public repo's own committed logs/, vs. whatever's on the local
-machine running app.py). Deploy entrypoint for Render/Fly/etc:
+"/stats", "/methodology" and their APIs), identical except for which logs/
+it can see (this already-public repo's own committed logs/, vs. whatever's
+on the local machine running app.py). Deploy entrypoint for Render/Fly/etc:
 gunicorn app_public:app (render.yaml).
 """
 import json
@@ -33,6 +33,11 @@ def replay_page():
 @app.get("/stats")
 def stats_page():
     return send_from_directory(app.static_folder, "stats.html")
+
+
+@app.get("/methodology")
+def methodology_page():
+    return send_from_directory(app.static_folder, "methodology.html")
 
 
 @app.get("/api/replay/runs")

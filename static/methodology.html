@@ -1,0 +1,740 @@
+<title>Training Methodology</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font: 14px/1.55 -apple-system, Segoe UI, sans-serif;
+    background: #14161a; color: #d8dbe0;
+  }
+  header {
+    display: flex; align-items: center; gap: 12px; height: 72px;
+    padding: 0 20px; border-bottom: 1px solid #2a2d33;
+  }
+  header h1 { margin: 0; font-size: 18px; }
+  header p { margin: 0; color: #888; font-size: 12px; }
+  header nav { margin-left: auto; display: flex; gap: 14px; }
+  header nav a { color: #6a9dff; text-decoration: none; font-size: 12px; }
+  header nav a:hover { text-decoration: underline; }
+
+  .toc {
+    position: sticky; top: 0; z-index: 5; display: flex; gap: 6px; flex-wrap: wrap;
+    padding: 10px 20px; background: #14161ae8; backdrop-filter: blur(4px);
+    border-bottom: 1px solid #2a2d33;
+  }
+  .toc a {
+    color: #9aa0aa; text-decoration: none; font-size: 12px; padding: 5px 10px;
+    border-radius: 14px; border: 1px solid #2a2d33; white-space: nowrap;
+  }
+  .toc a:hover { color: #fff; border-color: #3a6df0; }
+
+  main { max-width: 980px; margin: 0 auto; padding: 30px 20px 90px; }
+  .lede { color: #b8c0d0; font-size: 15px; max-width: 760px; margin: 8px 0 30px; }
+  h1.title { font-size: 26px; margin: 4px 0 2px; color: #fff; }
+
+  section { padding-top: 48px; margin-top: 30px; scroll-margin-top: 58px; border-top: 1px solid #21242a; }
+  section:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+  section .kicker { color: #6a9dff; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; font-weight: 600; }
+  section h2 { font-size: 21px; margin: 0 0 8px; color: #fff; }
+  section > p.intro { color: #b8c0d0; max-width: 760px; margin: 0 0 6px; }
+  h3.sub { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: #9aa0aa; margin: 26px 0 10px; }
+  .hint { color: #666; font-size: 12px; }
+
+  /* ---- flow / pipeline diagram ---- */
+  .flow-row { display: flex; align-items: center; gap: 0; flex-wrap: wrap; margin-bottom: 10px; }
+  .flow-row .row-label { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: .04em; width: 100%; margin-bottom: 6px; }
+  .flow-box {
+    background: #1b1e24; border: 1px solid #2a2d33; border-radius: 8px; padding: 10px 13px;
+    min-width: 120px; flex: 1 1 120px;
+  }
+  .flow-box .t { font-size: 12px; font-weight: 600; color: #fff; }
+  .flow-box .d { font-size: 10.5px; color: #888; margin-top: 3px; line-height: 1.4; }
+  .flow-arrow { display: flex; align-items: center; justify-content: center; color: #3a6df0; font-size: 16px; padding: 0 6px; flex: 0 0 auto; }
+  .flow-loop { font-size: 11px; color: #666; margin: 4px 0 18px 4px; }
+
+  /* ---- generic cards / grid (matches stats.html) ---- */
+  .card { background: #1b1e24; border: 1px solid #2a2d33; border-radius: 8px; padding: 12px 14px; }
+  .card-title { font-size: 12px; color: #b8c0d0; margin-bottom: 6px; }
+  .card svg { display: block; width: 100%; height: auto; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin: 16px 0; }
+
+  /* ---- drill-down detail blocks ---- */
+  details.drill { background: #1b1e24; border: 1px solid #2a2d33; border-radius: 8px; margin: 10px 0; }
+  details.drill summary {
+    cursor: pointer; padding: 10px 14px; font-size: 13px; color: #d8dbe0; list-style: none;
+    display: flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.drill summary::-webkit-details-marker { display: none; }
+  details.drill summary::before { content: '▸'; color: #6a9dff; display: inline-block; transition: transform .15s; font-size: 11px; }
+  details.drill[open] summary::before { transform: rotate(90deg); }
+  details.drill .drill-body { padding: 0 14px 14px; color: #b8c0d0; font-size: 12.5px; border-top: 1px solid #24272d; margin-top: -1px; padding-top: 10px; }
+  details.drill .drill-body ul { margin: 6px 0; padding-left: 18px; }
+  details.drill .drill-body li { margin-bottom: 4px; }
+  details.drill .drill-body code { background: #0e1013; border: 1px solid #262a31; border-radius: 3px; padding: 1px 5px; font-size: 11.5px; color: #9dc0ff; }
+
+  /* ---- league population diagram ---- */
+  .league-diagram { display: flex; gap: 14px; flex-wrap: wrap; margin: 18px 0; align-items: stretch; }
+  .pop-box { flex: 1 1 300px; background: #1b1e24; border: 1px solid #2a2d33; border-radius: 10px; padding: 14px; }
+  .pop-box.dim { opacity: .92; border-style: dashed; }
+  .pop-box h4 { margin: 0 0 4px; font-size: 13px; color: #fff; }
+  .pop-box .pop-sub { color: #888; font-size: 11px; margin-bottom: 10px; }
+  .pop-box .sub-item { background: #14161a; border: 1px solid #262a31; border-radius: 6px; padding: 8px 10px; margin-bottom: 6px; font-size: 11.5px; color: #b8c0d0; }
+  .pop-box .sub-item b { color: #d8dbe0; }
+  .pop-link { text-align: center; color: #666; font-size: 11px; margin: 4px 0 14px; }
+
+  /* ---- architecture flow ---- */
+  .arch-flow { display: flex; flex-direction: column; align-items: center; gap: 2px; margin: 20px 0 10px; }
+  .arch-node {
+    background: #1b1e24; border: 1px solid #2a2d33; border-radius: 8px; padding: 10px 16px;
+    text-align: center; min-width: 220px;
+  }
+  .arch-node .t { color: #fff; font-weight: 600; font-size: 12.5px; }
+  .arch-node .d { color: #888; font-size: 10.5px; margin-top: 3px; }
+  .arch-branch { display: flex; gap: 22px; justify-content: center; flex-wrap: wrap; }
+  .arch-down { color: #3a6df0; font-size: 15px; line-height: 1; }
+  .arch-heads { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+  .arch-heads .arch-node { min-width: 160px; }
+
+  /* ---- action space compare ---- */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 18px 0 10px; }
+  .compare .col { background: #1b1e24; border: 1px solid #2a2d33; border-radius: 8px; padding: 14px; }
+  .compare .col h4 { margin: 0 0 8px; font-size: 13px; color: #fff; }
+  .compare ul { margin: 0; padding-left: 18px; font-size: 12px; color: #b8c0d0; }
+  .compare ul li { margin-bottom: 5px; }
+  .merge-arrow { text-align: center; color: #3a6df0; font-size: 15px; margin: 6px 0; }
+  .merge-box { text-align: center; }
+  @media (max-width: 640px) { .compare { grid-template-columns: 1fr; } }
+
+  /* ---- callouts ---- */
+  .callout { border-radius: 8px; padding: 12px 14px; margin: 16px 0; font-size: 12.5px; border: 1px solid; }
+  .callout.info { background: #142032; border-color: #22344f; color: #b6c9e8; }
+  .callout.warn { background: #2a2010; border-color: #4a3a12; color: #e6c079; }
+  .callout .callout-title { font-weight: 600; color: #fff; margin-bottom: 4px; display: block; font-size: 12px; }
+
+  /* ---- tables ---- */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 10px 0 6px; }
+  .data-table th, .data-table td { text-align: left; padding: 7px 10px; border-bottom: 1px solid #2a2d33; vertical-align: top; }
+  .data-table th { color: #888; font-weight: 500; text-transform: uppercase; font-size: 10px; letter-spacing: .03em; }
+  .data-table td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* ---- checkpoint tree ---- */
+  pre.tree {
+    background: #0e1013; border: 1px solid #262a31; border-radius: 8px; padding: 14px 16px;
+    font-size: 12px; color: #7d8590; overflow-x: auto; line-height: 1.6; margin: 12px 0;
+  }
+  pre.tree b { color: #e8eaf0; font-weight: 600; }
+  pre.tree .c { color: #555; }
+
+  footer { max-width: 980px; margin: 40px auto 0; padding: 20px; color: #555; font-size: 11.5px; border-top: 1px solid #2a2d33; }
+</style>
+
+<header>
+  <h1>Training Methodology</h1>
+  <p>How self-play, the model, and PPO fit together.</p>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/replay">Game Replay</a>
+    <a href="/stats">Validation Stats</a>
+  </nav>
+</header>
+
+<div class="toc">
+  <a href="#overview">Overview</a>
+  <a href="#league">Self-Play League</a>
+  <a href="#model">Model</a>
+  <a href="#actions">Action Space</a>
+  <a href="#reward">Reward</a>
+  <a href="#ppo">PPO</a>
+  <a href="#mulligan">Mulligan Net</a>
+  <a href="#validation">Validation</a>
+  <a href="#config">Config &amp; Checkpoints</a>
+</div>
+
+<main>
+
+<section id="overview">
+  <h1 class="title">How this agent is trained</h1>
+  <p class="lede">
+    A fixed pauper card pool, several decks, and one loop: play games against
+    varied opponents, turn the outcome into a policy-gradient update, and
+    periodically check the result against fixed benchmarks. Everything below
+    is the real implementation, not a simplified model of it — expand any
+    <b>▸ drill-down</b> block for the exact mechanism.
+  </p>
+
+  <h3 class="sub">Two loops, two timescales</h3>
+  <div class="flow-row">
+    <span class="row-label">Per-decision — every single legal action, many times a game</span>
+    <div class="flow-box"><div class="t">Game State</div><div class="d">the engine's live board, both seats</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><div class="t">Observation Encoding</div><div class="d">zones → token set + scalar globals</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><div class="t">Policy / Value Net</div><div class="d">per-deck encoder + trunk + GRU</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><div class="t">Sample Action</div><div class="d">masked to legal moves only</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><div class="t">Engine Step</div><div class="d">applied, reward attributed</div></div>
+  </div>
+  <div class="flow-loop">↻ loops back to Game State until the game ends</div>
+
+  <div class="flow-row">
+    <span class="row-label">Training — every iteration / snapshot cadence / validation cadence</span>
+    <div class="flow-box"><div class="t">Collect Episodes</div><div class="d">rollouts vs a PFSP-sampled opponent</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><div class="t">PPO Update</div><div class="d">clipped policy-gradient step</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><div class="t">League Snapshot</div><div class="d">freeze into the opponent pool</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><div class="t">Validation</div><div class="d">round robins, vs-history, mulligan audit</div></div>
+  </div>
+
+  <p class="intro" style="margin-top:22px">Jump to a stage: League structure → model architecture → action space → reward → PPO → mulligan net → validation → config/checkpoints.</p>
+</section>
+
+<section id="league">
+  <div class="kicker">Stage 1</div>
+  <h2>Self-Play League Structure</h2>
+  <p class="intro">
+    Training runs as a <b>league</b>: a roster of decks that all improve
+    together, playing each other and their own past selves. Three
+    populations exist per league, and only one of them is the actual
+    training target.
+  </p>
+
+  <div class="league-diagram">
+    <div class="pop-box">
+      <h4>Primary League</h4>
+      <div class="pop-sub">e.g. <code style="background:#14161a;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">main-league</code> — the actual thing being trained</div>
+      <div class="sub-item"><b>Live nets</b> — one <code style="background:#0e1013;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">live.pt</code> per deck, updated every PPO step</div>
+      <div class="sub-item"><b>Archive</b> — rolling window of 32 frozen historical snapshots per deck (PFSP opponent pool)</div>
+      <div class="sub-item"><b>PFSP sampler</b> — picks which deck, then live-vs-snapshot, weighted toward opponents this deck is currently losing to</div>
+    </div>
+    <div class="pop-box dim">
+      <h4>Training League <span class="hint">(twin)</span></h4>
+      <div class="pop-sub">same roster/mechanics, independent trajectory, frozen size</div>
+      <div class="sub-item"><b>Fixed at 10,000 games/deck</b> — never extended, even as the primary keeps training</div>
+      <div class="sub-item">Exists purely as a <b>benchmark opponent pool</b> — since it stops improving, a rising win rate against it isn't confounded by "everyone got better together"</div>
+      <div class="sub-item">Built only if the config sets <code style="background:#0e1013;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">create_training_league: true</code></div>
+    </div>
+  </div>
+  <div class="pop-link">both populations feed round-robin evaluation ↓ (see <a href="#validation" style="color:#6a9dff">Validation</a>)</div>
+
+  <h3 class="sub">One training session, step by step</h3>
+  <ol style="color:#b8c0d0; padding-left:20px; font-size:13px;">
+    <li>Load (or resume) every train deck's network and optimizer state from <code style="background:#1b1e24;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">live.pt</code>, plus its mulligan net with a separate optimizer.</li>
+    <li>Per iteration, per train deck: sample an opponent (PFSP-weighted deck, then live-vs-snapshot), collect rollout games, run a PPO update on that deck's own buffer — and also update any <i>other</i> train deck whose buffer was generated as a live opponent in those same games ("salvaging").</li>
+    <li>Every 8 iterations (or the session's last one), flush accumulated mulligan-decision transitions through one REINFORCE step per deck.</li>
+    <li>When cumulative games cross the snapshot cadence, freeze a new snapshot per deck into the league pool, save live checkpoints + optimizer state + opponent stats, and update <code style="background:#1b1e24;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">progress.json</code>.</li>
+    <li>Always re-save live checkpoints at session end.</li>
+  </ol>
+  <p class="intro">A real run is many separate process invocations of this session, chained by the higher-level pipeline runner until a deck hits its configured <code style="background:#1b1e24;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">total_games</code>, with the full validation suite run after each chunk.</p>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">PFSP opponent weighting — weight vs. this deck's win rate against a candidate</div>
+      <div id="chart-pfsp"></div>
+      <p class="hint" style="margin:8px 0 0">weight = 0.1 + (1 − win_rate)^0.5. A never-played opponent starts at a neutral 0.5 win-rate prior. The 0.1 floor keeps even lopsided matchups in rotation instead of dropping to zero.</p>
+    </div>
+  </div>
+
+  <details class="drill">
+    <summary>Archive &amp; snapshot eviction</summary>
+    <div class="drill-body">
+      Each deck keeps at most 32 snapshots as PFSP opponents. When a new
+      snapshot would overflow that window, the oldest one is moved (never
+      deleted) into <code>&lt;deck&gt;/archive/</code>. Archived snapshots
+      stay playable — the <code>vs_history</code> validation check pits a
+      deck's current live net against its oldest still-active snapshot and,
+      once one exists, its oldest archived one too.
+    </div>
+  </details>
+</section>
+
+<section id="model">
+  <div class="kicker">Stage 2</div>
+  <h2>Model Architecture</h2>
+  <p class="intro">
+    Every deck owns its <b>own</b> encoder and trunk — nothing is shared
+    across decks. That costs cross-deck transfer, but means one deck's
+    representation never has to compromise for another's.
+  </p>
+
+  <div class="arch-flow">
+    <div class="arch-node"><div class="t">Card tokens, both seats</div><div class="d">battlefield · graveyard · stack · exile (both) + own hand</div></div>
+    <div class="arch-down">↓</div>
+    <div class="arch-node"><div class="t">SetTransformer encoder</div><div class="d">2-layer self-attention, 4 heads, d_model=64 — every token attends to every other</div></div>
+    <div class="arch-down">↓</div>
+    <div class="arch-branch">
+      <div class="arch-node"><div class="t">PMA pool → "mine" summary</div><div class="d">pooling-by-multihead-attention</div></div>
+      <div class="arch-node"><div class="t">PMA pool → "theirs" summary</div><div class="d">split by side flag</div></div>
+    </div>
+    <div class="arch-down">↓ theirs_summary modulates the trunk (FiLM)</div>
+    <div class="arch-node"><div class="t">Trunk — 2×128, FiLM-conditioned</div><div class="d">mine_summary + scalar globals in, gated by γ·h+β from theirs_summary</div></div>
+    <div class="arch-down">↓ + previous action embedding</div>
+    <div class="arch-node"><div class="t">GRU (recurrent memory)</div><div class="d">carries history the board alone doesn't show, e.g. "opponent held up mana and passed"</div></div>
+    <div class="arch-down">↓</div>
+    <div class="arch-heads">
+      <div class="arch-node"><div class="t">Critic head</div><div class="d">scalar value estimate</div></div>
+      <div class="arch-node"><div class="t">Fixed-action head</div><div class="d">logits over the menu-shaped action table</div></div>
+      <div class="arch-node"><div class="t">Pointer head</div><div class="d">scores legal targets against token representations</div></div>
+    </div>
+  </div>
+  <p class="hint" style="text-align:center">the fixed-action logits and pointer scores are concatenated into one softmax — see <a href="#actions" style="color:#6a9dff">Action Space</a></p>
+
+  <details class="drill">
+    <summary>Per-token features (what each card contributes)</summary>
+    <div class="drill-body">
+      <b>Static half</b> — doesn't change turn to turn: mana cost pips, card
+      type one-hot, base power/toughness, keyword multi-hot (scanned from
+      the effect registry), mana-production features, spec-key multi-hot,
+      pending-kind multi-hot, extra-flag multi-hot (artifact / basic /
+      defender / indestructible / devoid), subtype multi-hot.
+      <br><br>
+      <b>Dynamic half</b> — current state: tapped, effective P/T, blocked
+      / attacking / summoning-sick flags, aura attachment, targeted-by-mine
+      / targeted-by-theirs, revealed-hand disposition bits, counter counts,
+      zone one-hot, side flag.
+      <br><br>
+      Opponent's hand and both libraries are hidden by default — aggregate
+      counts only via the scalar globals — except two narrow reveal cases
+      (Mesmeric-Fiend-style effects, and scry/surveil/ponder/tuck "revealed"
+      holding areas), which get real tokens.
+    </div>
+  </details>
+  <details class="drill">
+    <summary>Scalar globals (non-tokenized state)</summary>
+    <div class="drill-body">
+      Turn number, lands played this turn, mulligans taken (both seats),
+      life totals, mana pools by color, phase one-hot, library sizes, opponent
+      hand size, stack-targeting flags, on-the-play, opponent discard count.
+      Concatenated with the "mine" summary before the trunk.
+    </div>
+  </details>
+  <details class="drill">
+    <summary>Why FiLM instead of just concatenating the opponent summary</summary>
+    <div class="drill-body">
+      A small conditioner MLP turns <code>theirs_summary</code> into
+      per-layer <code>(γ, β)</code> pairs that rescale and shift each trunk
+      layer's activations (<code>γ·h + β</code>), rather than appending it
+      as extra input features. The opponent's board state gates how the
+      trunk processes your own state, instead of just being one more thing
+      concatenated in.
+    </div>
+  </details>
+  <details class="drill">
+    <summary>Why a GRU on top of an already-Markov board state</summary>
+    <div class="drill-body">
+      The encoded board is itself close to fully observable, but recent
+      history still carries information the current snapshot doesn't —
+      what mana got held up and passed, what was declined last turn. The
+      GRU is fed the trunk output plus an embedding of the agent's own
+      previous action, giving it that short-term memory. PPO updates replay
+      whole episodes through it in order from a zero hidden state — see
+      <a href="#ppo" style="color:#6a9dff">PPO Training</a>.
+    </div>
+  </details>
+</section>
+
+<section id="actions">
+  <div class="kicker">Stage 3</div>
+  <h2>Action Space</h2>
+  <p class="intro">
+    Actions come from <b>one combined softmax</b>, not two separate
+    distributions — a fixed-table entry and a pointer-scored target can
+    both be legal at the same decision, so they compete in a single
+    masked distribution rather than being chosen in two stages.
+  </p>
+
+  <div class="compare">
+    <div class="col">
+      <h4>Fixed table — menu-shaped</h4>
+      <ul>
+        <li>Play land / Cast a spell / Activate an ability</li>
+        <li>Forestcycle</li>
+        <li>Pass</li>
+        <li>Mana-payment choices</li>
+        <li>"Choose: X" / "Choose: X as color" resolution picks</li>
+        <li>Keep / Dispose, Decline, Abandon payment</li>
+        <li>Mulligan actions, "Done blocking"</li>
+      </ul>
+      <p class="hint">fixed shape per deck, built once from its decklist</p>
+    </div>
+    <div class="col">
+      <h4>Pointer head — context-shaped</h4>
+      <ul>
+        <li>Attack, assign blocker</li>
+        <li>Choose target / opponent's permanent</li>
+        <li>Assign combat damage</li>
+        <li>Choose-any-target effects</li>
+        <li>Identity-matched picks: choose cast copy, choose graveyard card, choose stack target</li>
+      </ul>
+      <p class="hint">variable length — one score per currently legal token, masked by what's actually pending</p>
+    </div>
+  </div>
+  <div class="merge-arrow">↓ concatenated ↓</div>
+  <div class="merge-box"><div class="card" style="display:inline-block; text-align:left; max-width: 460px;">
+    <div class="card-title" style="margin:0">Single masked softmax over both halves</div>
+    <p class="hint" style="margin:6px 0 0">
+      Pointer targets are addressed by object identity for graveyard / stack
+      / hand-reveal picks, or by <code style="background:#0e1013;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">(name, slot)</code>
+      for battlefield permanents — so two identically-named permanents or
+      spells are still targeted correctly.
+    </p>
+  </div></div>
+</section>
+
+<section id="reward">
+  <div class="kicker">Stage 4</div>
+  <h2>Reward Function</h2>
+  <p class="intro">
+    The reward is almost entirely win/loss. The only shaping on top is a
+    small, capped, saturating penalty for wasting mana — applied only to
+    the seat that ends up winning, so a losing trajectory is never worse
+    off for having burned mana along the way.
+  </p>
+
+  <div class="card" style="max-width:640px">
+    <div class="card-title" style="margin:0">deploy_reward_v6 — the production reward</div>
+    <pre style="background:#0e1013;border:1px solid #262a31;border-radius:6px;padding:12px 14px;font-size:12px;color:#9dc0ff;overflow-x:auto;margin:8px 0 0">with_dense_mana_burn_penalty(
+    flat_win_loss_reward(),
+    mana_burn_c=2.9, mana_burn_p=4.0,
+    game_penalty_cap=1.5,
+    refund_on_loss=True, mana_burn_weight=0.5,
+)</pre>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Terminal band</div>
+      <p class="hint" style="margin:0">+1.0 win · −1.0 loss or no-winner timeout · 0.0 every non-terminal step. No efficiency or sloppiness term at this level — every win scores the same, every loss scores the same.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Marginal single-pip mana-burn penalty, by turn</div>
+      <div id="chart-hill"></div>
+      <p class="hint" style="margin:8px 0 0">0.5 · hill(x, c=2.9, p=4.0) — reset every turn, only charged if this seat wins the game, capped at 1.5 total across the whole game.</p>
+    </div>
+  </div>
+
+  <p class="intro">
+    Worst-case win reward is <code style="background:#1b1e24;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">1.0 − 1.5 = −0.5</code>;
+    every loss is exactly <code style="background:#1b1e24;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">−1.0</code>.
+    A win always outscores any loss by at least 0.5 — the shaping term can
+    never flip a win into looking worse than a loss.
+  </p>
+
+  <details class="drill">
+    <summary>What counts as "burn" (single-pip tagging)</summary>
+    <div class="drill-body">
+      Only mana-producing events that add exactly <b>one</b> floating
+      symbol are tagged — a plain land or a one-mana dork like Llanowar
+      Elves. Board-scaled abilities (Priest of Titania's count-all tap, a
+      fully-online Tron land) are never blamed, because spending always
+      consumes an untagged pip first. So the penalty targets genuinely
+      avoidable waste, not correct big taps that happen to leave some
+      unused.
+    </div>
+  </details>
+  <details class="drill">
+    <summary>Why "winner-only" and why deferred, not a terminal refund</summary>
+    <div class="drill-body">
+      Charging the loser too would make passive, mana-inefficient-but-safe
+      play look better than a real attempt to win — so the penalty is
+      deferred per-turn and only actually applied at game end if this seat
+      won. That's <i>not</i> the same as computing the whole game's burn and
+      refunding it as one lump sum at the end: under GAE, a charge written
+      at step t lands directly in that step's advantage estimate, while a
+      terminal-only refund would reach step t discounted by
+      <code>(γ·λ)^k</code> — leaving early-game burns mostly un-refunded. Per-turn
+      deferral keeps a losing trajectory bit-for-bit identical to one that
+      never burned any mana.
+    </div>
+  </details>
+</section>
+
+<section id="ppo">
+  <div class="kicker">Stage 5</div>
+  <h2>PPO Training</h2>
+  <p class="intro">
+    Standard clipped-surrogate PPO, with two schedules that ramp over the
+    first 50,000 cumulative games per deck: minibatch size grows in steps
+    as training stabilizes, and the entropy bonus anneals down as
+    exploration matters less.
+  </p>
+
+  <table class="data-table">
+    <thead><tr><th>Hyperparameter</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>Learning rate (Adam, per-deck)</td><td class="num">2e-4</td></tr>
+      <tr><td>Mulligan-net learning rate (separate Adam)</td><td class="num">1e-3</td></tr>
+      <tr><td>γ (discount)</td><td class="num">0.99</td></tr>
+      <tr><td>GAE λ</td><td class="num">0.95</td></tr>
+      <tr><td>Clip range</td><td class="num">0.2</td></tr>
+      <tr><td>Value-function coefficient</td><td class="num">0.5</td></tr>
+      <tr><td>Max grad norm</td><td class="num">0.5</td></tr>
+      <tr><td>Target KL (epoch-level early stop)</td><td class="num">0.03</td></tr>
+      <tr><td>Epochs per update</td><td class="num">4</td></tr>
+      <tr><td>Minibatch size</td><td class="num">4 → 16 episodes (stepped)</td></tr>
+      <tr><td>Entropy coefficient</td><td class="num">0.02 → 0.005 (linear anneal)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Entropy coefficient — linear anneal</div>
+      <div id="chart-entropy"></div>
+      <p class="hint" style="margin:8px 0 0">start 0.02, floor 0.005, held flat after 50,000 cumulative games/deck</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Minibatch size — stepped ramp (in episodes)</div>
+      <div id="chart-batch"></div>
+      <p class="hint" style="margin:8px 0 0">doubles at fixed fractions of the 50,000-game horizon, capped at 16</p>
+    </div>
+  </div>
+
+  <details class="drill">
+    <summary>Why minibatches are counted in episodes, and shuffled by episode</summary>
+    <div class="drill-body">
+      The recurrent trunk needs each episode replayed through the GRU in
+      temporal order from a zero hidden state — so PPO's update never
+      shuffles individual transitions, only which whole episodes land
+      together in a minibatch.
+    </div>
+  </details>
+  <details class="drill">
+    <summary>What each logged metric means</summary>
+    <div class="drill-body">
+      These are the exact numbers charted per deck, per PPO update, on the
+      <a href="/stats" style="color:#6a9dff">Validation Stats</a> page:
+      <ul>
+        <li><b>entropy</b> — masked mean entropy of the action distribution over real (non-padded) steps</li>
+        <li><b>approx_kl</b> — Schulman's k3 estimator, a non-negative post-step diagnostic (not the clipping trigger)</li>
+        <li><b>clip_fraction</b> — share of steps where the probability ratio moved outside the clip range</li>
+        <li><b>explained_variance</b> — how well the value head predicts returns, measured before the update</li>
+        <li><b>adv_std</b> — raw (pre-normalization) advantage standard deviation</li>
+      </ul>
+    </div>
+  </details>
+</section>
+
+<section id="mulligan">
+  <div class="kicker">Stage 6</div>
+  <h2>Mulligan Net</h2>
+  <p class="intro">
+    A separate, small network makes the keep/mulligan and bottoming
+    decisions — trained with REINFORCE, not PPO, because a mulligan is one
+    pregame decision scored by the whole game's eventual outcome: a bandit
+    problem, not a sequential-credit-assignment one.
+  </p>
+
+  <div class="arch-flow" style="margin-top:14px">
+    <div class="arch-node"><div class="t">Opening hand, tokenized</div><div class="d">same token pipeline as the main net</div></div>
+    <div class="arch-down">↓</div>
+    <div class="arch-node"><div class="t">Shared encoder — frozen (no_grad)</div><div class="d">reused from this deck's DeckNetwork, PPO trains it — the mulligan optimizer never touches it</div></div>
+    <div class="arch-down">↓</div>
+    <div class="arch-node"><div class="t">Mulligan trunk — 64 → 64, Tanh</div><div class="d">mine_summary + mulligans-taken + on-the-play</div></div>
+    <div class="arch-down">↓</div>
+    <div class="arch-heads">
+      <div class="arch-node"><div class="t">Keep / mulligan head</div></div>
+      <div class="arch-node"><div class="t">Bottom-card pointer</div></div>
+      <div class="arch-node"><div class="t">Value baseline</div></div>
+    </div>
+  </div>
+
+  <p class="intro">Reward is symmetric and game-level: +1.0 if this seat wins, −1.0 otherwise — no separate penalty for mulliganing more.</p>
+
+  <details class="drill">
+    <summary>Probe hands — why evaluation needs synthetic hands</summary>
+    <div class="drill-body">
+      Self-play rarely draws extreme opening hands naturally (0-land or
+      7-land hands are just unlikely with a normal deck), so there isn't
+      enough natural data to see how the net behaves at those land counts.
+      The <code>mulligan_audit</code> validation check builds synthetic,
+      seeded 7-card hands at every achievable land count (skipping counts a
+      deck's list literally can't produce), runs them through the current
+      live weights, and reports P(mulligan), its spread across variants, and
+      decision entropy in bits at each land count — comparable across
+      training checkpoints since the sampling is seeded.
+    </div>
+  </details>
+
+  <div class="callout warn">
+    <span class="callout-title">Marked experimental in the code</span>
+    The mulligan loss's entropy coefficient currently sits at 1.0 (loss =
+    policy loss + 0.5·value loss − 1.0·entropy), tuned up from a much
+    smaller value specifically to fight entropy collapse toward
+    "always keep." The source flags this magnitude as not yet validated on
+    the main league loop — included here for accuracy, not as settled
+    methodology.
+  </div>
+</section>
+
+<section id="validation">
+  <div class="kicker">Stage 7</div>
+  <h2>Validation &amp; Evaluation</h2>
+  <p class="intro">
+    Five checks run after each training chunk (roughly every 10% of a
+    league's <code style="background:#1b1e24;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">total_games</code>,
+    50 games per pairing by default). A check that raises is logged and
+    skipped — a bad validation run never aborts training.
+  </p>
+
+  <table class="data-table">
+    <thead><tr><th>Check</th><th>What it measures</th><th>Opponent</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><b>primary_vs_primary_round_robin</b></td>
+        <td>Every primary-league deck vs. every other, mirrors included, greedy (argmax) play</td>
+        <td>current live weights, within the same league</td>
+      </tr>
+      <tr>
+        <td><b>primary_vs_training_round_robin</b></td>
+        <td>Full cross product, primary roster × training-league twin; also sums per-deck mana-burn totals</td>
+        <td>the frozen training-league twin (see <a href="#league" style="color:#6a9dff">Self-Play League</a>)</td>
+      </tr>
+      <tr>
+        <td><b>mulligan_audit</b></td>
+        <td>Buckets the round robins' own opening-hand decisions by land count, plus a fresh seeded probe-hand pass</td>
+        <td>n/a — post-hoc + synthetic hands</td>
+      </tr>
+      <tr>
+        <td><b>vs_history</b></td>
+        <td>Live net vs. its own oldest still-active snapshot, and oldest archived one — the one check the opponent literally cannot change underneath it</td>
+        <td>this deck's own frozen past self</td>
+      </tr>
+      <tr>
+        <td><b>round_robin_review</b></td>
+        <td>Human-review only, 2 games/pairing, writes full replay logs into the webapp's <a href="/replay" style="color:#6a9dff">Game Replay</a> viewer</td>
+        <td>current live weights</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="intro">Win rate is consistently <code style="background:#1b1e24;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">wins / games</code> per deck or pairing side, from the engine's own <code style="background:#1b1e24;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">game_over</code> event; a no-winner horizon timeout is excluded from that denominator.</p>
+
+  <div class="callout info">
+    <span class="callout-title">Where this data goes</span>
+    Every check's output and every <code>metrics.jsonl</code> line gets
+    mirrored into this webapp as training runs, which is what powers the
+    <a href="/stats" style="color:#6a9dff">Validation Stats</a> page — the
+    metric names there (entropy, approx_kl, win_rate, keep_rate, …) are
+    exactly the ones described on this page.
+  </div>
+</section>
+
+<section id="config">
+  <div class="kicker">Stage 8</div>
+  <h2>Config &amp; Checkpoints</h2>
+  <p class="intro">
+    A league is defined by one JSON config (optionally extending a shared
+    base) and persists everything needed to resume — including surviving a
+    crash mid-write — under <code style="background:#1b1e24;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">checkpoints/&lt;league&gt;/</code>.
+  </p>
+
+  <table class="data-table">
+    <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><b>league_name</b></td><td>checkpoint directory name</td></tr>
+      <tr><td><b>roster</b></td><td>which decks this league trains and plays</td></tr>
+      <tr><td><b>total_games</b></td><td>target cumulative games per deck</td></tr>
+      <tr><td><b>create_training_league</b></td><td>build the frozen benchmark twin (see <a href="#league" style="color:#6a9dff">Self-Play League</a>)</td></tr>
+      <tr><td><b>checkpoint_opponent_rate</b></td><td>probability a sampled opponent is a frozen snapshot rather than the live net</td></tr>
+      <tr><td><b>pfsp / pfsp_power</b></td><td>PFSP on/off, and the sharpness exponent on the weighting curve</td></tr>
+      <tr><td><b>games_per_iteration</b></td><td>games collected per deck before each PPO update</td></tr>
+      <tr><td><b>snapshot_every_games</b></td><td>cumulative-game cadence for freezing a new league snapshot</td></tr>
+      <tr><td><b>stratify_0land_pct</b></td><td>chance of forcing a 0-land opening hand when the opponent is a frozen snapshot</td></tr>
+      <tr><td><b>ppo</b></td><td>partial override of the PPO defaults table above — unknown keys are a hard error, not silently ignored</td></tr>
+    </tbody>
+  </table>
+
+  <p class="hint">The production league (<code style="color:#9dc0ff">main_league.json</code>) runs 11 decks to 100,000 games/deck, with the training-league twin enabled and <code style="color:#9dc0ff">checkpoint_opponent_rate</code> raised to 0.3.</p>
+
+  <h3 class="sub">Checkpoint layout</h3>
+  <pre class="tree">checkpoints/
+├── <b>vocab.json</b>                <span class="c"># shared card-name → index, append-only across every league</span>
+└── &lt;league&gt;/
+    ├── <b>session.txt</b>           <span class="c"># last session number</span>
+    ├── <b>progress.json</b>         <span class="c"># cumulative_games_per_deck, last_batch_size</span>
+    ├── <b>metrics.jsonl</b>         <span class="c"># one line per PPO update / mulligan flush / validation result</span>
+    ├── &lt;deck&gt;/
+    │   ├── <b>live.pt</b>           <span class="c"># current net + optimizer state</span>
+    │   ├── <b>mulligan.pt</b>       <span class="c"># current mulligan net + its own optimizer</span>
+    │   ├── <b>snapshot_&lt;id&gt;.pt</b>  <span class="c"># up to 32 frozen historical selves</span>
+    │   ├── <b>opponent_stats.json</b> <span class="c"># PFSP win/loss tallies per opponent key</span>
+    │   └── archive/
+    │       └── <b>snapshot_&lt;id&gt;.pt</b> <span class="c"># evicted snapshots, moved not deleted</span>
+    └── checks/
+        └── <b>&lt;check&gt;_&lt;N&gt;games.json</b> <span class="c"># full validation output for one cadence point</span></pre>
+
+  <p class="hint">Writes go through a temp file + atomic replace, with retry/backoff specifically to survive OneDrive's transient file-locking on Windows.</p>
+
+  <div class="callout warn">
+    <span class="callout-title">Known open issue, as of 2026-08-17</span>
+    <code style="background:#0e1013;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">mono_red_rally</code>
+    wins 85.5% of its non-mirror games in the main league while its own
+    mirror match sits at 49.6% — diluting the training gradient for the
+    other ten decks. Documented in the config as a strategic/architectural
+    problem, not something a hyperparameter change fixes, and still open.
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Describes the production training path (main-league, deploy_reward_v6) as implemented in rl/ and src/validation/. Numbers reflect training_configs/main_league.json and the current source — not a simplified approximation of it.
+</footer>
+
+<script>
+function plotCurve(fn, opts) {
+  const w = opts.w || 300, h = opts.h || 130, padL = 30, padR = 8, padT = 8, padB = 20;
+  const xMin = opts.xMin, xMax = opts.xMax, steps = opts.steps || 100;
+  const pts = [];
+  for (let i = 0; i <= steps; i++) { const x = xMin + (xMax - xMin) * i / steps; pts.push([x, fn(x)]); }
+  const yMin = opts.yMin ?? Math.min(...pts.map(p => p[1]));
+  const yMax = opts.yMax ?? Math.max(...pts.map(p => p[1]));
+  const sx = x => padL + (x - xMin) / (xMax - xMin) * (w - padL - padR);
+  const sy = y => h - padB - (y - yMin) / (yMax - yMin || 1) * (h - padT - padB);
+
+  let d;
+  if (opts.step) {
+    d = `M${sx(pts[0][0]).toFixed(1)},${sy(pts[0][1]).toFixed(1)}`;
+    for (let i = 1; i < pts.length; i++) {
+      d += ` L${sx(pts[i][0]).toFixed(1)},${sy(pts[i - 1][1]).toFixed(1)} L${sx(pts[i][0]).toFixed(1)},${sy(pts[i][1]).toFixed(1)}`;
+    }
+  } else {
+    d = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${sx(p[0]).toFixed(1)},${sy(p[1]).toFixed(1)}`).join(' ');
+  }
+
+  const yTicks = opts.yTicks || [yMin, (yMin + yMax) / 2, yMax];
+  const axisY = yTicks.map(v => `
+    <line x1="${padL}" y1="${sy(v).toFixed(1)}" x2="${w - padR}" y2="${sy(v).toFixed(1)}" stroke="#23262c" stroke-width="1"/>
+    <text x="1" y="${(sy(v) + 3).toFixed(1)}" font-size="9" fill="#666">${opts.yFmt ? opts.yFmt(v) : v}</text>`).join('');
+  const xTicks = opts.xTicks || [xMin, xMax];
+  const axisX = xTicks.map(v => `<text x="${sx(v).toFixed(1)}" y="${h - 5}" font-size="9" fill="#666" text-anchor="middle">${opts.xFmt ? opts.xFmt(v) : v}</text>`).join('');
+
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+    ${axisY}${axisX}
+    <path d="${d}" fill="none" stroke="${opts.color || '#6a9dff'}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  </svg>`;
+}
+
+function hill(x, c, p) { return x <= 0 ? 0 : Math.pow(x, p) / (Math.pow(x, p) + Math.pow(c, p)); }
+
+document.getElementById('chart-hill').innerHTML = plotCurve(
+  x => 0.5 * hill(x, 2.9, 4.0),
+  { xMin: 0, xMax: 8, yMin: 0, yMax: 0.5, xTicks: [0, 2, 4, 6, 8], yTicks: [0, 0.25, 0.5], color: '#eda100', yFmt: v => v.toFixed(2) }
+);
+
+document.getElementById('chart-pfsp').innerHTML = plotCurve(
+  wr => 0.1 + Math.pow(1 - wr, 0.5),
+  { xMin: 0, xMax: 1, yMin: 0.1, yMax: 1.1, xTicks: [0, 0.5, 1], yTicks: [0.1, 0.6, 1.1], color: '#5fce7a', xFmt: v => (v * 100).toFixed(0) + '%', yFmt: v => v.toFixed(1) }
+);
+
+document.getElementById('chart-entropy').innerHTML = plotCurve(
+  g => 0.02 + (0.005 - 0.02) * Math.min(1, g / 50000),
+  { xMin: 0, xMax: 60000, yMin: 0, yMax: 0.02, xTicks: [0, 25000, 50000], yTicks: [0, 0.01, 0.02], color: '#6a9dff', xFmt: v => (v / 1000) + 'k', yFmt: v => v.toFixed(3) }
+);
+
+document.getElementById('chart-batch').innerHTML = plotCurve(
+  g => { const progress = Math.min(1, g / 50000); const doublings = Math.floor(progress * 6); return Math.min(4 * Math.pow(2, doublings), 16); },
+  { xMin: 0, xMax: 60000, yMin: 0, yMax: 16, xTicks: [0, 25000, 50000], yTicks: [4, 8, 16], color: '#c77dff', step: true, xFmt: v => (v / 1000) + 'k', yFmt: v => v }
+);
+</script>

@@ -1,5 +1,5 @@
 """Local Flask app: "/" is a landing page (static/index.html) linking to the
-two tools below. Local-only: no auth, binds to localhost. See app_public.py
+three tools below. Local-only: no auth, binds to localhost. See app_public.py
 for the publicly-hostable equivalent -- same routes, identical except for
 which logs/ it can see (this machine's vs. whatever's committed).
 
@@ -26,6 +26,11 @@ reads its own:
   webapp_mirror.py there and logs/validation/README.md here. Made because
   checkpoints/ itself is gitignored at the pauper_sim root and this
   submodule has no other way to ship real data with itself.
+- "/methodology" -- static/methodology.html, a static explainer of the
+  training methodology (league structure, model architecture, reward
+  function, PPO, mulligan net, validation). No API route: it doesn't read
+  logs/ at all, just prose and hand-authored diagrams describing how the
+  parent repo's rl/ and src/validation/ actually work.
 
 Run: python app.py (paths are anchored to this file, not to cwd).
 """
@@ -58,6 +63,11 @@ def replay_page():
 @app.get("/stats")
 def stats_page():
     return send_from_directory(app.static_folder, "stats.html")
+
+
+@app.get("/methodology")
+def methodology_page():
+    return send_from_directory(app.static_folder, "methodology.html")
 
 
 @app.get("/api/replay/runs")
