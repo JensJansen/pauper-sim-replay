@@ -48,7 +48,11 @@
   }
   .flow-box .t { font-size: 12px; font-weight: 600; color: #fff; }
   .flow-box .d { font-size: 10.5px; color: #888; margin-top: 3px; line-height: 1.4; }
-  .flow-arrow { display: flex; align-items: center; justify-content: center; color: #3a6df0; font-size: 16px; padding: 0 6px; flex: 0 0 auto; }
+  .flow-arrow {
+    display: flex; align-items: center; justify-content: center; color: #6a9dff;
+    font-size: 20px; font-weight: 700; padding: 0 6px; flex: 0 0 auto;
+    text-shadow: 0 0 8px rgba(106, 157, 255, .55);
+  }
   .flow-loop { font-size: 11px; color: #666; margin: 4px 0 18px 4px; }
 
   /* ---- generic cards / grid (matches stats.html) ---- */
@@ -56,6 +60,11 @@
   .card-title { font-size: 12px; color: #b8c0d0; margin-bottom: 6px; }
   .card svg { display: block; width: 100%; height: auto; }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin: 16px 0; }
+  /* fixed (not auto-fit) 2-up grid -- for an exact-2-cards-plus-one-spanning-card
+     layout, where the pair must split the spanning card's width evenly rather
+     than however many auto-fit tracks the container width happens to compute */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
+  @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
 
   /* ---- drill-down detail blocks ---- */
   details.drill { background: #1b1e24; border: 1px solid #2a2d33; border-radius: 8px; margin: 10px 0; }
@@ -90,9 +99,24 @@
   .arch-node .t { color: #fff; font-weight: 600; font-size: 12.5px; }
   .arch-node .d { color: #888; font-size: 10.5px; margin-top: 3px; }
   .arch-branch { display: flex; gap: 22px; justify-content: center; flex-wrap: wrap; }
-  .arch-down { color: #3a6df0; font-size: 15px; line-height: 1; }
+  .arch-down {
+    color: #8fb4ff; font-size: 12px; line-height: 1.3; text-align: center; max-width: 320px;
+  }
+  .arch-down b, .merge-label b {
+    display: block; color: #6a9dff; font-size: 19px; font-weight: 700; line-height: 1;
+    text-shadow: 0 0 8px rgba(106, 157, 255, .55); margin-bottom: 1px;
+  }
   .arch-heads { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
   .arch-heads .arch-node { min-width: 160px; }
+
+  /* ---- converging connector: N boxes above feeding one box below --
+     draws only the two converging curves; the arrowhead is the same bold
+     ↓ glyph used by every other connector on the page (.arch-down b /
+     .merge-label b), so a convergence reads as "the same arrow, fed by
+     two lines" rather than a differently-styled one-off shape. ---- */
+  .merge-connector { display: block; width: 100%; max-width: 420px; height: 28px; margin: 0 auto; overflow: visible; }
+  .merge-connector .curve { fill: none; stroke: #6a9dff; stroke-width: 2.25; stroke-linecap: round; filter: drop-shadow(0 0 2px rgba(106, 157, 255, .45)); }
+  .merge-label { text-align: center; color: #8fb4ff; font-size: 11.5px; margin: 4px 0 10px; }
 
   /* ---- action space compare ---- */
   .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 18px 0 10px; }
@@ -100,7 +124,6 @@
   .compare .col h4 { margin: 0 0 8px; font-size: 13px; color: #fff; }
   .compare ul { margin: 0; padding-left: 18px; font-size: 12px; color: #b8c0d0; }
   .compare ul li { margin-bottom: 5px; }
-  .merge-arrow { text-align: center; color: #3a6df0; font-size: 15px; margin: 6px 0; }
   .merge-box { text-align: center; }
   @media (max-width: 640px) { .compare { grid-template-columns: 1fr; } }
 
@@ -125,6 +148,17 @@
   pre.tree .c { color: #555; }
 
   footer { max-width: 980px; margin: 40px auto 0; padding: 20px; color: #555; font-size: 11.5px; border-top: 1px solid #2a2d33; }
+
+  /* ---- glossary terms ---- */
+  .term { border-bottom: 1px dotted #5a6472; cursor: help; }
+  .term:hover, .term:focus { border-bottom-color: #6a9dff; outline: none; }
+  #term-tip {
+    display: none; position: fixed; z-index: 200; max-width: 300px;
+    background: #1b1e24; border: 1px solid #3a3f47; border-radius: 6px;
+    padding: 9px 11px; font-size: 12px; line-height: 1.5; color: #d8dbe0;
+    box-shadow: 0 8px 24px #000a; pointer-events: none;
+  }
+  #term-tip .term-tip-title { display: block; color: #fff; font-weight: 600; font-size: 11.5px; margin-bottom: 3px; }
 </style>
 
 <header>
@@ -148,6 +182,8 @@
   <a href="#validation">Validation</a>
   <a href="#config">Config &amp; Checkpoints</a>
 </div>
+
+<div id="term-tip" role="tooltip"></div>
 
 <main>
 
@@ -178,9 +214,9 @@
 
   <div class="flow-row">
     <span class="row-label">Training — every iteration / snapshot cadence / validation cadence</span>
-    <div class="flow-box"><div class="t">Collect Episodes</div><div class="d">rollouts vs a PFSP-sampled opponent</div></div>
+    <div class="flow-box"><div class="t">Collect Episodes</div><div class="d">rollouts vs a <span class="term" tabindex="0" data-term="pfsp">PFSP</span>-sampled opponent</div></div>
     <div class="flow-arrow">→</div>
-    <div class="flow-box"><div class="t">PPO Update</div><div class="d">clipped policy-gradient step</div></div>
+    <div class="flow-box"><div class="t"><span class="term" tabindex="0" data-term="ppo">PPO</span> Update</div><div class="d">clipped policy-gradient step</div></div>
     <div class="flow-arrow">→</div>
     <div class="flow-box"><div class="t">League Snapshot</div><div class="d">freeze into the opponent pool</div></div>
     <div class="flow-arrow">→</div>
@@ -206,7 +242,7 @@
       <div class="pop-sub">e.g. <code style="background:#14161a;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">main-league</code> — the actual thing being trained</div>
       <div class="sub-item"><b>Live nets</b> — one <code style="background:#0e1013;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">live.pt</code> per deck, updated every PPO step</div>
       <div class="sub-item"><b>Archive</b> — rolling window of 32 frozen historical snapshots per deck (PFSP opponent pool)</div>
-      <div class="sub-item"><b>PFSP sampler</b> — picks which deck, then live-vs-snapshot, weighted toward opponents this deck is currently losing to</div>
+      <div class="sub-item"><b><span class="term" tabindex="0" data-term="pfsp">PFSP</span> sampler</b> — picks which deck, then live-vs-snapshot, weighted toward opponents this deck is currently losing to</div>
     </div>
     <div class="pop-box dim">
       <h4>Training League <span class="hint">(twin)</span></h4>
@@ -219,13 +255,15 @@
   <div class="pop-link">both populations feed round-robin evaluation ↓ (see <a href="#validation" style="color:#6a9dff">Validation</a>)</div>
 
   <h3 class="sub">One training session, step by step</h3>
-  <ol style="color:#b8c0d0; padding-left:20px; font-size:13px;">
-    <li>Load (or resume) every train deck's network and optimizer state from <code style="background:#1b1e24;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">live.pt</code>, plus its mulligan net with a separate optimizer.</li>
-    <li>Per iteration, per train deck: sample an opponent (PFSP-weighted deck, then live-vs-snapshot), collect rollout games, run a PPO update on that deck's own buffer — and also update any <i>other</i> train deck whose buffer was generated as a live opponent in those same games ("salvaging").</li>
-    <li>Every 8 iterations (or the session's last one), flush accumulated mulligan-decision transitions through one REINFORCE step per deck.</li>
-    <li>When cumulative games cross the snapshot cadence, freeze a new snapshot per deck into the league pool, save live checkpoints + optimizer state + opponent stats, and update <code style="background:#1b1e24;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">progress.json</code>.</li>
-    <li>Always re-save live checkpoints at session end.</li>
-  </ol>
+  <div class="card">
+    <ol style="color:#b8c0d0; padding-left:20px; font-size:13px; margin:0;">
+      <li>Load (or resume) every train deck's network and optimizer state from <code style="background:#0e1013;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">live.pt</code>, plus its mulligan net with a separate optimizer.</li>
+      <li>Per iteration, per train deck: sample an opponent (PFSP-weighted deck, then live-vs-snapshot), collect rollout games, run a PPO update on that deck's own buffer — and also update any <i>other</i> train deck whose buffer was generated as a live opponent in those same games ("salvaging").</li>
+      <li>Every 8 iterations (or the session's last one), flush accumulated mulligan-decision transitions through one REINFORCE step per deck.</li>
+      <li>When cumulative games cross the snapshot cadence, freeze a new snapshot per deck into the league pool, save live checkpoints + optimizer state + opponent stats, and update <code style="background:#0e1013;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">progress.json</code>.</li>
+      <li>Always re-save live checkpoints at session end.</li>
+    </ol>
+  </div>
   <p class="intro">A real run is many separate process invocations of this session, chained by the higher-level pipeline runner until a deck hits its configured <code style="background:#1b1e24;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">total_games</code>, with the full validation suite run after each chunk.</p>
 
   <div class="grid">
@@ -260,18 +298,22 @@
 
   <div class="arch-flow">
     <div class="arch-node"><div class="t">Card tokens, both seats</div><div class="d">battlefield · graveyard · stack · exile (both) + own hand</div></div>
-    <div class="arch-down">↓</div>
-    <div class="arch-node"><div class="t">SetTransformer encoder</div><div class="d">2-layer self-attention, 4 heads, d_model=64 — every token attends to every other</div></div>
-    <div class="arch-down">↓</div>
+    <div class="arch-down"><b>↓</b></div>
+    <div class="arch-node"><div class="t"><span class="term" tabindex="0" data-term="set_transformer">SetTransformer</span> encoder</div><div class="d">2-layer <span class="term" tabindex="0" data-term="self_attention">self-attention</span>, 4 heads, d_model=64 — every token attends to every other</div></div>
+    <div class="arch-down"><b>↓</b></div>
     <div class="arch-branch">
-      <div class="arch-node"><div class="t">PMA pool → "mine" summary</div><div class="d">pooling-by-multihead-attention</div></div>
+      <div class="arch-node"><div class="t"><span class="term" tabindex="0" data-term="pma">PMA</span> pool → "mine" summary</div><div class="d">pooling-by-multihead-attention</div></div>
       <div class="arch-node"><div class="t">PMA pool → "theirs" summary</div><div class="d">split by side flag</div></div>
     </div>
-    <div class="arch-down">↓ theirs_summary modulates the trunk (FiLM)</div>
+    <svg class="merge-connector" viewBox="0 0 300 26">
+      <path class="curve" d="M 70 1 C 70 15, 150 13, 150 25"/>
+      <path class="curve" d="M 230 1 C 230 15, 150 13, 150 25"/>
+    </svg>
+    <div class="merge-label"><b>↓</b>both summaries feed the trunk below — mine_summary directly, theirs_summary by modulating it (<span class="term" tabindex="0" data-term="film">FiLM</span>)</div>
     <div class="arch-node"><div class="t">Trunk — 2×128, FiLM-conditioned</div><div class="d">mine_summary + scalar globals in, gated by γ·h+β from theirs_summary</div></div>
-    <div class="arch-down">↓ + previous action embedding</div>
-    <div class="arch-node"><div class="t">GRU (recurrent memory)</div><div class="d">carries history the board alone doesn't show, e.g. "opponent held up mana and passed"</div></div>
-    <div class="arch-down">↓</div>
+    <div class="arch-down"><b>↓</b> + previous action embedding</div>
+    <div class="arch-node"><div class="t"><span class="term" tabindex="0" data-term="gru">GRU</span> (recurrent memory)</div><div class="d">carries history the board alone doesn't show, e.g. "opponent held up mana and passed"</div></div>
+    <div class="arch-down"><b>↓</b></div>
     <div class="arch-heads">
       <div class="arch-node"><div class="t">Critic head</div><div class="d">scalar value estimate</div></div>
       <div class="arch-node"><div class="t">Fixed-action head</div><div class="d">logits over the menu-shaped action table</div></div>
@@ -338,7 +380,7 @@
   <div class="kicker">Stage 3</div>
   <h2>Action Space</h2>
   <p class="intro">
-    Actions come from <b>one combined softmax</b>, not two separate
+    Actions come from <b>one combined <span class="term" tabindex="0" data-term="softmax">softmax</span></b>, not two separate
     distributions — a fixed-table entry and a pointer-scored target can
     both be legal at the same decision, so they compete in a single
     masked distribution rather than being chosen in two stages.
@@ -370,7 +412,11 @@
       <p class="hint">variable length — one score per currently legal token, masked by what's actually pending</p>
     </div>
   </div>
-  <div class="merge-arrow">↓ concatenated ↓</div>
+  <svg class="merge-connector" viewBox="0 0 700 26" style="max-width:700px">
+    <path class="curve" d="M 175 1 C 175 15, 350 13, 350 25"/>
+    <path class="curve" d="M 525 1 C 525 15, 350 13, 350 25"/>
+  </svg>
+  <div class="merge-label"><b>↓</b>both halves concatenate into one decision below</div>
   <div class="merge-box"><div class="card" style="display:inline-block; text-align:left; max-width: 460px;">
     <div class="card-title" style="margin:0">Single masked softmax over both halves</div>
     <p class="hint" style="margin:6px 0 0">
@@ -392,25 +438,26 @@
     off for having burned mana along the way.
   </p>
 
-  <div class="card" style="max-width:640px">
-    <div class="card-title" style="margin:0">deploy_reward_v6 — the production reward</div>
-    <pre style="background:#0e1013;border:1px solid #262a31;border-radius:6px;padding:12px 14px;font-size:12px;color:#9dc0ff;overflow-x:auto;margin:8px 0 0">with_dense_mana_burn_penalty(
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title" style="margin:0">deploy_reward_v6 — the production reward</div>
+      <pre style="background:#0e1013;border:1px solid #262a31;border-radius:6px;padding:12px 14px;font-size:11.5px;color:#9dc0ff;overflow-x:auto;margin:8px 0 0">with_dense_mana_burn_penalty(
     flat_win_loss_reward(),
-    mana_burn_c=2.9, mana_burn_p=4.0,
+    mana_burn_c=2.9,
+    mana_burn_p=4.0,
     game_penalty_cap=1.5,
-    refund_on_loss=True, mana_burn_weight=0.5,
+    refund_on_loss=True,
+    mana_burn_weight=0.5,
 )</pre>
-  </div>
-
-  <div class="grid">
+    </div>
     <div class="card">
       <div class="card-title">Terminal band</div>
       <p class="hint" style="margin:0">+1.0 win · −1.0 loss or no-winner timeout · 0.0 every non-terminal step. No efficiency or sloppiness term at this level — every win scores the same, every loss scores the same.</p>
     </div>
-    <div class="card">
+    <div class="card" style="grid-column: 1 / -1">
       <div class="card-title">Marginal single-pip mana-burn penalty, by turn</div>
       <div id="chart-hill"></div>
-      <p class="hint" style="margin:8px 0 0">0.5 · hill(x, c=2.9, p=4.0) — reset every turn, only charged if this seat wins the game, capped at 1.5 total across the whole game.</p>
+      <p class="hint" style="margin:8px 0 0">0.5 · <span class="term" tabindex="0" data-term="hill">hill</span>(x, c=2.9, p=4.0) — reset every turn, only charged if this seat wins the game, capped at 1.5 total across the whole game.</p>
     </div>
   </div>
 
@@ -440,7 +487,7 @@
       play look better than a real attempt to win — so the penalty is
       deferred per-turn and only actually applied at game end if this seat
       won. That's <i>not</i> the same as computing the whole game's burn and
-      refunding it as one lump sum at the end: under GAE, a charge written
+      refunding it as one lump sum at the end: under <span class="term" tabindex="0" data-term="gae">GAE</span>, a charge written
       at step t lands directly in that step's advantage estimate, while a
       terminal-only refund would reach step t discounted by
       <code>(γ·λ)^k</code> — leaving early-game burns mostly un-refunded. Per-turn
@@ -460,22 +507,24 @@
     exploration matters less.
   </p>
 
-  <table class="data-table">
-    <thead><tr><th>Hyperparameter</th><th>Value</th></tr></thead>
-    <tbody>
-      <tr><td>Learning rate (Adam, per-deck)</td><td class="num">2e-4</td></tr>
-      <tr><td>Mulligan-net learning rate (separate Adam)</td><td class="num">1e-3</td></tr>
-      <tr><td>γ (discount)</td><td class="num">0.99</td></tr>
-      <tr><td>GAE λ</td><td class="num">0.95</td></tr>
-      <tr><td>Clip range</td><td class="num">0.2</td></tr>
-      <tr><td>Value-function coefficient</td><td class="num">0.5</td></tr>
-      <tr><td>Max grad norm</td><td class="num">0.5</td></tr>
-      <tr><td>Target KL (epoch-level early stop)</td><td class="num">0.03</td></tr>
-      <tr><td>Epochs per update</td><td class="num">4</td></tr>
-      <tr><td>Minibatch size</td><td class="num">4 → 16 episodes (stepped)</td></tr>
-      <tr><td>Entropy coefficient</td><td class="num">0.02 → 0.005 (linear anneal)</td></tr>
-    </tbody>
-  </table>
+  <div class="card">
+    <table class="data-table">
+      <thead><tr><th>Hyperparameter</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Learning rate (<span class="term" tabindex="0" data-term="adam">Adam</span>, per-deck)</td><td class="num">2e-4</td></tr>
+        <tr><td>Mulligan-net learning rate (separate Adam)</td><td class="num">1e-3</td></tr>
+        <tr><td><span class="term" tabindex="0" data-term="gamma">γ (discount)</span></td><td class="num">0.99</td></tr>
+        <tr><td><span class="term" tabindex="0" data-term="gae_lambda">GAE λ</span></td><td class="num">0.95</td></tr>
+        <tr><td><span class="term" tabindex="0" data-term="clip_range">Clip range</span></td><td class="num">0.2</td></tr>
+        <tr><td><span class="term" tabindex="0" data-term="vf_coef">Value-function coefficient</span></td><td class="num">0.5</td></tr>
+        <tr><td><span class="term" tabindex="0" data-term="max_grad_norm">Max grad norm</span></td><td class="num">0.5</td></tr>
+        <tr><td><span class="term" tabindex="0" data-term="target_kl">Target KL (epoch-level early stop)</span></td><td class="num">0.03</td></tr>
+        <tr><td><span class="term" tabindex="0" data-term="epochs_per_update">Epochs per update</span></td><td class="num">4</td></tr>
+        <tr><td><span class="term" tabindex="0" data-term="minibatch">Minibatch size</span></td><td class="num">4 → 16 episodes (stepped)</td></tr>
+        <tr><td><span class="term" tabindex="0" data-term="entropy_coef">Entropy coefficient</span></td><td class="num">0.02 → 0.005 (linear anneal)</td></tr>
+      </tbody>
+    </table>
+  </div>
 
   <div class="grid">
     <div class="card">
@@ -520,22 +569,22 @@
   <h2>Mulligan Net</h2>
   <p class="intro">
     A separate, small network makes the keep/mulligan and bottoming
-    decisions — trained with REINFORCE, not PPO, because a mulligan is one
-    pregame decision scored by the whole game's eventual outcome: a bandit
-    problem, not a sequential-credit-assignment one.
+    decisions — trained with <span class="term" tabindex="0" data-term="reinforce">REINFORCE</span>, not PPO, because a mulligan is one
+    pregame decision scored by the whole game's eventual outcome: a <span class="term" tabindex="0" data-term="bandit">bandit
+    problem</span>, not a sequential-credit-assignment one.
   </p>
 
   <div class="arch-flow" style="margin-top:14px">
     <div class="arch-node"><div class="t">Opening hand, tokenized</div><div class="d">same token pipeline as the main net</div></div>
-    <div class="arch-down">↓</div>
+    <div class="arch-down"><b>↓</b></div>
     <div class="arch-node"><div class="t">Shared encoder — frozen (no_grad)</div><div class="d">reused from this deck's DeckNetwork, PPO trains it — the mulligan optimizer never touches it</div></div>
-    <div class="arch-down">↓</div>
+    <div class="arch-down"><b>↓</b></div>
     <div class="arch-node"><div class="t">Mulligan trunk — 64 → 64, Tanh</div><div class="d">mine_summary + mulligans-taken + on-the-play</div></div>
-    <div class="arch-down">↓</div>
+    <div class="arch-down"><b>↓</b></div>
     <div class="arch-heads">
       <div class="arch-node"><div class="t">Keep / mulligan head</div></div>
       <div class="arch-node"><div class="t">Bottom-card pointer</div></div>
-      <div class="arch-node"><div class="t">Value baseline</div></div>
+      <div class="arch-node"><div class="t"><span class="term" tabindex="0" data-term="baseline">Value baseline</span></div></div>
     </div>
   </div>
 
@@ -577,36 +626,38 @@
     skipped — a bad validation run never aborts training.
   </p>
 
-  <table class="data-table">
-    <thead><tr><th>Check</th><th>What it measures</th><th>Opponent</th></tr></thead>
-    <tbody>
-      <tr>
-        <td><b>primary_vs_primary_round_robin</b></td>
-        <td>Every primary-league deck vs. every other, mirrors included, greedy (argmax) play</td>
-        <td>current live weights, within the same league</td>
-      </tr>
-      <tr>
-        <td><b>primary_vs_training_round_robin</b></td>
-        <td>Full cross product, primary roster × training-league twin; also sums per-deck mana-burn totals</td>
-        <td>the frozen training-league twin (see <a href="#league" style="color:#6a9dff">Self-Play League</a>)</td>
-      </tr>
-      <tr>
-        <td><b>mulligan_audit</b></td>
-        <td>Buckets the round robins' own opening-hand decisions by land count, plus a fresh seeded probe-hand pass</td>
-        <td>n/a — post-hoc + synthetic hands</td>
-      </tr>
-      <tr>
-        <td><b>vs_history</b></td>
-        <td>Live net vs. its own oldest still-active snapshot, and oldest archived one — the one check the opponent literally cannot change underneath it</td>
-        <td>this deck's own frozen past self</td>
-      </tr>
-      <tr>
-        <td><b>round_robin_review</b></td>
-        <td>Human-review only, 2 games/pairing, writes full replay logs into the webapp's <a href="/replay" style="color:#6a9dff">Game Replay</a> viewer</td>
-        <td>current live weights</td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="card">
+    <table class="data-table">
+      <thead><tr><th>Check</th><th>What it measures</th><th>Opponent</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>primary_vs_primary_round_robin</b></td>
+          <td>Every primary-league deck vs. every other, mirrors included, <span class="term" tabindex="0" data-term="greedy_argmax">greedy (argmax)</span> play</td>
+          <td>current live weights, within the same league</td>
+        </tr>
+        <tr>
+          <td><b>primary_vs_training_round_robin</b></td>
+          <td>Full cross product, primary roster × training-league twin; also sums per-deck mana-burn totals</td>
+          <td>the frozen training-league twin (see <a href="#league" style="color:#6a9dff">Self-Play League</a>)</td>
+        </tr>
+        <tr>
+          <td><b>mulligan_audit</b></td>
+          <td>Buckets the round robins' own opening-hand decisions by land count, plus a fresh seeded probe-hand pass</td>
+          <td>n/a — post-hoc + synthetic hands</td>
+        </tr>
+        <tr>
+          <td><b>vs_history</b></td>
+          <td>Live net vs. its own oldest still-active snapshot, and oldest archived one — the one check the opponent literally cannot change underneath it</td>
+          <td>this deck's own frozen past self</td>
+        </tr>
+        <tr>
+          <td><b>round_robin_review</b></td>
+          <td>Human-review only, 2 games/pairing, writes full replay logs into the webapp's <a href="/replay" style="color:#6a9dff">Game Replay</a> viewer</td>
+          <td>current live weights</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <p class="intro">Win rate is consistently <code style="background:#1b1e24;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">wins / games</code> per deck or pairing side, from the engine's own <code style="background:#1b1e24;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">game_over</code> event; a no-winner horizon timeout is excluded from that denominator.</p>
 
@@ -629,26 +680,29 @@
     crash mid-write — under <code style="background:#1b1e24;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">checkpoints/&lt;league&gt;/</code>.
   </p>
 
-  <table class="data-table">
-    <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
-    <tbody>
-      <tr><td><b>league_name</b></td><td>checkpoint directory name</td></tr>
-      <tr><td><b>roster</b></td><td>which decks this league trains and plays</td></tr>
-      <tr><td><b>total_games</b></td><td>target cumulative games per deck</td></tr>
-      <tr><td><b>create_training_league</b></td><td>build the frozen benchmark twin (see <a href="#league" style="color:#6a9dff">Self-Play League</a>)</td></tr>
-      <tr><td><b>checkpoint_opponent_rate</b></td><td>probability a sampled opponent is a frozen snapshot rather than the live net</td></tr>
-      <tr><td><b>pfsp / pfsp_power</b></td><td>PFSP on/off, and the sharpness exponent on the weighting curve</td></tr>
-      <tr><td><b>games_per_iteration</b></td><td>games collected per deck before each PPO update</td></tr>
-      <tr><td><b>snapshot_every_games</b></td><td>cumulative-game cadence for freezing a new league snapshot</td></tr>
-      <tr><td><b>stratify_0land_pct</b></td><td>chance of forcing a 0-land opening hand when the opponent is a frozen snapshot</td></tr>
-      <tr><td><b>ppo</b></td><td>partial override of the PPO defaults table above — unknown keys are a hard error, not silently ignored</td></tr>
-    </tbody>
-  </table>
+  <div class="card">
+    <table class="data-table">
+      <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><b>league_name</b></td><td>checkpoint directory name</td></tr>
+        <tr><td><b>roster</b></td><td>which decks this league trains and plays</td></tr>
+        <tr><td><b>total_games</b></td><td>target cumulative games per deck</td></tr>
+        <tr><td><b>create_training_league</b></td><td>build the frozen benchmark twin (see <a href="#league" style="color:#6a9dff">Self-Play League</a>)</td></tr>
+        <tr><td><b>checkpoint_opponent_rate</b></td><td>probability a sampled opponent is a frozen snapshot rather than the live net</td></tr>
+        <tr><td><b>pfsp / pfsp_power</b></td><td>PFSP on/off, and the sharpness exponent on the weighting curve</td></tr>
+        <tr><td><b>games_per_iteration</b></td><td>games collected per deck before each PPO update</td></tr>
+        <tr><td><b>snapshot_every_games</b></td><td>cumulative-game cadence for freezing a new league snapshot</td></tr>
+        <tr><td><b>stratify_0land_pct</b></td><td>chance of forcing a 0-land opening hand when the opponent is a frozen snapshot</td></tr>
+        <tr><td><b>ppo</b></td><td>partial override of the PPO defaults table above — unknown keys are a hard error, not silently ignored</td></tr>
+      </tbody>
+    </table>
+  </div>
 
   <p class="hint">The production league (<code style="color:#9dc0ff">main_league.json</code>) runs 11 decks to 100,000 games/deck, with the training-league twin enabled and <code style="color:#9dc0ff">checkpoint_opponent_rate</code> raised to 0.3.</p>
 
   <h3 class="sub">Checkpoint layout</h3>
-  <pre class="tree">checkpoints/
+  <div class="card">
+    <pre class="tree">checkpoints/
 ├── <b>vocab.json</b>                <span class="c"># shared card-name → index, append-only across every league</span>
 └── &lt;league&gt;/
     ├── <b>session.txt</b>           <span class="c"># last session number</span>
@@ -663,6 +717,7 @@
     │       └── <b>snapshot_&lt;id&gt;.pt</b> <span class="c"># evicted snapshots, moved not deleted</span>
     └── checks/
         └── <b>&lt;check&gt;_&lt;N&gt;games.json</b> <span class="c"># full validation output for one cadence point</span></pre>
+  </div>
 
   <p class="hint">Writes go through a temp file + atomic replace, with retry/backoff specifically to survive OneDrive's transient file-locking on Windows.</p>
 
@@ -683,6 +738,54 @@
 </footer>
 
 <script>
+const GLOSSARY = {
+  pfsp: ["PFSP", "Prioritized Fictitious Self-Play (AlphaStar-style): weight opponent choice toward whoever this deck is currently losing to, instead of sampling opponents uniformly."],
+  ppo: ["PPO", "Proximal Policy Optimization — a policy-gradient method that clips how far one update can shift the policy from what generated the data, trading a bit of update size for training stability."],
+  set_transformer: ["SetTransformer", "A transformer variant built for an unordered, variable-length set of items (here: every visible card) rather than a fixed sequence — order shouldn't matter, only which cards are present."],
+  self_attention: ["Self-attention", "Every token computes a weighted mixture of every other token's representation, so e.g. a creature's encoding can be shaped by what else is on the stack targeting it."],
+  pma: ["PMA — pooling by multihead attention", "Compresses a variable-length set of token representations into one fixed-size summary vector using attention, rather than a plain average."],
+  film: ["FiLM", "Feature-wise Linear Modulation — one part of the network learns to rescale and shift (γ·h + β) another part's activations, instead of just concatenating in more input features."],
+  gru: ["GRU — gated recurrent unit", "A small recurrent network that carries a hidden state across decisions, giving the policy short-term memory beyond what's visible in the current board snapshot."],
+  softmax: ["Softmax", "Turns a set of raw scores into a valid probability distribution (all values 0–1, summing to 1) — how logits become action probabilities before sampling."],
+  gae: ["GAE", "Generalized Advantage Estimation — blends short- and long-horizon reward information to estimate how much better an action was than expected, smoothing the bias/variance trade-off of that estimate."],
+  hill: ["Hill function", "A saturating, S-shaped curve: near zero for small x, rises steeply around its midpoint c, then flattens out approaching (but never reaching) its ceiling."],
+  gae_lambda: ["GAE λ", "The smoothing weight in Generalized Advantage Estimation — higher trusts longer-horizon reward information more, lower leans on the value function's own (lower-variance, more biased) short-horizon estimate."],
+  gamma: ["γ — discount factor", "How much a future reward is worth today. Closer to 1.0 weighs long-horizon consequences more; closer to 0 focuses on immediate reward."],
+  clip_range: ["Clip range", "How far the new policy's probability for an action can move from the old policy's before PPO's objective stops rewarding further change in that direction — caps how much one update can shift behavior."],
+  vf_coef: ["Value-function coefficient", "Weight on the value (critic) head's prediction-error loss relative to the policy loss, inside PPO's combined objective."],
+  max_grad_norm: ["Max grad norm", "Ceiling on the size of the gradient before a weight update — rescaled down if exceeded, so one unusually large update can't destabilize training."],
+  target_kl: ["Target KL", "KL-divergence threshold: if this epoch's mean divergence between the new and old policy crosses it, PPO stops updating early on this batch rather than moving further from the data it was collected under."],
+  epochs_per_update: ["Epochs per update", "How many passes PPO makes over the same batch of collected experience before discarding it and collecting fresh games."],
+  minibatch: ["Minibatch (in episodes)", "One gradient step's worth of data, measured in whole episodes rather than individual steps — needed because the recurrent trunk has to replay each episode in order from a zero hidden state."],
+  entropy_coef: ["Entropy coefficient", "Weight on a bonus for keeping the action distribution spread out, discouraging the policy from collapsing onto one action too early and losing the ability to explore."],
+  adam: ["Adam", "A gradient-descent optimizer that adapts its per-parameter step size from running estimates of recent gradients — used for both the main policy net and the mulligan net here, with separate instances and learning rates."],
+  reinforce: ["REINFORCE", "The simplest policy-gradient method: push up the probability of actions that led to a good outcome, push down the ones that led to a bad one, weighted directly by the total reward — no clipping."],
+  bandit: ["Bandit problem", "A decision problem with no intermediate steps to assign credit across — one choice, one reward. Contrasted with a full sequential RL problem, where credit has to be split across many decisions."],
+  baseline: ["Value baseline", "A learned estimate of expected outcome, subtracted from the actual reward so the learning signal reflects 'better or worse than expected' rather than raw reward magnitude — reduces variance without changing what's optimal."],
+  greedy_argmax: ["Greedy / argmax play", "Always picking the single highest-probability action instead of sampling from the distribution — used for evaluation so results reflect the policy's best move, not its exploration noise."],
+};
+
+function showTermTip(el) {
+  const def = GLOSSARY[el.dataset.term];
+  if (!def) return;
+  const tip = document.getElementById('term-tip');
+  tip.innerHTML = `<span class="term-tip-title">${def[0]}</span>${def[1]}`;
+  tip.style.display = 'block';
+  const r = el.getBoundingClientRect();
+  const tw = tip.offsetWidth, th = tip.offsetHeight;
+  let left = r.left + r.width / 2 - tw / 2;
+  left = Math.max(8, Math.min(left, window.innerWidth - tw - 8));
+  let top = r.top - th - 8;
+  if (top < 4) top = r.bottom + 8;
+  tip.style.left = `${left}px`;
+  tip.style.top = `${top}px`;
+}
+function hideTermTip() { document.getElementById('term-tip').style.display = 'none'; }
+document.addEventListener('mouseover', e => { const t = e.target.closest('.term'); if (t) showTermTip(t); });
+document.addEventListener('mouseout', e => { if (e.target.closest('.term')) hideTermTip(); });
+document.addEventListener('focusin', e => { const t = e.target.closest('.term'); if (t) showTermTip(t); });
+document.addEventListener('focusout', e => { if (e.target.closest('.term')) hideTermTip(); });
+
 function plotCurve(fn, opts) {
   const w = opts.w || 300, h = opts.h || 130, padL = 30, padR = 8, padT = 8, padB = 20;
   const xMin = opts.xMin, xMax = opts.xMax, steps = opts.steps || 100;
@@ -720,21 +823,21 @@ function hill(x, c, p) { return x <= 0 ? 0 : Math.pow(x, p) / (Math.pow(x, p) + 
 
 document.getElementById('chart-hill').innerHTML = plotCurve(
   x => 0.5 * hill(x, 2.9, 4.0),
-  { xMin: 0, xMax: 8, yMin: 0, yMax: 0.5, xTicks: [0, 2, 4, 6, 8], yTicks: [0, 0.25, 0.5], color: '#eda100', yFmt: v => v.toFixed(2) }
+  { w: 860, h: 150, xMin: 0, xMax: 8, yMin: 0, yMax: 0.5, xTicks: [0, 1, 2, 3, 4, 5, 6, 7, 8], yTicks: [0, 0.25, 0.5], yFmt: v => v.toFixed(2) }
 );
 
 document.getElementById('chart-pfsp').innerHTML = plotCurve(
   wr => 0.1 + Math.pow(1 - wr, 0.5),
-  { xMin: 0, xMax: 1, yMin: 0.1, yMax: 1.1, xTicks: [0, 0.5, 1], yTicks: [0.1, 0.6, 1.1], color: '#5fce7a', xFmt: v => (v * 100).toFixed(0) + '%', yFmt: v => v.toFixed(1) }
+  { xMin: 0, xMax: 1, yMin: 0.1, yMax: 1.1, xTicks: [0, 0.5, 1], yTicks: [0.1, 0.6, 1.1], xFmt: v => (v * 100).toFixed(0) + '%', yFmt: v => v.toFixed(1) }
 );
 
 document.getElementById('chart-entropy').innerHTML = plotCurve(
   g => 0.02 + (0.005 - 0.02) * Math.min(1, g / 50000),
-  { xMin: 0, xMax: 60000, yMin: 0, yMax: 0.02, xTicks: [0, 25000, 50000], yTicks: [0, 0.01, 0.02], color: '#6a9dff', xFmt: v => (v / 1000) + 'k', yFmt: v => v.toFixed(3) }
+  { xMin: 0, xMax: 60000, yMin: 0, yMax: 0.02, xTicks: [0, 25000, 50000], yTicks: [0, 0.01, 0.02], xFmt: v => (v / 1000) + 'k', yFmt: v => v.toFixed(3) }
 );
 
 document.getElementById('chart-batch').innerHTML = plotCurve(
   g => { const progress = Math.min(1, g / 50000); const doublings = Math.floor(progress * 6); return Math.min(4 * Math.pow(2, doublings), 16); },
-  { xMin: 0, xMax: 60000, yMin: 0, yMax: 16, xTicks: [0, 25000, 50000], yTicks: [4, 8, 16], color: '#c77dff', step: true, xFmt: v => (v / 1000) + 'k', yFmt: v => v }
+  { xMin: 0, xMax: 60000, yMin: 0, yMax: 16, xTicks: [0, 25000, 50000], yTicks: [4, 8, 16], step: true, xFmt: v => (v / 1000) + 'k', yFmt: v => v }
 );
 </script>
