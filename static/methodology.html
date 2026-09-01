@@ -811,7 +811,13 @@ function plotCurve(fn, opts) {
     <line x1="${padL}" y1="${sy(v).toFixed(1)}" x2="${w - padR}" y2="${sy(v).toFixed(1)}" stroke="#23262c" stroke-width="1"/>
     <text x="1" y="${(sy(v) + 3).toFixed(1)}" font-size="9" fill="#666">${opts.yFmt ? opts.yFmt(v) : v}</text>`).join('');
   const xTicks = opts.xTicks || [xMin, xMax];
-  const axisX = xTicks.map(v => `<text x="${sx(v).toFixed(1)}" y="${h - 5}" font-size="9" fill="#666" text-anchor="middle">${opts.xFmt ? opts.xFmt(v) : v}</text>`).join('');
+  const axisX = xTicks.map(v => {
+    // edge ticks anchor outward (start/end) instead of centering on the
+    // plot boundary, so a wide label like "100%" doesn't run past the
+    // viewBox and get clipped by the svg's own edge
+    const anchor = v === xMin ? 'start' : v === xMax ? 'end' : 'middle';
+    return `<text x="${sx(v).toFixed(1)}" y="${h - 5}" font-size="9" fill="#666" text-anchor="${anchor}">${opts.xFmt ? opts.xFmt(v) : v}</text>`;
+  }).join('');
 
   return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
     ${axisY}${axisX}
