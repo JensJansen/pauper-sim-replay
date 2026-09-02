@@ -27,15 +27,15 @@
   }
   .toc a:hover { color: #fff; border-color: #3a6df0; }
 
-  main { max-width: 980px; margin: 0 auto; padding: 30px 20px 90px; }
-  .lede { color: #b8c0d0; font-size: 15px; max-width: 760px; margin: 8px 0 30px; }
+  main { max-width: 1200px; margin: 0 auto; padding: 30px 20px 90px; }
+  .lede { color: #b8c0d0; font-size: 15px; margin: 8px 0 30px; }
   h1.title { font-size: 26px; margin: 4px 0 2px; color: #fff; }
 
   section { padding-top: 48px; margin-top: 30px; scroll-margin-top: 58px; border-top: 1px solid #21242a; }
   section:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
   section .kicker { color: #6a9dff; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; font-weight: 600; }
   section h2 { font-size: 21px; margin: 0 0 8px; color: #fff; }
-  section > p.intro { color: #b8c0d0; max-width: 760px; margin: 0 0 6px; }
+  section > p.intro { color: #b8c0d0; margin: 0 0 6px; }
   h3.sub { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: #9aa0aa; margin: 26px 0 10px; }
   .hint { color: #666; font-size: 12px; }
 
@@ -44,7 +44,7 @@
   .flow-row .row-label { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: .04em; width: 100%; margin-bottom: 6px; }
   .flow-box {
     background: #1b1e24; border: 1px solid #2a2d33; border-radius: 8px; padding: 10px 13px;
-    min-width: 120px; flex: 1 1 120px;
+    min-width: 100px; flex: 1 1 0; /* basis 0 + shared min-width -> every box in a row is the same width */
   }
   .flow-box .t { font-size: 12px; font-weight: 600; color: #fff; }
   .flow-box .d { font-size: 10.5px; color: #888; margin-top: 3px; line-height: 1.4; }
@@ -147,7 +147,7 @@
   pre.tree b { color: #e8eaf0; font-weight: 600; }
   pre.tree .c { color: #555; }
 
-  footer { max-width: 980px; margin: 40px auto 0; padding: 20px; color: #555; font-size: 11.5px; border-top: 1px solid #2a2d33; }
+  footer { max-width: 1200px; margin: 40px auto 0; padding: 20px; color: #555; font-size: 11.5px; border-top: 1px solid #2a2d33; }
 
   /* ---- glossary terms ---- */
   .term { border-bottom: 1px dotted #5a6472; cursor: help; }
@@ -192,9 +192,7 @@
   <p class="lede">
     A fixed pauper card pool, several decks, and one loop: play games against
     varied opponents, turn the outcome into a policy-gradient update, and
-    periodically check the result against fixed benchmarks. Everything below
-    is the real implementation, not a simplified model of it — expand any
-    <b>▸ drill-down</b> block for the exact mechanism.
+    periodically check the result against fixed benchmarks.
   </p>
 
   <h3 class="sub">Two loops, two timescales</h3>
@@ -412,7 +410,7 @@
       <p class="hint">variable length — one score per currently legal token, masked by what's actually pending</p>
     </div>
   </div>
-  <svg class="merge-connector" viewBox="0 0 700 26" style="max-width:700px">
+  <svg class="merge-connector" viewBox="0 0 700 26" preserveAspectRatio="none" style="max-width:none">
     <path class="curve" d="M 175 1 C 175 15, 350 13, 350 25"/>
     <path class="curve" d="M 525 1 C 525 15, 350 13, 350 25"/>
   </svg>
