@@ -307,6 +307,7 @@ function attachChartTooltips(root) {
 
 // ---- state ----
 let leagues = [];
+const DEFAULT_LEAGUE = 'main-league';  // what the page opens on (keep in sync with stats_checks.DEFAULT_LEAGUE)
 let currentLeague = null;
 let metrics = {};       // metrics.jsonl grouped by `kind`
 let checksIndex = [];   // every checks/*.json, see /api/stats/leagues/<league>/checks
@@ -706,16 +707,26 @@ async function init() {
     document.getElementById('main').innerHTML = '<p class="hint">No checkpoints/&lt;league&gt;/metrics.jsonl found yet — run training first.</p>';
     return;
   }
+  // Opens on main-league (the API lists it first), unless the URL asks for another
+  // existing league via ?league=<name>; falls back to the first league listed.
+  const requested = new URLSearchParams(location.search).get('league');
+  const startName = [requested, DEFAULT_LEAGUE].find(n => n && leagues.some(l => l.name === n)) || leagues[0].name;
   const sel = document.getElementById('league-select');
-  sel.innerHTML = leagues.map(l => `<option value="${escapeHtml(l.name)}">${escapeHtml(l.name)}</option>`).join('');
-  sel.addEventListener('change', () => loadLeague(sel.value));
+  sel.innerHTML = leagues.map(l => {
+    const games = l.cumulative_games_per_deck != null ? ` — ${l.cumulative_games_per_deck.toLocaleString()} games/deck` : '';
+    return `<option value="${escapeHtml(l.name)}"${l.name === startName ? ' selected' : ''}>${escapeHtml(l.name)}${games}</option>`;
+  }).join('');
+  sel.addEventListener('change', () => {
+    history.replaceState(null, '', `?league=${encodeURIComponent(sel.value)}`);  // shareable link to this league
+    loadLeague(sel.value);
+  });
   document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => {
     activeTab = b.dataset.tab;
     document.querySelectorAll('.tab-btn').forEach(x => x.classList.toggle('active', x === b));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === `panel-${activeTab}`));
     renderActiveTab();
   }));
-  await loadLeague(leagues[0].name);
+  await loadLeague(startName);
 }
 init();
 </script>

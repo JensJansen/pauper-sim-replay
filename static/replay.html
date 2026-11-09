@@ -559,12 +559,26 @@ async function loadRunsList() {
     const res = await fetch('/api/replay/runs');
     const runs = await res.json();
     if (!res.ok) throw new Error(runs.error || res.statusText);
+    // Grouped by league (the API already orders: main-league first, newest game count first);
+    // files outside any league folder go last under "Other". Training review replays show their
+    // game count, not a file time -- mtime is the checkout time on a deployed copy.
+    let lastGroup;
     listEl.innerHTML = runs.length
-      ? runs.map(r => `
+      ? runs.map(r => {
+          const group = r.league || 'Other';
+          const heading = group !== lastGroup
+            ? `<div class="hint" style="margin:10px 0 4px;font-weight:600">${escapeHtml(group)}</div>` : '';
+          lastGroup = group;
+          const isReview = r.league && r.cumulative_games != null;
+          const title = isReview ? `Round-robin review — ${r.cumulative_games.toLocaleString()} games/deck` : r.name;
+          const detail = isReview ? `${r.size_kb.toFixed(0)} KB`
+            : `${new Date(r.mtime * 1000).toLocaleString()} — ${r.size_kb.toFixed(0)} KB`;
+          return `${heading}
         <button class="game-item" data-run-name="${escapeHtml(r.name)}">
-          <div class="game-item-header">${escapeHtml(r.name)}</div>
-          <div class="game-item-detail">${new Date(r.mtime * 1000).toLocaleString()} — ${r.size_kb.toFixed(0)} KB</div>
-        </button>`).join('')
+          <div class="game-item-header">${escapeHtml(title)}</div>
+          <div class="game-item-detail">${detail}</div>
+        </button>`;
+        }).join('')
       : '<p class="hint">no server logs yet</p>';
   } catch (err) {
     listEl.innerHTML = `<p class="hint">failed to list: ${escapeHtml(err.message)}</p>`;

@@ -33,9 +33,11 @@ real league under `checkpoints/` (a benchmark harness's throwaway dir, a
 test's `tmp_path`). It never raises -- a webapp mirroring hiccup must never
 take training down with it.
 
-Nothing to run by hand going forward: train normally, then `git add` /
-`git commit` inside this submodule (and update the pinned commit in the
-parent repo) whenever you want `/stats` on `main` to reflect the latest run.
+Nothing to run by hand: after every validation cadence tick the parent repo's
+`src/webapp_sync.py` prunes each league's `checks/*.jsonl` to its newest 10
+cadence ticks (`metrics.jsonl` and `progress.json` are kept whole), commits this
+directory's league folders (not this README) plus `logs/replays/` to `main`,
+pushes, and bumps the parent's submodule pointer.
 
 ## One-time bootstrap (already done, kept here for reference)
 

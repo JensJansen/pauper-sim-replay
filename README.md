@@ -51,9 +51,14 @@ mulligan-net behavior, and round-robin/vs-history matchup data written by
 pauper_sim's own (gitignored) `checkpoints/<league>/`, kept current
 **automatically**: the parent repo's `src/webapp_mirror.py` mirrors every
 write here as it happens, whenever this submodule is checked out — see
-`logs/validation/README.md`. Commit inside this submodule (same as
-committing a new replay log) whenever you want `/stats` on `main` to reflect
-the latest run. Works identically on `app.py` and `app_public.py` since the
+`logs/validation/README.md`. During a
+training run the parent repo's `webapp_sync.py` also commits and pushes this data
+to `main` automatically after every validation tick (see "Automatic publishing"
+in its README) -- each league keeps its newest 10 sets of check results and
+review replays, plus its full `metrics.jsonl`/`progress.json`.
+
+The league selector at the top of `/stats` lists every league with data and opens
+on `main-league`; `/stats?league=<name>` links straight to another one. Works identically on `app.py` and `app_public.py` since the
 data travels with the repo.
 
 ## Tests
@@ -83,6 +88,12 @@ ever has filesystem access to files already committed to this repo.
 - `static/index.html` — the `/` landing page.
 - `static/replay.html` — the `/replay` frontend, no build step.
 - `static/stats.html` — the `/stats` frontend, no build step.
-- `logs/replays/` — committed + locally-added game-log JSON for `/replay`.
+- `replay_listing.py` — the shared `/api/replay/runs` listing (grouped by league,
+  ordered by game count -- file mtime is the checkout time on a deployed copy).
+- `stats_checks.py` — shared check-snapshot read path plus `DEFAULT_LEAGUE` /
+  league ordering for `/api/stats/leagues`.
+- `logs/replays/` — game-log JSON for `/replay`: training's per-tick review replays
+  live under `logs/replays/<league>/` (newest 10 per league, auto-committed);
+  hand-made files can sit alongside at the top level.
 - `logs/validation/` — committed copy of validation data; see its own
   README.md.

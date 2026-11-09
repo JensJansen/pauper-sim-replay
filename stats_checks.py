@@ -15,6 +15,13 @@ import re
 
 CHECK_FILE_RE = re.compile(r"(.+)_(\d+)games\.json$")  # virtual per-snapshot filename shape
 
+DEFAULT_LEAGUE = "main-league"  # what /stats opens on, and the first league in every listing
+
+
+def league_sort_key(name):
+    """Sort key putting DEFAULT_LEAGUE first, then everything else by name."""
+    return (name != DEFAULT_LEAGUE, name)
+
 
 def _parse_line(line):
     """The parsed record for one jsonl line, or None if the line is blank

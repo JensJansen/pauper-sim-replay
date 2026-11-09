@@ -41,7 +41,8 @@ from pathlib import Path
 from flask import Flask, jsonify, request, send_from_directory
 
 from replay_engine import list_games, reduce_game
-from stats_checks import CHECK_FILE_RE, iter_check_snapshots, read_consolidated_record
+from replay_listing import list_replay_runs
+from stats_checks import CHECK_FILE_RE, DEFAULT_LEAGUE, iter_check_snapshots, read_consolidated_record
 
 WEBAPP_LOGS_DIR = Path(__file__).resolve().parent / "logs"
 REPLAY_LOGS_DIR = WEBAPP_LOGS_DIR / "replays"
@@ -72,17 +73,11 @@ def methodology_page():
 
 @app.get("/api/replay/runs")
 def replay_runs():
-    """List every *.json file under logs/replays/ (any depth), newest first,
-    named by path relative to REPLAY_LOGS_DIR. Only stats each file, never
-    opens it. Scoped to replays/ specifically (not all of logs/) so a
+    """Every *.json under logs/replays/ (any depth) as {name, league, cumulative_games,
+    mtime, size_kb}, grouped by league (main-league first) and newest game count first --
+    see replay_listing.py. Scoped to replays/ specifically (not all of logs/) so a
     validation checks/*.json never shows up here as if it were a game log."""
-    runs = []
-    for event_path in REPLAY_LOGS_DIR.rglob("*.json"):
-        stat = event_path.stat()
-        name = event_path.relative_to(REPLAY_LOGS_DIR).as_posix()
-        runs.append({"name": name, "mtime": stat.st_mtime, "size_kb": stat.st_size / 1024})
-    runs.sort(key=lambda r: r["mtime"], reverse=True)
-    return jsonify(runs)
+    return jsonify(list_replay_runs(REPLAY_LOGS_DIR))
 
 
 @app.get("/api/replay/runs/<path:name>/raw")
@@ -132,7 +127,7 @@ def _league_dir(name):
 
 @app.get("/api/stats/leagues")
 def stats_leagues():
-    """Every logs/validation/<league>/ with a metrics.jsonl, newest-modified first."""
+    """Every logs/validation/<league>/ with a metrics.jsonl: DEFAULT_LEAGUE first, then newest-modified first."""
     leagues = []
     if VALIDATION_DIR.is_dir():
         for league_dir in VALIDATION_DIR.iterdir():
@@ -146,7 +141,8 @@ def stats_leagues():
                 "mtime": metrics_path.stat().st_mtime,
                 "cumulative_games_per_deck": progress.get("cumulative_games_per_deck"),
             })
-    leagues.sort(key=lambda l: l["mtime"], reverse=True)
+    # main-league first (what /stats defaults to), the rest most recently written first
+    leagues.sort(key=lambda l: (l["name"] != DEFAULT_LEAGUE, -l["mtime"]))
     return jsonify(leagues)
 
 
