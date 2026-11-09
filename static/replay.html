@@ -328,7 +328,11 @@
 </footer>
 
 <script>
-let fileContent = null;
+// Where the open file's games come from. {kind: 'server', urlPath} -> /api/replay/runs/<path>/games[/<i>]
+// (the server reads just what's asked from disk, via its game index); {kind: 'local', doc} -> a file
+// picked from disk, parsed once here. Neither ever sends the whole file to the server: a click sends at
+// most the one game (~200 KB) instead of the ~30 MB file it used to.
+let source = null;
 let currentSteps = null;
 let currentIndex = 0;
 
@@ -528,29 +532,72 @@ async function postJson(url, body) {
   return data;
 }
 
-async function loadContent(content, label) {
+async function getJson(url) {
+  const res = await fetch(url);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || res.statusText);
+  return data;
+}
+
+// A game's identity in a doc: its own game_index, else its position (replay_engine.list_games does the same).
+const gameId = (g, i) => (g.game_index != null ? g.game_index : i);
+
+// What /api/replay/games needs to label a file's games: no events, just their counts.
+function lightDoc(doc) {
+  return { meta: doc.meta, games: (doc.games || []).map((g, i) => (
+    { game_index: gameId(g, i), deck_a: g.deck_a, deck_b: g.deck_b, n_events: (g.events || []).length })) };
+}
+
+// One game of a local doc, in a doc of its own, for /api/replay/game.
+function oneGameDoc(doc, gameIndex) {
+  const i = (doc.games || []).findIndex((g, k) => gameId(g, k) === gameIndex);
+  if (i < 0) throw new Error(`game ${gameIndex} not found in this file`);
+  return { meta: doc.meta, games: [{ ...doc.games[i], game_index: gameIndex }] };
+}
+
+// A file picked from disk: parse once in the browser, send only the light list.
+async function loadLocal(text, label) {
   document.getElementById('file-hint').textContent = 'parsing…';
   try {
-    fileContent = content;
-    const data = await postJson('/api/replay/games', { content: fileContent });
-    allGames = data.games;
-    fileLoaded = true;
-    selectedGameIndex = null;
-    const search = document.getElementById('game-search');
-    search.disabled = allGames.length === 0;
-    search.value = '';
-    applyGameSearch('');
-    document.getElementById('file-hint').textContent = `${label}: ${allGames.length} game(s)`;
+    const doc = JSON.parse(text);
+    source = { kind: 'local', doc };
+    showGames(await postJson('/api/replay/games', { content: JSON.stringify(lightDoc(doc)) }), label);
   } catch (err) {
     document.getElementById('file-hint').textContent = '';
     alert('Failed to load log: ' + err.message);
   }
 }
 
+// A log listed under "Browse server logs": the server lists its games from its index.
+async function loadServerRun(name) {
+  document.getElementById('file-hint').textContent = 'loading…';
+  try {
+    // name may be a nested relative path -- encode each segment on its own so a literal "/" survives
+    // to match the backend's <path:name> route instead of becoming a stray %2F.
+    const urlPath = name.split('/').map(encodeURIComponent).join('/');
+    source = { kind: 'server', urlPath };
+    showGames(await getJson(`/api/replay/runs/${urlPath}/games`), name);
+  } catch (err) {
+    document.getElementById('file-hint').textContent = '';
+    alert('Failed to load log: ' + err.message);
+  }
+}
+
+function showGames(data, label) {
+  allGames = data.games;
+  fileLoaded = true;
+  selectedGameIndex = null;
+  const search = document.getElementById('game-search');
+  search.disabled = allGames.length === 0;
+  search.value = '';
+  applyGameSearch('');
+  document.getElementById('file-hint').textContent = `${label}: ${allGames.length} game(s)`;
+}
+
 async function onFile(ev) {
   const file = ev.target.files[0];
   if (!file) return;
-  await loadContent(await file.text(), file.name);
+  await loadLocal(await file.text(), file.name);
 }
 
 async function loadRunsList() {
@@ -586,16 +633,7 @@ async function loadRunsList() {
 }
 
 async function onSelectRun(name) {
-  // name may be a nested relative path ("myrun/event_log.json") -- encode
-  // each segment on its own so a literal "/" survives to match the
-  // backend's <path:name> route instead of becoming a stray %2F.
-  const urlPath = name.split('/').map(encodeURIComponent).join('/');
-  const res = await fetch(`/api/replay/runs/${urlPath}/raw`);
-  if (!res.ok) {
-    alert('Failed to load log: ' + res.statusText);
-    return;
-  }
-  await loadContent(await res.text(), name);
+  await loadServerRun(name);
 }
 
 function applyGameSearch(query) {
@@ -644,7 +682,9 @@ function renderGameList() {
 
 async function selectGame(gameIndex) {
   try {
-    const data = await postJson('/api/replay/game', { content: fileContent, game_index: gameIndex });
+    const data = source.kind === 'server'
+      ? await getJson(`/api/replay/runs/${source.urlPath}/games/${gameIndex}`)
+      : await postJson('/api/replay/game', { content: JSON.stringify(oneGameDoc(source.doc, gameIndex)), game_index: gameIndex });
     currentSteps = data.steps;
     selectedGameIndex = gameIndex;
     renderGameList();

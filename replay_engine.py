@@ -641,7 +641,9 @@ def list_games(doc):
     pairing_occurrence = {}
     for i, g in enumerate(doc.get("games") or []):
         idx = g.get("game_index", i)
-        n = len(g.get("events") or [])
+        # n_events: a light doc (replay_index.list_doc / the viewer's local-file path) carries
+        # the count instead of the events themselves
+        n = g["n_events"] if "n_events" in g else len(g.get("events") or [])
         deck_a, deck_b = g.get("deck_a"), g.get("deck_b")
         if deck_a and deck_b:
             pairing_occurrence[(deck_a, deck_b)] = pairing_occurrence.get((deck_a, deck_b), 0) + 1

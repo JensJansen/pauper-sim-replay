@@ -14,6 +14,8 @@ Only stats each file, never opens it.
 """
 import re
 
+import replay_index
+from replay_engine import list_games, reduce_game
 from stats_checks import league_sort_key
 
 _GAMES_RE = re.compile(r"(\d+)games\.json$")
@@ -35,3 +37,27 @@ def list_replay_runs(replay_logs_dir):
         return (0, league_sort_key(run["league"]), 0, -(run["cumulative_games"] if run["cumulative_games"] is not None else -1))
     runs.sort(key=key)
     return runs
+
+
+def resolve_run(replay_logs_dir, name):
+    """The replay file for a `name` as listed by list_replay_runs, or None if it
+    escapes replay_logs_dir, isn't a file, or isn't a .json."""
+    path = (replay_logs_dir / name).resolve()
+    if replay_logs_dir.resolve() not in path.parents or not path.is_file() or path.suffix != ".json":
+        return None
+    return path
+
+
+def run_games(path):
+    """list_games for a replay on disk, from its index alone -- reads no game data."""
+    return list_games(replay_index.list_doc(replay_index.get_index(path)))
+
+
+def run_game(path, game_index):
+    """The reduced steps for one game of a replay on disk, reading only that
+    game's bytes. ValueError if the game isn't in the replay."""
+    index = replay_index.get_index(path)
+    entry = next((g for g in index["games"] if g["game_index"] == game_index), None)
+    if entry is None:
+        raise ValueError(f"game index {game_index} not found in this log")
+    return reduce_game({"games": [replay_index.read_game(path, entry)]}, game_index)

@@ -26,6 +26,11 @@ Opens on a landing page linking to both tools below.
 
 ### Game Replay (`/replay`)
 
+How a log reaches the page: **Browse server logs** lists games from the server's
+index and fetches one game at a time; **Open new file** parses the picked file in
+the browser and sends only the light game list, then the single clicked game. The
+whole file is never uploaded or downloaded.
+
 Two ways to load a game log:
 - **Open new file** — pick any `--log`-shaped event-log JSON file from disk.
   This isn't limited to files under this repo: `validation/round_robin_primary.py`
@@ -88,6 +93,16 @@ ever has filesystem access to files already committed to this repo.
 - `static/index.html` — the `/` landing page.
 - `static/replay.html` — the `/replay` frontend, no build step.
 - `static/stats.html` — the `/stats` frontend, no build step.
+- `replay_index.py` — the per-game byte-offset index (`<replay>.json.gameindex`
+  sidecar). `GET /api/replay/runs/<name>/games` and `.../games/<index>` use it to
+  list a replay's games and reduce ONE game by reading only that game's bytes
+  (~200 KB, ~6 MB of memory, tens of ms) instead of parsing the whole ~30 MB file
+  (~400 ms, ~145 MB) per click. Training-side `webapp_sync` builds the sidecars
+  before committing; a replay without a valid one (hand-made, or changed size) is
+  indexed lazily on first use. Stdlib only; also a script (`python replay_index.py
+  <file|dir>`).
+- `compress.py` — gzips JSON API responses (stdlib `gzip`, no dependency): a reduced
+  game is ~2 MB and ~50 KB gzipped.
 - `replay_listing.py` — the shared `/api/replay/runs` listing (grouped by league,
   ordered by game count -- file mtime is the checkout time on a deployed copy).
 - `stats_checks.py` — shared check-snapshot read path plus `DEFAULT_LEAGUE` /

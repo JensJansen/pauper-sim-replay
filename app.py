@@ -41,7 +41,8 @@ from pathlib import Path
 from flask import Flask, jsonify, request, send_from_directory
 
 from replay_engine import list_games, reduce_game
-from replay_listing import list_replay_runs
+from compress import init_gzip
+from replay_listing import list_replay_runs, resolve_run, run_game, run_games
 from stats_checks import CHECK_FILE_RE, DEFAULT_LEAGUE, iter_check_snapshots, read_consolidated_record
 
 WEBAPP_LOGS_DIR = Path(__file__).resolve().parent / "logs"
@@ -49,6 +50,7 @@ REPLAY_LOGS_DIR = WEBAPP_LOGS_DIR / "replays"
 VALIDATION_DIR = WEBAPP_LOGS_DIR / "validation"
 
 app = Flask(__name__, static_folder="static", static_url_path="")
+init_gzip(app)  # gzip JSON responses (stdlib) -- see compress.py
 
 
 @app.get("/")
@@ -88,6 +90,30 @@ def replay_run_raw(name):
     if REPLAY_LOGS_DIR.resolve() not in path.parents or not path.is_file():
         return jsonify({"error": "not found"}), 404
     return send_from_directory(path.parent, path.name)
+
+
+@app.get("/api/replay/runs/<path:name>/games")
+def replay_run_games(name):
+    """Game list for a server-side replay, from its index -- no file download/upload."""
+    path = resolve_run(REPLAY_LOGS_DIR, name)
+    if path is None:
+        return jsonify({"error": "not found"}), 404
+    try:
+        return jsonify(run_games(path))
+    except (ValueError, UnicodeDecodeError) as exc:
+        return jsonify({"error": f"couldn't parse log file: {exc}"}), 400
+
+
+@app.get("/api/replay/runs/<path:name>/games/<int:game_index>")
+def replay_run_game(name, game_index):
+    """One reduced game of a server-side replay, reading only that game's bytes."""
+    path = resolve_run(REPLAY_LOGS_DIR, name)
+    if path is None:
+        return jsonify({"error": "not found"}), 404
+    try:
+        return jsonify(run_game(path, game_index))
+    except (ValueError, UnicodeDecodeError) as exc:
+        return jsonify({"error": str(exc)}), 400
 
 
 @app.post("/api/replay/games")
