@@ -16,7 +16,9 @@
   }
   header h1 { margin: 0; font-size: 18px; }
   header p { margin: 0; color: #888; font-size: 12px; }
-  header nav { margin-left: auto; display: flex; gap: 12px; }
+  /* z-index 56: above the drawer backdrop (55) so the mode links stay clickable while the drawer is open
+     (it is forced open until a game is loaded), below the drawer (60). */
+  header nav { margin-left: auto; display: flex; gap: 12px; position: relative; z-index: 56; }
   header nav a { color: #6a9dff; text-decoration: none; font-size: 12px; }
   header nav a:hover { text-decoration: underline; }
   main { padding: 16px 20px 110px; }
