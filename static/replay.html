@@ -216,6 +216,10 @@
 <button id="btn-menu" title="Menu">☰</button>
 <div id="drawer-backdrop"></div>
 <nav id="drawer">
+  <!-- Mode links also live here: on a narrow window the drawer (forced open until a game loads) covers the header nav. -->
+  <a class="drawer-link" href="/">🏠 Home</a>
+  <a class="drawer-link" href="/stats">📊 Validation Stats</a>
+  <a class="drawer-link" href="/methodology">📖 Methodology</a>
   <button class="drawer-link" id="btn-open-file">📂 Open new file</button>
   <input type="file" id="file-input" accept=".json" hidden>
   <p class="hint" id="file-hint"></p>
