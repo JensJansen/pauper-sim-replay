@@ -139,6 +139,7 @@
   <button class="tab-btn" data-tab="mulligan">Mulligan</button>
   <button class="tab-btn" data-tab="roundrobin">Round Robin</button>
   <button class="tab-btn" data-tab="manaburn">Mana Burn</button>
+  <button class="tab-btn" data-tab="opponents">Opponents</button>
 </div>
 
 <main id="main">
@@ -149,6 +150,7 @@
   <div class="tab-panel" id="panel-mulligan"></div>
   <div class="tab-panel" id="panel-roundrobin"></div>
   <div class="tab-panel" id="panel-manaburn"></div>
+  <div class="tab-panel" id="panel-opponents"></div>
 </main>
 
 <div id="chart-tip"></div>
@@ -323,6 +325,7 @@ function attachChartTooltips(root) {
 let leagues = [];
 let currentLeague = null;
 let metrics = {};       // metrics.jsonl grouped by `kind`
+let opponents = null;   // PFSP tallies {training_deck: {"deck:x"|"snapshot:x:id": [wins, games]}}, or null
 let manifest = null;    // the run manifest (config, model architecture, code state, sessions), or null
 let checksIndex = [];   // every checks/*.json, see /api/stats/leagues/<league>/checks
 const detailCache = new Map();
@@ -813,7 +816,45 @@ function renderProgress() {
   if (sel) sel.addEventListener('change', () => { progressAnchor = +sel.value; renderProgress(); });
 }
 
+// ---- Opponents (PFSP tallies: what each deck's training games were played against) ----
+let oppTrain = null, oppVs = null;  // selected training deck / opponent deck for the snapshot chart
+function renderOpponents() {
+  const el = document.getElementById('panel-opponents');
+  if (!opponents) { el.innerHTML = '<p class="hint">No opponent_stats.json for this league yet (written at each snapshot).</p>'; return; }
+  const trainDecks = Object.keys(opponents).sort();
+  const oppDecks = [...new Set(trainDecks.flatMap(t => Object.keys(opponents[t]).map(k => k.split(':')[1])))].sort();
+  const tally = (t, key) => opponents[t][key] || [0, 0];
+  // Training games per deck, summed over live-vs-deck and live-vs-snapshot, so a cell's share is of ALL its games.
+  const totals = Object.fromEntries(trainDecks.map(t => [t, Object.values(opponents[t]).reduce((a, [, g]) => a + g, 0)]));
+  const rows = trainDecks.map(t => `<tr><th>${wrapDeckName(t)}</th>${oppDecks.map(o => {
+    const [w, g] = tally(t, 'deck:' + o);
+    const snaps = Object.entries(opponents[t]).filter(([k]) => k.startsWith('snapshot:' + o + ':')).reduce((a, [, v]) => [a[0] + v[0], a[1] + v[1]], [0, 0]);
+    if (!g && !snaps[1]) return '<td class="matrix-empty">·</td>';
+    const share = v => (100 * v / totals[t]).toFixed(1) + '%';
+    const title = `${t} vs ${o} live: ${w}/${g} (${share(g)} of its games) · vs ${o} snapshots: ${snaps[0]}/${snaps[1]} (${share(snaps[1])})`;
+    return `<td class="matrix-cell" style="background:${g ? scoreColor(w / g) : 'transparent'}" title="${escapeHtml(title)}">${g ? (100 * w / g).toFixed(0) + '%' : '—'}<br><span class="hint">${share(g + snaps[1])}</span></td>`;
+  }).join('')}<td>${totals[t].toLocaleString()}</td></tr>`).join('');
+  oppTrain = trainDecks.includes(oppTrain) ? oppTrain : trainDecks[0];
+  oppVs = oppDecks.includes(oppVs) ? oppVs : oppDecks[0];
+  const snaps = Object.entries(opponents[oppTrain])
+    .filter(([k]) => k.startsWith('snapshot:' + oppVs + ':'))
+    .map(([k, [w, g]]) => ({ id: +k.split(':')[2], w, g })).sort((a, b) => a.id - b.id);
+  const sel = (id, vals, cur) => `<select id="${id}">${vals.map(v => `<option${v === cur ? ' selected' : ''}>${escapeHtml(v)}</option>`).join('')}</select>`;
+  el.innerHTML = `
+    <h2>Training games vs each opponent deck</h2>
+    <p class="hint">Row = training deck, column = opponent deck. Colour and top number: the row deck's win % against the opponent's <b>live</b> agent. Bottom number: the share of the row deck's training games played against that deck (live + its snapshots). Hover for counts. Last column: total training games. Cumulative over the whole run, not a trend.</p>
+    <table class="matrix"><thead><tr><th>trains ↓ / vs →</th>${oppDecks.map(o => `<th>${wrapDeckName(o)}</th>`).join('')}<th>games</th></tr></thead><tbody>${rows}</tbody></table>
+    <h2>Win rate vs opponent snapshots (older → newer)</h2>
+    <div>${sel('opp-train', trainDecks, oppTrain)} vs snapshots of ${sel('opp-vs', oppDecks, oppVs)}</div>
+    ${snaps.length ? winRateBarList(snaps.map(s => ({ label: 'snapshot ' + s.id, rate: s.g ? s.w / s.g : 0, sub: `${s.w}/${s.g}` })))
+                   : '<p class="hint">no snapshot games for this pair</p>'}
+    <p class="hint">Snapshot ids count up with age. Low bars = snapshots this deck loses to, which PFSP samples more.</p>`;
+  document.getElementById('opp-train').onchange = e => { oppTrain = e.target.value; renderOpponents(); };
+  document.getElementById('opp-vs').onchange = e => { oppVs = e.target.value; renderOpponents(); };
+}
+
 // ---- Run manifest (shown on the Overview) ----
+
 function runSection() {
   if (!manifest) return '<h2>Run</h2><p class="hint">No run manifest for this league (it predates manifests).</p>';
   const m = manifest, sessions = m.sessions || [], last = sessions[sessions.length - 1] || {};
@@ -834,7 +875,7 @@ function runSection() {
 }
 
 // ---- tabs & league switching ----
-const TAB_RENDERERS = { overview: renderOverview, progress: renderProgress, winrates: renderWinRates, ppo: renderPpo, mulligan: renderMulligan, roundrobin: renderRoundRobin, manaburn: renderManaBurn };
+const TAB_RENDERERS = { overview: renderOverview, progress: renderProgress, winrates: renderWinRates, ppo: renderPpo, mulligan: renderMulligan, roundrobin: renderRoundRobin, manaburn: renderManaBurn, opponents: renderOpponents };
 let activeTab = 'overview';
 function renderActiveTab() { TAB_RENDERERS[activeTab](); }
 
@@ -843,10 +884,11 @@ async function loadLeague(name) {
   detailCache.clear();
   document.getElementById('main').classList.add('loading');
   try {
-    [metrics, checksIndex, manifest] = await Promise.all([
+    [metrics, checksIndex, manifest, opponents] = await Promise.all([
       fetchJson(`/api/stats/leagues/${encodeURIComponent(name)}/metrics`),
       fetchJson(`/api/stats/leagues/${encodeURIComponent(name)}/checks`),
       fetchJson(`/api/stats/leagues/${encodeURIComponent(name)}/manifest`).catch(() => null),
+      fetchJson(`/api/stats/leagues/${encodeURIComponent(name)}/opponents`).catch(() => null),
     ]);
     renderActiveTab();
   } finally {

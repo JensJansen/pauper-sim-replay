@@ -143,6 +143,17 @@ def stats_manifest(league):
     return jsonify(json.loads(path.read_text()) if path.is_file() else None)
 
 
+@app.get("/api/stats/leagues/<league>/opponents")
+def stats_opponents(league):
+    """PFSP tallies, {training_deck: {"deck:<name>" | "snapshot:<name>:<id>": [wins, games]}} (rl/league/league.py
+    in the parent repo; cumulative over the whole run), or null for a league with none."""
+    league_dir = _league_dir(league)
+    if league_dir is None:
+        return jsonify({"error": "not found"}), 404
+    path = league_dir / "opponent_stats.json"
+    return jsonify(json.loads(path.read_text()) if path.is_file() else None)
+
+
 @app.get("/api/stats/leagues/<league>/metrics")
 def stats_metrics(league):
     league_dir = _league_dir(league)

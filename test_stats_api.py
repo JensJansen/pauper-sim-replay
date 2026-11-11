@@ -133,3 +133,10 @@ def test_check_detail_skips_a_malformed_trailing_line(tmp_path, monkeypatch, app
 
         checks = c.get("/api/stats/leagues/truncated-league/checks").get_json()
         assert [x["cumulative_games"] for x in checks] == [50]
+
+
+def test_opponents_is_null_until_a_run_writes_it_then_served_whole(client, tmp_path):
+    assert client.get("/api/stats/leagues/test-league/opponents").get_json() is None
+    (tmp_path / "test-league" / "opponent_stats.json").write_text(json.dumps({"elves": {"deck:elves": [1, 2]}}))
+    assert client.get("/api/stats/leagues/test-league/opponents").get_json() == {"elves": {"deck:elves": [1, 2]}}
+    assert client.get("/api/stats/leagues/does-not-exist/opponents").status_code == 404

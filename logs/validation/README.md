@@ -7,7 +7,8 @@ the pauper_sim root). Per league: `metrics.jsonl`, `progress.json`,
 `checks/*.jsonl`, and `<deck>/checks/*.jsonl` -- never the `live.pt` /
 `archive/*.pt` / `mulligan.pt` model weights, which are multi-GB and not
 needed by the stats page. Per league there is also `manifest.json` (the run's config, model architecture,
-code state and sessions; served at `/api/stats/leagues/<league>/manifest`), kept whole like `progress.json`.
+code state and sessions; served at `/api/stats/leagues/<league>/manifest`), kept whole like `progress.json`. Likewise `opponent_stats.json` (every training deck's PFSP win/games tally against each
+opponent deck and snapshot, cumulative over the run; served at `/api/stats/leagues/<league>/opponents`, shown on the Opponents tab).
 
 Note the `checks/` shape here is NOT a copy of `checkpoints/<league>/checks/`'s
 own layout: the parent repo's canonical copy still writes one
