@@ -19,6 +19,22 @@
         "--config",
         "../training_configs/small_lrdecay.json"
       ]
+    },
+    {
+      "started_at": "2026-11-11T17:46:07-0500",
+      "finished_at": null,
+      "games_start": 11520,
+      "games_end": null,
+      "code": {
+        "commit": "9b5125d560287a6208a67ba723ff750d144b8d04",
+        "branch": "main",
+        "dirty": true
+      },
+      "argv": [
+        "run_training_pipeline.py",
+        "--config",
+        "../training_configs/small_lrdecay.json"
+      ]
     }
   ],
   "config": {
