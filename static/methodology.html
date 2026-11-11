@@ -237,7 +237,7 @@
   <div class="league-diagram">
     <div class="pop-box">
       <h4>Primary League</h4>
-      <div class="pop-sub">e.g. <code style="background:#14161a;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">main-league</code> — the actual thing being trained</div>
+      <div class="pop-sub">e.g. <code style="background:#14161a;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">small_league</code> — the actual thing being trained</div>
       <div class="sub-item"><b>Live nets</b> — one <code style="background:#0e1013;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">live.pt</code> per deck, updated every PPO step</div>
       <div class="sub-item"><b>Archive</b> — rolling window of 32 frozen historical snapshots per deck (PFSP opponent pool)</div>
       <div class="sub-item"><b><span class="term" tabindex="0" data-term="pfsp">PFSP</span> sampler</b> — picks which deck, then live-vs-snapshot, weighted toward opponents this deck is currently losing to</div>
@@ -278,9 +278,11 @@
       Each deck keeps at most 32 snapshots as PFSP opponents. When a new
       snapshot would overflow that window, the oldest one is moved (never
       deleted) into <code>&lt;deck&gt;/archive/</code>. Archived snapshots
-      stay playable — the <code>vs_history</code> validation check pits a
-      deck's current live net against its oldest still-active snapshot and,
-      once one exists, its oldest archived one too.
+      stay playable — every snapshot a deck ever took is kept (one per
+      <code>snapshot_every_games</code>), which is what lets the history checks
+      (<a href="#history-checks" style="color:#6a9dff">below</a>) play the
+      current net against its own past selves at any age, even long after
+      they left the active window.
     </div>
   </details>
 </section>
@@ -618,7 +620,7 @@
   <div class="kicker">Stage 7</div>
   <h2>Validation &amp; Evaluation</h2>
   <p class="intro">
-    Five checks run after each training chunk (roughly every 10% of a
+    Seven checks run after each training chunk (roughly every 10% of a
     league's <code style="background:#1b1e24;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">total_games</code>,
     50 games per pairing by default). A check that raises is logged and
     skipped — a bad validation run never aborts training.
@@ -644,9 +646,19 @@
           <td>n/a — post-hoc + synthetic hands</td>
         </tr>
         <tr>
-          <td><b>vs_history</b></td>
-          <td>Live net vs. its own oldest still-active snapshot, and oldest archived one — the one check the opponent literally cannot change underneath it</td>
-          <td>this deck's own frozen past self</td>
+          <td><b>strength_history</b></td>
+          <td>Current agents vs. their own snapshots <em>and</em> every deck's snapshots, at a ladder of ages (1k … 500k games/deck) — the steady-improvement curve</td>
+          <td>frozen past selves; the opponent cannot change underneath it</td>
+        </tr>
+        <tr>
+          <td><b>policy_movement</b></td>
+          <td>How far the current policy has moved from its past policies, on a fixed suite of mid-game decisions (Jensen–Shannon divergence, top-1 agreement, entropy)</td>
+          <td>n/a — a fixed probe suite, no games</td>
+        </tr>
+        <tr>
+          <td><b>progress_indicator</b></td>
+          <td>The one-line answer to "is the league still learning?" — <b>IMPROVING / CHURNING / STUCK / FLAT / WARMUP</b>, built from the two checks above. Report only.</td>
+          <td>n/a — summarises strength_history + policy_movement</td>
         </tr>
         <tr>
           <td><b>round_robin_review</b></td>
@@ -657,6 +669,44 @@
     </table>
   </div>
 
+  <h3 class="sub" id="history-checks">History checks — is the league still learning?</h3>
+  <p class="intro">
+    The three history checks exist because a league's own win rates cannot answer that:
+    everyone improves together, so the primary-vs-primary rate sits near 50% whatever
+    happens. They measure against <em>frozen</em> agents instead, read off the archived
+    snapshots (one per <code>snapshot_every_games</code> games/deck, so a finished run can be
+    evaluated at any earlier age).
+  </p>
+  <div class="card">
+    <table class="data-table">
+      <thead><tr><th>Measurement</th><th>How to read it</th></tr></thead>
+      <tbody>
+        <tr><td><b>Current vs own past selves</b><br><span class="hint">strength_history · own</span></td>
+          <td>Score against the deck's own snapshot at each ladder age. Steady improvement means older selves are beaten more and more clearly; a plateau is the same row reading the same at later ticks.
+          Against recent selves it sinks toward 50%; against very old ones it saturates near 100% and says little.</td></tr>
+        <tr><td><b>Current vs every deck's history</b><br><span class="hint">strength_history · field</span></td>
+          <td>All decks' current agents (pooled) against deck B at each age. It falls as B improves and flattens where B stopped improving — a fixed yardstick on each deck's learning, and a check that progress generalises beyond a deck's own history.</td></tr>
+        <tr><td><b>Policy movement</b><br><span class="hint">policy_movement</span></td>
+          <td>A fixed suite of mid-game decisions (turn ≥ 5, ≥ 6 permanents, ≥ 3 legal actions) recorded from reference games; each checkpoint is replayed over the same games (recorded actions fed back in, so its GRU sees the same history) and its action distribution compared with the current policy's.
+          Two scale references are printed: snapshots one interval apart (a normal step) and a random net (unrelated policies).
+          <b>Movement is not progress</b> — a flat strength curve with a moving policy is churning; with a frozen one, stuck.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="intro">
+    <b>The indicator's rule.</b> For each deck the reference is its own snapshot at the largest ladder age that is no newer than 0.6× its current age
+    and at least 10k games old (the reference cell plays 4× the usual games). The pooled score of the current agents against their reference selves gets a 95% interval:
+    <b>IMPROVING</b> if the interval is above 50%; otherwise <b>CHURNING</b> if the policy has moved ≥ 25% of the way to an unrelated policy, <b>STUCK</b> if it has not,
+    <b>FLAT</b> if there is no probe, and <b>WARMUP</b> before any reference exists. The thresholds are <em>provisional</em>: replayed over the old 11-deck run
+    the label flickered between IMPROVING and CHURNING once the true gain per interval fell below what a few hundred games can resolve, so read the printed numbers, not just the label.
+    It never stops or changes training.
+  </p>
+  <div class="callout info">
+    <span class="callout-title">Retired: vs_history</span>
+    An earlier check pitted each deck against only two past selves (its oldest active and oldest archived snapshot). The first saturates by ~7k games
+    and the second moves with the window, so the ladder above replaced it; old <code>vs_history</code> lines remain readable in archived runs.
+  </div>
+
   <p class="intro">Win rate is consistently <code style="background:#1b1e24;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">wins / games</code> per deck or pairing side, from the engine's own <code style="background:#1b1e24;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">game_over</code> event; a no-winner horizon timeout is excluded from that denominator.</p>
 
   <div class="callout info">
@@ -664,8 +714,10 @@
     Every check's output and every <code>metrics.jsonl</code> line gets
     mirrored into this webapp as training runs, which is what powers the
     <a href="/stats" style="color:#6a9dff">Validation Stats</a> page — the
-    metric names there (entropy, approx_kl, win_rate, keep_rate, …) are
-    exactly the ones described on this page.
+    metric names there (entropy, approx_kl, win_rate, keep_rate, score, js, …) are
+    exactly the ones described on this page. The run's <code>manifest.json</code>
+    (resolved config, network architecture, git commit, sessions) is mirrored too and shown
+    on the Overview tab, and the Progress tab charts the history checks.
   </div>
 </section>
 
@@ -691,12 +743,14 @@
         <tr><td><b>games_per_iteration</b></td><td>games collected per deck before each PPO update</td></tr>
         <tr><td><b>snapshot_every_games</b></td><td>cumulative-game cadence for freezing a new league snapshot</td></tr>
         <tr><td><b>stratify_0land_pct</b></td><td>chance of forcing a 0-land opening hand when the opponent is a frozen snapshot</td></tr>
+        <tr><td><b>overlap_collect</b></td><td>pipeline collection and the PPO update: workers collect the next deck's games while the GPU updates the current one (one update stale for decks seen as opponents). Measured ~24% faster with no detectable cost to learning; on in <code>small_league.json</code></td></tr>
+        <tr><td><b>probe_states_dir / history_ladder / history_checks</b></td><td>the fixed probe suite for policy_movement, the ladder of anchor ages for strength_history, and an off switch for all three history checks</td></tr>
         <tr><td><b>ppo</b></td><td>partial override of the PPO defaults table above — unknown keys are a hard error, not silently ignored</td></tr>
       </tbody>
     </table>
   </div>
 
-  <p class="hint">The production league (<code style="color:#9dc0ff">main_league.json</code>) runs 11 decks to 100,000 games/deck, with the training-league twin enabled and <code style="color:#9dc0ff">checkpoint_opponent_rate</code> raised to 0.3.</p>
+  <p class="hint">The current focus is the 4-deck <code style="color:#9dc0ff">small_league.json</code> (to 600,000 games/deck, training-league twin and <code style="color:#9dc0ff">overlap_collect</code> enabled, history checks on). <code style="color:#9dc0ff">main_league.json</code> is the 11-deck league the first long run used (100,000 games/deck).</p>
 
   <h3 class="sub">Checkpoint layout</h3>
   <div class="card">
@@ -705,14 +759,15 @@
 └── &lt;league&gt;/
     ├── <b>session.txt</b>           <span class="c"># last session number</span>
     ├── <b>progress.json</b>         <span class="c"># cumulative_games_per_deck, last_batch_size</span>
+    ├── <b>manifest.json</b>         <span class="c"># what this run IS: config, network architecture, git commit, sessions (+ history of changes)</span>
     ├── <b>metrics.jsonl</b>         <span class="c"># one line per PPO update / mulligan flush / validation result</span>
     ├── &lt;deck&gt;/
     │   ├── <b>live.pt</b>           <span class="c"># current net + optimizer state</span>
     │   ├── <b>mulligan.pt</b>       <span class="c"># current mulligan net + its own optimizer</span>
-    │   ├── <b>snapshot_&lt;id&gt;.pt</b>  <span class="c"># up to 32 frozen historical selves</span>
+    │   ├── <b>snapshot_&lt;id&gt;.pt</b>  <span class="c"># the newest 32 frozen historical selves (the PFSP window)</span>
     │   ├── <b>opponent_stats.json</b> <span class="c"># PFSP win/loss tallies per opponent key</span>
     │   └── archive/
-    │       └── <b>snapshot_&lt;id&gt;.pt</b> <span class="c"># evicted snapshots, moved not deleted</span>
+    │       └── <b>snapshot_&lt;id&gt;.pt</b> <span class="c"># every older snapshot, moved not deleted: the full history</span>
     └── checks/
         └── <b>&lt;check&gt;_&lt;N&gt;games.json</b> <span class="c"># full validation output for one cadence point</span></pre>
   </div>
@@ -720,7 +775,7 @@
   <p class="hint">Writes go through a temp file + atomic replace, with retry/backoff specifically to survive OneDrive's transient file-locking on Windows.</p>
 
   <div class="callout warn">
-    <span class="callout-title">Known open issue, as of 2026-08-17</span>
+    <span class="callout-title">Historical note from the 11-deck main league (2026-08-17)</span>
     <code style="background:#0e1013;border:1px solid #262a31;border-radius:3px;padding:1px 5px;color:#9dc0ff">mono_red_rally</code>
     wins 85.5% of its non-mirror games in the main league while its own
     mirror match sits at 49.6% — diluting the training gradient for the
@@ -732,7 +787,7 @@
 </main>
 
 <footer>
-  Describes the production training path (main-league, deploy_reward_v6) as implemented in rl/ and src/validation/. Numbers reflect training_configs/main_league.json and the current source — not a simplified approximation of it.
+  Describes the training path (deploy_reward_v6) as implemented in rl/, src/evaluation/ and src/validation/. Numbers reflect the configs in training_configs/ and the current source — not a simplified approximation of it.
 </footer>
 
 <script>

@@ -13,7 +13,7 @@ from flask import Flask, jsonify, request, send_from_directory
 from replay_engine import list_games, reduce_game
 from compress import init_gzip
 from replay_listing import list_replay_runs, resolve_run, run_game, run_games
-from stats_checks import CHECK_FILE_RE, DEFAULT_LEAGUE, iter_check_snapshots, read_consolidated_record
+from stats_checks import CHECK_FILE_RE, iter_check_snapshots, read_consolidated_record
 
 WEBAPP_LOGS_DIR = Path(__file__).resolve().parent / "logs"
 REPLAY_LOGS_DIR = WEBAPP_LOGS_DIR / "replays"
@@ -46,7 +46,7 @@ def methodology_page():
 @app.get("/api/replay/runs")
 def replay_runs():
     """Every *.json under logs/replays/ (any depth) as {name, league, cumulative_games,
-    mtime, size_kb}, grouped by league (main-league first) and newest game count first --
+    mtime, size_kb}, grouped by league (by name) and newest game count first --
     see replay_listing.py. Scoped to replays/ specifically (not all of logs/) so a
     validation checks/*.json never shows up here as if it were a game log."""
     return jsonify(list_replay_runs(REPLAY_LOGS_DIR))
@@ -127,9 +127,20 @@ def stats_leagues():
                 "mtime": metrics_path.stat().st_mtime,
                 "cumulative_games_per_deck": progress.get("cumulative_games_per_deck"),
             })
-    # main-league first (what /stats defaults to), the rest most recently written first
-    leagues.sort(key=lambda l: (l["name"] != DEFAULT_LEAGUE, -l["mtime"]))
+    # No league is special: most recently written first (what /stats opens on), ties by name
+    leagues.sort(key=lambda l: (-l["mtime"], l["name"]))
     return jsonify(leagues)
+
+
+@app.get("/api/stats/leagues/<league>/manifest")
+def stats_manifest(league):
+    """The run manifest (config, model architecture, code state, sessions -- rl/league/manifest.py in the parent
+    repo), or null for a league with none (runs from before manifests existed)."""
+    league_dir = _league_dir(league)
+    if league_dir is None:
+        return jsonify({"error": "not found"}), 404
+    path = league_dir / "manifest.json"
+    return jsonify(json.loads(path.read_text()) if path.is_file() else None)
 
 
 @app.get("/api/stats/leagues/<league>/metrics")

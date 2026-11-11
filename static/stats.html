@@ -101,6 +101,18 @@
   .toggle-switch input:checked + .toggle-track { background: #22344f; border-color: #3a6df0; }
   .toggle-switch input:checked + .toggle-track::after { left: 15px; background: #6a9dff; }
 
+  .label-chip { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; border: 1px solid #3a3f47; }
+  .label-IMPROVING { background: #1d3a28; border-color: #2f7a48; color: #7fe39b; }
+  .label-CHURNING { background: #3b3217; border-color: #8a6d1a; color: #fab219; }
+  .label-STUCK { background: #3b1d1d; border-color: #8a2f2f; color: #e08080; }
+  .label-FLAT, .label-WARMUP { background: #262a31; color: #9aa0aa; }
+  .indicator { background: #1b1e24; border: 1px solid #2a2d33; border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; }
+  .indicator .big { font-size: 18px; font-weight: 700; margin-right: 12px; }
+  .timeline { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; font-size: 12px; margin: 0 0 10px; }
+  .kv dt { color: #888; }
+  .kv dd { margin: 0; color: #d8dbe0; overflow-wrap: anywhere; }
+
   #chart-tip {
     display: none; position: fixed; z-index: 100; pointer-events: none;
     background: #1b1e24; border: 1px solid #3a3f47; border-radius: 5px;
@@ -121,6 +133,7 @@
 
 <div class="tabs">
   <button class="tab-btn active" data-tab="overview">Overview</button>
+  <button class="tab-btn" data-tab="progress">Progress</button>
   <button class="tab-btn" data-tab="winrates">Win Rates</button>
   <button class="tab-btn" data-tab="ppo">PPO Diagnostics</button>
   <button class="tab-btn" data-tab="mulligan">Mulligan</button>
@@ -130,6 +143,7 @@
 
 <main id="main">
   <div class="tab-panel active" id="panel-overview"><p class="hint">loading…</p></div>
+  <div class="tab-panel" id="panel-progress"></div>
   <div class="tab-panel" id="panel-winrates"></div>
   <div class="tab-panel" id="panel-ppo"></div>
   <div class="tab-panel" id="panel-mulligan"></div>
@@ -307,9 +321,9 @@ function attachChartTooltips(root) {
 
 // ---- state ----
 let leagues = [];
-const DEFAULT_LEAGUE = 'main-league';  // what the page opens on (keep in sync with stats_checks.DEFAULT_LEAGUE)
 let currentLeague = null;
 let metrics = {};       // metrics.jsonl grouped by `kind`
+let manifest = null;    // the run manifest (config, model architecture, code state, sessions), or null
 let checksIndex = [];   // every checks/*.json, see /api/stats/leagues/<league>/checks
 const detailCache = new Map();
 
@@ -357,6 +371,7 @@ function renderOverview() {
 
   el.innerHTML = `
     ${tiles}
+    ${runSection()}
     <h2>Latest primary-vs-primary win rate</h2>
     ${winRateBarList(winRows)}
     <h2>PPO health — latest update per deck</h2>
@@ -367,24 +382,10 @@ function renderOverview() {
 }
 
 // ---- Win Rates ----
-const VS_HISTORY_REF = [
-  { key: 'active_oldest', color: '#5fce7a', dash: '6,3', label: 'vs active-oldest' },
-  { key: 'archive_oldest', color: '#c77dff', dash: '2,2', label: 'vs archive-oldest' },
-];
 let winRateMode = 'primary_vs_primary_round_robin';
 function renderWinRates() {
   const el = document.getElementById('panel-winrates');
   const records = metrics[winRateMode] || [];
-
-  // latest active-oldest/archive-oldest snapshot per deck -- these are single
-  // current values (not a trend), so they're drawn as horizontal reference
-  // lines across the deck's win-rate-over-time chart rather than their own series.
-  const vhByDeck = new Map();
-  for (const [deck, rs] of byDeck(metrics.vs_history || [])) {
-    const latestCum = Math.max(...rs.map(r => r.cumulative_games));
-    vhByDeck.set(deck, Object.fromEntries(VS_HISTORY_REF.map(ref =>
-      [ref.key, rs.find(r => r.cumulative_games === latestCum && r.label === ref.key && r.win_rate != null) || null])));
-  }
 
   const cards = [...byDeck(records)].sort((a, b) => a[0].localeCompare(b[0])).map(([deck, rs]) => {
     const points = rs.filter(r => r.win_rate != null).map(r => ({
@@ -392,19 +393,9 @@ function renderWinRates() {
       label: `${r.cumulative_games.toLocaleString()} games`, yLabel: `${(r.win_rate * 100).toFixed(1)}% win rate`,
     }));
     const latest = points[points.length - 1];
-    const vh = vhByDeck.get(deck) || {};
     const refLines = [{ y: 0.5, color: '#666', dash: '3,3' }];
-    const refLabels = [];
-    for (const ref of VS_HISTORY_REF) {
-      const r = vh[ref.key];
-      if (!r) continue;
-      refLines.push({ y: r.win_rate, color: ref.color, dash: ref.dash });
-      refLabels.push(`<span style="color:${ref.color}">${ref.label} ${(r.win_rate * 100).toFixed(0)}%
-        <span class="hint">(${r.live_wins}/${r.games} @ ${r.cumulative_games.toLocaleString()}g)</span></span>`);
-    }
     return `<div class="card">
       <div class="card-title">${escapeHtml(deck)} <span class="card-value">${latest ? (latest.y * 100).toFixed(1) + '%' : '—'}</span></div>
-      ${refLabels.length ? `<div class="ref-labels">${refLabels.join('')}</div>` : ''}
       ${sparkline(points, { yMin: 0, yMax: 1, refLines, w: 300, h: 110 })}
     </div>`;
   }).join('');
@@ -417,8 +408,6 @@ function renderWinRates() {
     <div class="chart-legend">
       <span class="legend-item"><span class="legend-swatch" style="background:#6a9dff"></span>Win rate trend</span>
       <span class="legend-item"><span class="legend-line" style="border-color:#666"></span>50% breakeven</span>
-      <span class="legend-item"><span class="legend-line" style="border-color:#5fce7a"></span>vs active-oldest</span>
-      <span class="legend-item"><span class="legend-line" style="border-color:#c77dff"></span>vs archive-oldest</span>
     </div>
     <div class="grid grid-wide">${cards || '<p class="hint">no data yet</p>'}</div>`;
   attachChartTooltips(el);
@@ -681,8 +670,171 @@ async function renderManaBurn() {
   attachChartTooltips(el);
 }
 
+// ---- Progress (the history checks: strength_history / policy_movement / progress_indicator) ----
+// Is the league still learning? Read it top-down: the indicator's one-line answer, then the numbers behind it.
+const LABEL_HELP = {
+  IMPROVING: 'the current agents clearly beat their own older selves (interval above 50%)',
+  CHURNING: 'no clear strength gain, but the policy is still moving — changing without getting better',
+  STUCK: 'no clear strength gain and the policy has stopped moving',
+  FLAT: 'no clear strength gain (the policy probe was not available)',
+  WARMUP: 'too early: no snapshot is old enough to compare against yet',
+};
+// Diverging scale for a score (0..1, 50% = no difference): red below, green above, the number is always printed.
+function scoreColor(p) {
+  const d = Math.max(-1, Math.min(1, (p - 0.5) / 0.4));
+  return d >= 0 ? `rgba(95,206,122,${(0.10 + 0.55 * d).toFixed(2)})` : `rgba(224,128,128,${(0.10 + 0.55 * -d).toFixed(2)})`;
+}
+// Sequential scale for a distance (JS divergence, nats; 0 identical).
+function distanceColor(js) {
+  return `rgba(106,157,255,${(0.08 + 0.6 * Math.min(1, js / 0.3)).toFixed(2)})`;
+}
+function newestTick(records) {
+  if (!records.length) return [];
+  const t = Math.max(...records.map(r => r.cumulative_games));
+  return records.filter(r => r.cumulative_games === t);
+}
+// Heat table: rows x anchor ages; cell(row, anchor) -> {text, color, title} or null.
+function heatTable(rowNames, anchors, cell, corner) {
+  if (!rowNames.length) return '<p class="hint">no data yet</p>';
+  const head = anchors.map(a => `<th>${a.toLocaleString()}</th>`).join('');
+  const body = rowNames.map(row => `<tr><th>${wrapDeckName(row)}</th>${anchors.map(a => {
+    const c = cell(row, a);
+    return c ? `<td class="matrix-cell" style="background:${c.color}" title="${escapeHtml(c.title || '')}">${c.text}</td>` : '<td class="matrix-empty">·</td>';
+  }).join('')}</tr>`).join('');
+  return `<table class="matrix"><thead><tr><th>${corner}</th>${head}</tr></thead><tbody>${body}</tbody></table>`;
+}
+let progressAnchor = null;   // anchor age (games/deck) of the trend charts
+
+function indicatorSection() {
+  const records = (metrics.progress_indicator || []).filter(r => r.deck === 'ALL');
+  if (!records.length) {
+    return `<div class="indicator"><span class="hint">No progress indicator yet — it is written at each validation tick once the league has
+      a snapshot old enough to compare against (see Methodology → History checks).</span></div>`;
+  }
+  const latest = records[records.length - 1];
+  const ratio = latest.policy_ratio == null ? 'probe not available' : `policy moved ${(latest.policy_ratio * 100).toFixed(0)}% of the way to an unrelated policy`;
+  const numbers = latest.label === 'WARMUP' ? '' : `<div class="hint" style="margin-top:6px">current agents beat their own older selves
+      <b>${(latest.score * 100).toFixed(1)}%</b> [${(latest.lo * 100).toFixed(1)}, ${(latest.hi * 100).toFixed(1)}] over ${latest.games.toLocaleString()} games (50% = no progress) · ${ratio}</div>`;
+  const chips = records.map(r => `<span class="label-chip label-${r.label}" title="${escapeHtml(LABEL_HELP[r.label] || '')}">${r.cumulative_games.toLocaleString()} · ${r.label}</span>`).join('');
+  const scorePoints = records.filter(r => r.score != null).map(r => ({
+    x: r.cumulative_games, y: r.score, label: `${r.cumulative_games.toLocaleString()} games`,
+    yLabel: `${(r.score * 100).toFixed(1)}% [${(r.lo * 100).toFixed(1)}, ${(r.hi * 100).toFixed(1)}]`,
+  }));
+  return `<div class="indicator">
+      <span class="big">Is it still learning?</span><span class="label-chip label-${latest.label}">${latest.label}</span>
+      <div class="hint" style="margin-top:6px">${escapeHtml(LABEL_HELP[latest.label] || '')} · at ${latest.cumulative_games.toLocaleString()} games/deck</div>
+      ${numbers}
+      <div class="timeline">${chips}</div>
+      ${scorePoints.length > 1 ? `<div style="max-width:340px;margin-top:10px"><div class="hint">pooled score against the reference self, by tick</div>
+        ${sparkline(scorePoints, { yMin: 0.3, yMax: 0.8, refLines: [{ y: 0.5, color: '#666', dash: '3,3' }], w: 340, h: 90 })}</div>` : ''}
+      <div class="hint" style="margin-top:8px">Report only: nothing here stops or changes training. The label's thresholds are provisional —
+        the numbers are what to read.</div>
+    </div>`;
+}
+
+function renderProgress() {
+  const el = document.getElementById('panel-progress');
+  const own = metrics.strength_history || [];
+  const field = metrics.strength_field || [];
+  const movement = metrics.policy_movement || [];
+  const scale = metrics.policy_scale || [];
+
+  // ---- current agents vs their own past selves ----
+  const ownNow = newestTick(own);
+  const ownAnchors = [...new Set(ownNow.map(r => r.anchor_games))].sort((a, b) => a - b);
+  const ownDecks = [...new Set(ownNow.map(r => r.deck))].sort();
+  const ownTable = heatTable(ownDecks, ownAnchors, (d, a) => {
+    const r = ownNow.find(x => x.deck === d && x.anchor_games === a);
+    return r ? { text: `${(r.score * 100).toFixed(0)}%`, color: scoreColor(r.score), title: `${r.games} games` } : null;
+  }, 'deck \\ older self at');
+
+  // trend of one anchor over cadence ticks, per deck
+  const allAnchors = [...new Set(own.map(r => r.anchor_games))].sort((a, b) => a - b);
+  if (progressAnchor == null || !allAnchors.includes(progressAnchor)) progressAnchor = allAnchors[allAnchors.length - 1] ?? null;
+  const trendCards = [...byDeck(own.filter(r => r.anchor_games === progressAnchor))].sort((a, b) => a[0].localeCompare(b[0])).map(([deck, rs]) => {
+    const points = rs.map(r => ({ x: r.cumulative_games, y: r.score, label: `${r.cumulative_games.toLocaleString()} games`, yLabel: `${(r.score * 100).toFixed(1)}% (${r.games} games)` }));
+    const last = points[points.length - 1];
+    return `<div class="card"><div class="card-title">${escapeHtml(deck)} <span class="card-value">${(last.y * 100).toFixed(0)}%</span></div>
+      ${sparkline(points, { yMin: 0, yMax: 1, refLines: [{ y: 0.5, color: '#666', dash: '3,3' }], w: 300, h: 90 })}</div>`;
+  }).join('');
+
+  // ---- current agents vs every deck's history ----
+  const fieldNow = newestTick(field);
+  const fieldAnchors = [...new Set(fieldNow.map(r => r.anchor_games))].sort((a, b) => a - b);
+  const fieldDecks = [...new Set(fieldNow.map(r => r.deck))].sort();
+  const fieldTable = heatTable(fieldDecks, fieldAnchors, (d, a) => {
+    const r = fieldNow.find(x => x.deck === d && x.anchor_games === a);
+    return r ? { text: `${(r.score * 100).toFixed(0)}%`, color: scoreColor(r.score), title: `${r.games} games` } : null;
+  }, 'opponent deck at age');
+
+  // ---- policy movement ----
+  const moveNow = newestTick(movement);
+  const moveAnchors = [...new Set(moveNow.map(r => r.anchor_games))].sort((a, b) => a - b);
+  const moveDecks = [...new Set(moveNow.map(r => r.deck))].sort();
+  const moveTable = heatTable(moveDecks, moveAnchors, (d, a) => {
+    const r = moveNow.find(x => x.deck === d && x.anchor_games === a);
+    return r ? { text: r.js.toFixed(3), color: distanceColor(r.js), title: `top-1 agreement ${(r.top1 * 100).toFixed(0)}%` } : null;
+  }, 'deck \\ vs snapshot at');
+  const scaleNow = newestTick(scale);
+  const mean = k => scaleNow.length ? scaleNow.reduce((s, r) => s + (r[k] ?? 0), 0) / scaleNow.length : null;
+  const adj = mean('adjacent_js'), rnd = mean('random_js');
+  const entropyCards = [...byDeck(scale)].sort((a, b) => a[0].localeCompare(b[0])).map(([deck, rs]) => {
+    const points = rs.map(r => ({ x: r.cumulative_games, y: r.entropy, label: `${r.cumulative_games.toLocaleString()} games`, yLabel: `entropy ${r.entropy.toFixed(2)}` }));
+    return `<div class="card"><div class="card-title">${escapeHtml(deck)} <span class="card-value">${points[points.length - 1].y.toFixed(2)}</span></div>
+      ${sparkline(points, { color: '#c77dff', w: 300, h: 70 })}</div>`;
+  }).join('');
+
+  el.innerHTML = `
+    ${indicatorSection()}
+
+    <h2>Current agents vs their own past selves — latest tick${ownNow.length ? ` (${ownNow[0].cumulative_games.toLocaleString()} games/deck)` : ''}</h2>
+    <p class="hint">Score of each deck's current agent against its own snapshot at the column's age. Against much older selves it should be well above 50%;
+      as the opponent gets recent it sinks toward 50%. Cells near 100% are saturated and say little.</p>
+    ${ownTable}
+    ${allAnchors.length ? `<div class="toolbar"><label class="hint">Trend against the self at</label>
+      <select id="progress-anchor-select">${allAnchors.map(a => `<option value="${a}"${a === progressAnchor ? ' selected' : ''}>${a.toLocaleString()} games</option>`).join('')}</select>
+      <span class="hint">still rising = still improving relative to that fixed past</span></div>
+      <div class="grid grid-wide">${trendCards}</div>` : ''}
+
+    <h2>Current agents vs every deck's history</h2>
+    <p class="hint">Score of ALL decks' current agents (pooled) against the row's deck at the column's age. It falls as that deck improves over time and flattens where it stopped improving —
+      a fixed yardstick on each deck's learning, not just on a deck's own past.</p>
+    ${fieldTable}
+
+    <h2>Policy movement</h2>
+    <p class="hint">Mean Jensen–Shannon divergence (nats; 0 = identical, 0.693 = disjoint) between the current policy and its snapshot, over a fixed suite of mid-game decisions.
+      ${adj != null ? `Scale: one snapshot interval apart ≈ <b>${adj.toFixed(3)}</b>; a random net vs the current policy ≈ <b>${rnd.toFixed(3)}</b>.` : ''}
+      Movement is not progress — read it next to the strength tables above.</p>
+    ${moveTable}
+    <h2>Policy entropy on the probe suite</h2>
+    <div class="grid grid-wide">${entropyCards || '<p class="hint">no data yet</p>'}</div>`;
+  attachChartTooltips(el);
+  const sel = document.getElementById('progress-anchor-select');
+  if (sel) sel.addEventListener('change', () => { progressAnchor = +sel.value; renderProgress(); });
+}
+
+// ---- Run manifest (shown on the Overview) ----
+function runSection() {
+  if (!manifest) return '<h2>Run</h2><p class="hint">No run manifest for this league (it predates manifests).</p>';
+  const m = manifest, sessions = m.sessions || [], last = sessions[sessions.length - 1] || {};
+  const model = m.model || {}, cfg = m.config || {}, env = m.environment || {}, code = last.code || {};
+  const row = (k, v) => `<dt>${k}</dt><dd>${v}</dd>`;
+  const cfgKeys = ['league_name', 'total_games', 'roster', 'games_per_iteration', 'n_workers', 'overlap_collect', 'checkpoint_rate', 'stratify_0land_pct', 'pfsp', 'device', 'seed', 'checks_cadence_pct'];
+  const cfgText = cfgKeys.filter(k => cfg[k] != null).map(k => `${k}=${escapeHtml(Array.isArray(cfg[k]) ? cfg[k].join(',') : String(cfg[k]))}`).join(' · ');
+  const changed = (m.model_history || []).length ? `<span class="status-warn">model changed ${(m.model_history || []).length}× during this run</span>` : '';
+  return `<h2>Run</h2>
+    <dl class="kv">
+      ${row('started', escapeHtml(m.created_at || '?'))}
+      ${row('sessions', `${sessions.length} · latest ${last.games_start != null ? `${last.games_start.toLocaleString()} → ${last.games_end != null ? last.games_end.toLocaleString() : 'running'} games/deck` : '?'}`)}
+      ${row('model', `trunk ${escapeHtml((model.trunk_hidden || []).join('×'))} · encoder d=${model.encoder_d_model ?? '?'} · ${(model.n_params_example_deck || 0).toLocaleString()} params/deck · vocab ${model.vocab_size ?? '?'} · structure ${escapeHtml(model.structure_sha || '?')} ${changed}`)}
+      ${row('config', cfgText || '—')}
+      ${row('code', `${escapeHtml((code.commit || '?').slice(0, 8))} on ${escapeHtml(code.branch || '?')}${code.dirty ? ' (uncommitted changes)' : ''}`)}
+      ${row('environment', `python ${escapeHtml(env.python || '?')} · torch ${escapeHtml(env.torch || '?')} · ${escapeHtml(env.cuda_device || 'cpu')}`)}
+    </dl>`;
+}
+
 // ---- tabs & league switching ----
-const TAB_RENDERERS = { overview: renderOverview, winrates: renderWinRates, ppo: renderPpo, mulligan: renderMulligan, roundrobin: renderRoundRobin, manaburn: renderManaBurn };
+const TAB_RENDERERS = { overview: renderOverview, progress: renderProgress, winrates: renderWinRates, ppo: renderPpo, mulligan: renderMulligan, roundrobin: renderRoundRobin, manaburn: renderManaBurn };
 let activeTab = 'overview';
 function renderActiveTab() { TAB_RENDERERS[activeTab](); }
 
@@ -691,9 +843,10 @@ async function loadLeague(name) {
   detailCache.clear();
   document.getElementById('main').classList.add('loading');
   try {
-    [metrics, checksIndex] = await Promise.all([
+    [metrics, checksIndex, manifest] = await Promise.all([
       fetchJson(`/api/stats/leagues/${encodeURIComponent(name)}/metrics`),
       fetchJson(`/api/stats/leagues/${encodeURIComponent(name)}/checks`),
+      fetchJson(`/api/stats/leagues/${encodeURIComponent(name)}/manifest`).catch(() => null),
     ]);
     renderActiveTab();
   } finally {
@@ -707,10 +860,10 @@ async function init() {
     document.getElementById('main').innerHTML = '<p class="hint">No checkpoints/&lt;league&gt;/metrics.jsonl found yet — run training first.</p>';
     return;
   }
-  // Opens on main-league (the API lists it first), unless the URL asks for another
-  // existing league via ?league=<name>; falls back to the first league listed.
+  // Opens on the first league listed (the API lists the most recently written first), unless the URL asks
+  // for another existing league via ?league=<name>.
   const requested = new URLSearchParams(location.search).get('league');
-  const startName = [requested, DEFAULT_LEAGUE].find(n => n && leagues.some(l => l.name === n)) || leagues[0].name;
+  const startName = leagues.some(l => l.name === requested) ? requested : leagues[0].name;
   const sel = document.getElementById('league-select');
   sel.innerHTML = leagues.map(l => {
     const games = l.cumulative_games_per_deck != null ? ` — ${l.cumulative_games_per_deck.toLocaleString()} games/deck` : '';

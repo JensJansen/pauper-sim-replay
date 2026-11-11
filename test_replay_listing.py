@@ -16,7 +16,7 @@ def _touch(path, mtime=None):
         os.utime(path, (mtime, mtime))
 
 
-def test_orders_by_game_count_not_mtime_with_main_league_first(tmp_path):
+def test_orders_by_game_count_not_mtime_with_leagues_by_name(tmp_path):
     # mtimes deliberately inverted vs game count (a git checkout stamps every file alike)
     _touch(tmp_path / "zz-league" / "round_robin_review_5000games.json", mtime=900)
     _touch(tmp_path / "main-league" / "round_robin_review_9000games.json", mtime=100)
@@ -28,14 +28,14 @@ def test_orders_by_game_count_not_mtime_with_main_league_first(tmp_path):
     runs = list_replay_runs(tmp_path)
 
     assert [r["name"] for r in runs] == [
+        "aa-league/round_robin_review_1000games.json",        # leagues by name, no league is special
         "main-league/round_robin_review_10000games.json",     # 10000 > 9000 numerically, not as text
         "main-league/round_robin_review_9000games.json",
         "main-league/round_robin_review_2000games.json",
-        "aa-league/round_robin_review_1000games.json",
         "zz-league/round_robin_review_5000games.json",
         "cross_league_50k.json",                                # no league folder: last
     ]
-    assert runs[0]["league"] == "main-league" and runs[0]["cumulative_games"] == 10000
+    assert runs[1]["league"] == "main-league" and runs[1]["cumulative_games"] == 10000
     assert runs[-1]["league"] is None and runs[-1]["cumulative_games"] is None
 
 
@@ -57,7 +57,7 @@ def test_both_apps_serve_the_grouped_listing(tmp_path, monkeypatch, app_module):
     assert [r["league"] for r in runs] == ["main-league", "other"]
 
 
-def test_both_apps_list_main_league_first_then_most_recent(tmp_path, monkeypatch, app_module):
+def test_both_apps_list_leagues_most_recently_written_first(tmp_path, monkeypatch, app_module):
     monkeypatch.setattr(app_module, "VALIDATION_DIR", tmp_path)
     for name, mtime in (("old-league", 100), ("zz-newest", 900), ("main-league", 1)):
         d = tmp_path / name
@@ -66,5 +66,5 @@ def test_both_apps_list_main_league_first_then_most_recent(tmp_path, monkeypatch
         os.utime(d / "metrics.jsonl", (mtime, mtime))
         (d / "progress.json").write_text(json.dumps({"cumulative_games_per_deck": 1234}))
     leagues = app_module.app.test_client().get("/api/stats/leagues").get_json()
-    assert [l["name"] for l in leagues] == ["main-league", "zz-newest", "old-league"]
-    assert leagues[0]["cumulative_games_per_deck"] == 1234
+    assert [l["name"] for l in leagues] == ["zz-newest", "old-league", "main-league"]  # no league is special
+    assert leagues[2]["cumulative_games_per_deck"] == 1234

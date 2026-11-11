@@ -6,7 +6,8 @@ submodule is checked out on its own (`checkpoints/` itself is gitignored at
 the pauper_sim root). Per league: `metrics.jsonl`, `progress.json`,
 `checks/*.jsonl`, and `<deck>/checks/*.jsonl` -- never the `live.pt` /
 `archive/*.pt` / `mulligan.pt` model weights, which are multi-GB and not
-needed by the stats page.
+needed by the stats page. Per league there is also `manifest.json` (the run's config, model architecture,
+code state and sessions; served at `/api/stats/leagues/<league>/manifest`), kept whole like `progress.json`.
 
 Note the `checks/` shape here is NOT a copy of `checkpoints/<league>/checks/`'s
 own layout: the parent repo's canonical copy still writes one
@@ -16,7 +17,7 @@ every check's history into one growing `checks/<check>.jsonl` instead -- one
 compact line per cadence tick, self-describing via its own
 `"cumulative_games"` field -- since a new small file per tick, forever,
 committed to a public repo, doesn't scale the way an append-only file does.
-See `src/webapp_mirror.py`'s `mirror_json`/`_consolidated_check_path` in the
+See `src/webapp_publish/mirror.py`'s `mirror_json`/`_consolidated_check_path` in the
 parent repo for the write side, and `app.py`'s `stats_checks`/
 `stats_check_detail` here for how a per-snapshot request resolves to one
 line in the consolidated file. The old one-file-per-snapshot shape is no
@@ -24,17 +25,17 @@ longer understood on the read side -- every league here has been migrated.
 
 ## Kept current automatically
 
-`src/validation/_common.py` and `rl/league/league_runner.py` (both in the
-parent pauper_sim repo) write here directly as a side effect of every write
-they make to `checkpoints/<league>/` -- see `src/webapp_mirror.py` there.
+`src/validation/_common.py`, `rl/league/metrics.py`, `rl/league/manifest.py` and
+`rl/league/league_runner.py` (all in the parent pauper_sim repo) write here directly as a side effect of every
+write they make to `checkpoints/<league>/` -- see `src/webapp_publish/mirror.py` there.
 Each mirror write is best-effort: it silently no-ops if this submodule isn't
-checked out (`webapp_mirror.webapp_ready()`), or for anything that isn't a
+checked out (`webapp_publish.mirror.webapp_ready()`), or for anything that isn't a
 real league under `checkpoints/` (a benchmark harness's throwaway dir, a
 test's `tmp_path`). It never raises -- a webapp mirroring hiccup must never
 take training down with it.
 
 Nothing to run by hand: after every validation cadence tick the parent repo's
-`src/webapp_sync.py` prunes each league's `checks/*.jsonl` to its newest 10
+`src/webapp_publish/sync.py` prunes each league's `checks/*.jsonl` to its newest 10
 cadence ticks (`metrics.jsonl` and `progress.json` are kept whole), commits this
 directory's league folders (not this README) plus `logs/replays/` to `main`,
 pushes, and bumps the parent's submodule pointer.

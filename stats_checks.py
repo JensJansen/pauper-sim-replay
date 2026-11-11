@@ -4,7 +4,7 @@ already share replay_engine.list_games/reduce_game instead of duplicating
 that logic.
 
 Reads logs/validation/<league>/[<deck>/]checks/<check>.jsonl (one growing
-file per check, one line per cadence tick -- see webapp_mirror.mirror_json
+file per check, one line per cadence tick -- see webapp_publish.mirror.mirror_json
 in the parent repo) and exposes it through a virtual old-style per-snapshot
 filename (checks/<check>_<N>games.json), the stable per-snapshot address
 stats_checks/stats_check_detail expose to the frontend even though no such
@@ -15,12 +15,10 @@ import re
 
 CHECK_FILE_RE = re.compile(r"(.+)_(\d+)games\.json$")  # virtual per-snapshot filename shape
 
-DEFAULT_LEAGUE = "main-league"  # what /stats opens on, and the first league in every listing
-
-
 def league_sort_key(name):
-    """Sort key putting DEFAULT_LEAGUE first, then everything else by name."""
-    return (name != DEFAULT_LEAGUE, name)
+    """Sort key for grouping replays by league: by name. No league is special -- /stats lists leagues most
+    recently written first and opens on the first one."""
+    return name
 
 
 def _parse_line(line):

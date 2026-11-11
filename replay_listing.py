@@ -8,7 +8,7 @@ Lists every *.json under logs/replays/ (any depth) as
   - cumulative_games: N parsed from a `..._<N>games.json` filename, else None.
 Ordering is by N, NOT file mtime -- a git checkout (e.g. Render's deploy) stamps
 every file with the checkout time, so mtime can't say which replay is newest.
-Leagues come in stats_checks.league_sort_key order (main-league first), newest N
+Leagues come in stats_checks.league_sort_key order (by name), newest N
 first within a league; files with no league go last, newest mtime first.
 Only stats each file, never opens it.
 """

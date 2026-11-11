@@ -606,7 +606,7 @@ async function loadRunsList() {
     const res = await fetch('/api/replay/runs');
     const runs = await res.json();
     if (!res.ok) throw new Error(runs.error || res.statusText);
-    // Grouped by league (the API already orders: main-league first, newest game count first);
+    // Grouped by league (the API already orders: leagues by name, newest game count first);
     // files outside any league folder go last under "Other". Training review replays show their
     // game count, not a file time -- mtime is the checkout time on a deployed copy.
     let lastGroup;

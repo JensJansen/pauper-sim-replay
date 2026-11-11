@@ -54,16 +54,17 @@ Reads `logs/validation/<league>/` — win rates, PPO training diagnostics,
 mulligan-net behavior, and round-robin/vs-history matchup data written by
 `src/validation/` in the parent pauper_sim repo. That directory is a copy of
 pauper_sim's own (gitignored) `checkpoints/<league>/`, kept current
-**automatically**: the parent repo's `src/webapp_mirror.py` mirrors every
+**automatically**: the parent repo's `src/webapp_publish/mirror.py` mirrors every
 write here as it happens, whenever this submodule is checked out — see
 `logs/validation/README.md`. During a
-training run the parent repo's `webapp_sync.py` also commits and pushes this data
+training run the parent repo's `webapp_publish/sync.py` also commits and pushes this data
 to `main` automatically after every validation tick (see "Automatic publishing"
 in its README) -- each league keeps its newest 10 sets of check results and
 review replays, plus its full `metrics.jsonl`/`progress.json`.
 
-The league selector at the top of `/stats` lists every league with data and opens
-on `main-league`; `/stats?league=<name>` links straight to another one. Works identically on `app.py` and `app_public.py` since the
+The league selector at the top of `/stats` lists every league with data, most
+recently written first, and opens on the first one (no league is special);
+`/stats?league=<name>` links straight to another one. Works identically on `app.py` and `app_public.py` since the
 data travels with the repo.
 
 ## Tests
@@ -97,7 +98,7 @@ ever has filesystem access to files already committed to this repo.
   sidecar). `GET /api/replay/runs/<name>/games` and `.../games/<index>` use it to
   list a replay's games and reduce ONE game by reading only that game's bytes
   (~200 KB, ~6 MB of memory, tens of ms) instead of parsing the whole ~30 MB file
-  (~400 ms, ~145 MB) per click. Training-side `webapp_sync` builds the sidecars
+  (~400 ms, ~145 MB) per click. Training-side `webapp_publish/sync.py` builds the sidecars
   before committing; a replay without a valid one (hand-made, or changed size) is
   indexed lazily on first use. Stdlib only; also a script (`python replay_index.py
   <file|dir>`).
@@ -105,8 +106,8 @@ ever has filesystem access to files already committed to this repo.
   game is ~2 MB and ~50 KB gzipped.
 - `replay_listing.py` — the shared `/api/replay/runs` listing (grouped by league,
   ordered by game count -- file mtime is the checkout time on a deployed copy).
-- `stats_checks.py` — shared check-snapshot read path plus `DEFAULT_LEAGUE` /
-  league ordering for `/api/stats/leagues`.
+- `stats_checks.py` — shared check-snapshot read path plus `league_sort_key`
+  (replay grouping by league name).
 - `logs/replays/` — game-log JSON for `/replay`: training's per-tick review replays
   live under `logs/replays/<league>/` (newest 10 per league, auto-committed);
   hand-made files can sit alongside at the top level.
