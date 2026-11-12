@@ -302,8 +302,8 @@
     <div class="arch-node"><div class="t"><span class="term" tabindex="0" data-term="set_transformer">SetTransformer</span> encoder</div><div class="d">2-layer <span class="term" tabindex="0" data-term="self_attention">self-attention</span>, 4 heads, d_model=64 — every token attends to every other</div></div>
     <div class="arch-down"><b>↓</b></div>
     <div class="arch-branch">
-      <div class="arch-node"><div class="t"><span class="term" tabindex="0" data-term="pma">PMA</span> pool → "mine" summary</div><div class="d">pooling-by-multihead-attention</div></div>
-      <div class="arch-node"><div class="t">PMA pool → "theirs" summary</div><div class="d">split by side flag</div></div>
+      <div class="arch-node"><div class="t"><span class="term" tabindex="0" data-term="pma">PMA</span> pool + sum pool → "mine" summary</div><div class="d">attention pool (a weighted mean) ‖ plain sum, so counts survive</div></div>
+      <div class="arch-node"><div class="t">PMA pool + sum pool → "theirs" summary</div><div class="d">split by side flag</div></div>
     </div>
     <svg class="merge-connector" viewBox="0 0 300 26">
       <path class="curve" d="M 70 1 C 70 15, 150 13, 150 25"/>
@@ -334,7 +334,11 @@
       <b>Dynamic half</b> — current state: tapped, effective P/T, blocked
       / attacking / summoning-sick flags, aura attachment, targeted-by-mine
       / targeted-by-theirs, revealed-hand disposition bits, counter counts,
-      zone one-hot, side flag.
+      zone one-hot, side flag, and two copy counts (how many identical
+      cards, and how many identical-state cards, are present — attention is
+      a weighted mean, so without these six Mountains would look like one),
+      and link slots pairing an aura with its host, a spell with its target
+      and a blocker with its attacker.
       <br><br>
       Opponent's hand and both libraries are hidden by default — aggregate
       counts only via the scalar globals — except two narrow reveal cases
@@ -347,7 +351,9 @@
     <div class="drill-body">
       Turn number, lands played this turn, mulligans taken (both seats),
       life totals, mana pools by color, phase one-hot, library sizes, opponent
-      hand size, stack-targeting flags, on-the-play, opponent discard count.
+      hand size, stack-targeting flags, on-the-play, opponent discard count,
+      and exact per-side counts (permanents by card type, untapped by type,
+      graveyard, exile, stack entries; plus the agent's own hand size).
       Concatenated with the "mine" summary before the trunk.
     </div>
   </details>
