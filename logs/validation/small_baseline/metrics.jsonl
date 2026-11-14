@@ -10026,3 +10026,100 @@
 {"cumulative_games": 49992, "kind": "policy_scale", "deck": "mono_red_rally", "entropy": 0.46571207764119893, "adjacent_js": 0.027384193268197927, "random_js": 0.25348588182290765}
 {"cumulative_games": 49992, "kind": "progress_indicator", "deck": "ALL", "label": "IMPROVING", "score": 0.568125, "lo": 0.5437192853984855, "hi": 0.5922043738839341, "games": 1600, "policy_ratio": 0.3590452844198755}
 {"kind": "session_start", "session": 14, "cumulative_games": 49992, "reward_fn": "deploy_reward_v6", "roster": ["rakdos_madness", "dmir_terror", "elves", "mono_red_rally"], "train_decks": ["dmir_terror", "elves", "mono_red_rally", "rakdos_madness"], "n_iterations": 1, "games_per_iteration": 24, "snapshot_every": 8, "checkpoint_rate": 0.15, "pfsp": true, "n_workers": 10, "horizon": 120, "pfsp_power": 0.5, "stratify_0land_pct": 0.0, "overlap_collect": true, "lr": 0.0002, "seq_batch_size_start": 4, "seq_batch_size_cap": 16, "mulligan_lr": 0.001, "gamma": 0.99, "gae_lambda": 0.95, "target_kl": 0.03, "n_epochs": 4, "adv_norm_floor": 0.0, "ent_coef": null}
+{"kind": "ppo", "session": 14, "iteration": 0, "deck": "rakdos_madness", "cumulative_games": 49992, "games": 24, "buffer_size": 2216, "batch_size": 16, "salvaged": 1483, "ent_coef": 0.005002400000000002, "policy_loss": -0.0835302397608757, "value_loss": 0.018683115020394325, "entropy": 0.26899436116218567, "approx_kl": 0.003350886981934309, "clip_fraction": 0.034069981426000595, "epochs_run": 4, "explained_variance": 0.903536940230343, "adv_std": 0.19355390965938568, "target_kl": 0.03, "policy_loss_mean": -0.0024526403268752116, "value_loss_mean": 0.03392291155102451, "entropy_mean": 0.26296418668561033, "approx_kl_mean": 0.0017392501934340714, "clip_fraction_mean": 0.017260830324909746}
+{"kind": "ppo", "session": 14, "iteration": 0, "deck": "dmir_terror", "cumulative_games": 49992, "games": 24, "buffer_size": 3519, "batch_size": 16, "salvaged": 922, "ent_coef": 0.005002400000000002, "policy_loss": 0.1935606747865677, "value_loss": 0.009650551714003086, "entropy": 0.22229942679405212, "approx_kl": 0.0009162331116385758, "clip_fraction": 0.01785714365541935, "epochs_run": 4, "explained_variance": 0.8821527775574594, "adv_std": 0.17094440758228302, "target_kl": 0.03, "policy_loss_mean": -0.0015109545400651485, "value_loss_mean": 0.028900103123223927, "entropy_mean": 0.2217896513791205, "approx_kl_mean": 0.004274384817571659, "clip_fraction_mean": 0.04191531685137823}
+{"kind": "ppo", "session": 14, "iteration": 0, "deck": "elves", "cumulative_games": 49992, "games": 24, "buffer_size": 3392, "batch_size": 16, "salvaged": 959, "ent_coef": 0.005002400000000002, "policy_loss": -0.02265135757625103, "value_loss": 0.021879995241761208, "entropy": 0.1955176740884781, "approx_kl": 0.004113867413252592, "clip_fraction": 0.021234240382909775, "epochs_run": 4, "explained_variance": 0.9048171186891023, "adv_std": 0.15466158092021942, "target_kl": 0.03, "policy_loss_mean": -0.000657367818760422, "value_loss_mean": 0.024493314185232488, "entropy_mean": 0.20750844703530366, "approx_kl_mean": 0.0027206562600045835, "clip_fraction_mean": 0.018941627358490566}
+{"kind": "ppo", "session": 14, "iteration": 0, "deck": "mono_red_rally", "cumulative_games": 49992, "games": 24, "buffer_size": 1945, "batch_size": 16, "salvaged": 900, "ent_coef": 0.005002400000000002, "policy_loss": 0.454001784324646, "value_loss": 0.061210472136735916, "entropy": 0.33347776532173157, "approx_kl": 0.0020107172895222902, "clip_fraction": 0.014084506779909134, "epochs_run": 4, "explained_variance": 0.8295982986539404, "adv_std": 0.2551414668560028, "target_kl": 0.03, "policy_loss_mean": -0.005042598302689187, "value_loss_mean": 0.06130191047884198, "entropy_mean": 0.35113606980036954, "approx_kl_mean": 0.0042367837116467, "clip_fraction_mean": 0.033419023136246784}
+{"kind": "mulligan", "session": 14, "iteration": 0, "deck": "rakdos_madness", "cumulative_games": 49992, "n": 105, "loss": -0.45111754536628723}
+{"kind": "mulligan", "session": 14, "iteration": 0, "deck": "dmir_terror", "cumulative_games": 49992, "n": 158, "loss": -0.6842941045761108}
+{"kind": "mulligan", "session": 14, "iteration": 0, "deck": "elves", "cumulative_games": 49992, "n": 104, "loss": -0.5982915759086609}
+{"kind": "mulligan", "session": 14, "iteration": 0, "deck": "mono_red_rally", "cumulative_games": 49992, "n": 92, "loss": -0.39826133847236633}
+{"cumulative_games": 50016, "kind": "primary_vs_primary_round_robin", "deck": "rakdos_madness", "games": 150, "wins": 66, "win_rate": 0.44}
+{"cumulative_games": 50016, "kind": "primary_vs_primary_round_robin", "deck": "dmir_terror", "games": 150, "wins": 45, "win_rate": 0.3}
+{"cumulative_games": 50016, "kind": "primary_vs_primary_round_robin", "deck": "elves", "games": 150, "wins": 61, "win_rate": 0.4066666666666667}
+{"cumulative_games": 50016, "kind": "primary_vs_primary_round_robin", "deck": "mono_red_rally", "games": 150, "wins": 128, "win_rate": 0.8533333333333334}
+{"cumulative_games": 50016, "kind": "primary_vs_training_round_robin", "deck": "rakdos_madness", "games": 200, "wins": 111, "win_rate": 0.555}
+{"cumulative_games": 50016, "kind": "primary_vs_training_round_robin", "deck": "dmir_terror", "games": 200, "wins": 94, "win_rate": 0.47}
+{"cumulative_games": 50016, "kind": "primary_vs_training_round_robin", "deck": "elves", "games": 200, "wins": 130, "win_rate": 0.65}
+{"cumulative_games": 50016, "kind": "primary_vs_training_round_robin", "deck": "mono_red_rally", "games": 200, "wins": 156, "win_rate": 0.78}
+{"cumulative_games": 50016, "kind": "mulligan_audit", "deck": "rakdos_madness", "decisions": 452, "mulligan_rate": 0.004424778761061947}
+{"cumulative_games": 50016, "kind": "mulligan_audit", "deck": "dmir_terror", "decisions": 469, "mulligan_rate": 0.04051172707889126}
+{"cumulative_games": 50016, "kind": "mulligan_audit", "deck": "elves", "decisions": 619, "mulligan_rate": 0.2730210016155089}
+{"cumulative_games": 50016, "kind": "mulligan_audit", "deck": "mono_red_rally", "decisions": 450, "mulligan_rate": 0.0}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "rakdos_madness", "anchor_games": 960, "games": 100, "score": 0.77}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "rakdos_madness", "anchor_games": 4992, "games": 100, "score": 0.62}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "rakdos_madness", "anchor_games": 9984, "games": 100, "score": 0.53}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "rakdos_madness", "anchor_games": 19968, "games": 100, "score": 0.56}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "rakdos_madness", "anchor_games": 29952, "games": 400, "score": 0.4925}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "rakdos_madness", "anchor_games": 39936, "games": 100, "score": 0.5}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "dmir_terror", "anchor_games": 960, "games": 100, "score": 0.98}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "dmir_terror", "anchor_games": 4992, "games": 100, "score": 0.81}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "dmir_terror", "anchor_games": 9984, "games": 100, "score": 0.71}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "dmir_terror", "anchor_games": 19968, "games": 100, "score": 0.65}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "dmir_terror", "anchor_games": 29952, "games": 400, "score": 0.485}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "dmir_terror", "anchor_games": 39936, "games": 100, "score": 0.55}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "elves", "anchor_games": 960, "games": 100, "score": 0.82}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "elves", "anchor_games": 4992, "games": 100, "score": 0.54}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "elves", "anchor_games": 9984, "games": 100, "score": 0.7}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "elves", "anchor_games": 19968, "games": 100, "score": 0.55}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "elves", "anchor_games": 29952, "games": 400, "score": 0.56}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "elves", "anchor_games": 39936, "games": 100, "score": 0.58}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "mono_red_rally", "anchor_games": 960, "games": 100, "score": 0.84}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "mono_red_rally", "anchor_games": 4992, "games": 100, "score": 0.77}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "mono_red_rally", "anchor_games": 9984, "games": 100, "score": 0.6}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "mono_red_rally", "anchor_games": 19968, "games": 100, "score": 0.6}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "mono_red_rally", "anchor_games": 29952, "games": 400, "score": 0.615}
+{"cumulative_games": 50016, "kind": "strength_history", "deck": "mono_red_rally", "anchor_games": 39936, "games": 100, "score": 0.54}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "rakdos_madness", "anchor_games": 960, "games": 120, "score": 0.75}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "rakdos_madness", "anchor_games": 4992, "games": 120, "score": 0.6583333333333333}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "rakdos_madness", "anchor_games": 9984, "games": 120, "score": 0.6333333333333333}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "rakdos_madness", "anchor_games": 19968, "games": 120, "score": 0.6916666666666667}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "rakdos_madness", "anchor_games": 29952, "games": 120, "score": 0.5583333333333333}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "rakdos_madness", "anchor_games": 39936, "games": 120, "score": 0.575}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "dmir_terror", "anchor_games": 960, "games": 120, "score": 1.0}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "dmir_terror", "anchor_games": 4992, "games": 120, "score": 0.9083333333333333}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "dmir_terror", "anchor_games": 9984, "games": 120, "score": 0.8333333333333334}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "dmir_terror", "anchor_games": 19968, "games": 120, "score": 0.825}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "dmir_terror", "anchor_games": 29952, "games": 120, "score": 0.7333333333333333}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "dmir_terror", "anchor_games": 39936, "games": 120, "score": 0.7333333333333333}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "elves", "anchor_games": 960, "games": 120, "score": 0.775}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "elves", "anchor_games": 4992, "games": 120, "score": 0.6}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "elves", "anchor_games": 9984, "games": 120, "score": 0.7333333333333333}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "elves", "anchor_games": 19968, "games": 120, "score": 0.6166666666666667}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "elves", "anchor_games": 29952, "games": 120, "score": 0.6583333333333333}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "elves", "anchor_games": 39936, "games": 120, "score": 0.65}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "mono_red_rally", "anchor_games": 960, "games": 120, "score": 0.36666666666666664}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "mono_red_rally", "anchor_games": 4992, "games": 120, "score": 0.35833333333333334}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "mono_red_rally", "anchor_games": 9984, "games": 120, "score": 0.25}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "mono_red_rally", "anchor_games": 19968, "games": 120, "score": 0.24166666666666667}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "mono_red_rally", "anchor_games": 29952, "games": 120, "score": 0.20833333333333334}
+{"cumulative_games": 50016, "kind": "strength_field", "deck": "mono_red_rally", "anchor_games": 39936, "games": 120, "score": 0.2833333333333333}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "rakdos_madness", "anchor_games": 960, "js": 0.25901904680091936, "top1": 0.38476658476658476}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "rakdos_madness", "anchor_games": 4992, "js": 0.15754169934556983, "top1": 0.5700245700245701}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "rakdos_madness", "anchor_games": 9984, "js": 0.16339235424345486, "top1": 0.6004914004914005}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "rakdos_madness", "anchor_games": 19968, "js": 0.1517100188765317, "top1": 0.628992628992629}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "rakdos_madness", "anchor_games": 29952, "js": 0.07658118924423334, "top1": 0.7547911547911548}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "rakdos_madness", "anchor_games": 39936, "js": 0.0647908366000367, "top1": 0.8014742014742015}
+{"cumulative_games": 50016, "kind": "policy_scale", "deck": "rakdos_madness", "entropy": 0.3594703905804534, "adjacent_js": 0.010356394227757812, "random_js": 0.28256203026024385}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "dmir_terror", "anchor_games": 960, "js": 0.20542206834107649, "top1": 0.5391522988505747}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "dmir_terror", "anchor_games": 4992, "js": 0.15766393106764395, "top1": 0.6357758620689655}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "dmir_terror", "anchor_games": 9984, "js": 0.17888591195524225, "top1": 0.5818965517241379}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "dmir_terror", "anchor_games": 19968, "js": 0.1335625522497422, "top1": 0.6573275862068966}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "dmir_terror", "anchor_games": 29952, "js": 0.10178885018715866, "top1": 0.728448275862069}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "dmir_terror", "anchor_games": 39936, "js": 0.11192323795589972, "top1": 0.7205459770114943}
+{"cumulative_games": 50016, "kind": "policy_scale", "deck": "dmir_terror", "entropy": 0.3619723259714708, "adjacent_js": 0.020955320133168694, "random_js": 0.28206182662859336}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "elves", "anchor_games": 960, "js": 0.18716563006232476, "top1": 0.5963762528912876}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "elves", "anchor_games": 4992, "js": 0.14127300862774891, "top1": 0.6912104857363146}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "elves", "anchor_games": 9984, "js": 0.1346267833383768, "top1": 0.6962220508866616}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "elves", "anchor_games": 19968, "js": 0.08056282061174244, "top1": 0.8080185042405551}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "elves", "anchor_games": 29952, "js": 0.09295291640106698, "top1": 0.7791056283731689}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "elves", "anchor_games": 39936, "js": 0.08517663997979837, "top1": 0.7929838087895142}
+{"cumulative_games": 50016, "kind": "policy_scale", "deck": "elves", "entropy": 0.33436111630656257, "adjacent_js": 0.015198541310971807, "random_js": 0.29163050434004834}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "mono_red_rally", "anchor_games": 960, "js": 0.1646581934817511, "top1": 0.5561139028475712}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "mono_red_rally", "anchor_games": 4992, "js": 0.18919430588947508, "top1": 0.5538805136795086}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "mono_red_rally", "anchor_games": 9984, "js": 0.14692937645205065, "top1": 0.626465661641541}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "mono_red_rally", "anchor_games": 19968, "js": 0.14956302363658874, "top1": 0.6007816862088219}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "mono_red_rally", "anchor_games": 29952, "js": 0.12522802666764862, "top1": 0.6700167504187605}
+{"cumulative_games": 50016, "kind": "policy_movement", "deck": "mono_red_rally", "anchor_games": 39936, "js": 0.15242516343485593, "top1": 0.6259073143495254}
+{"cumulative_games": 50016, "kind": "policy_scale", "deck": "mono_red_rally", "entropy": 0.46295679984203747, "adjacent_js": 0.027384193268197927, "random_js": 0.25402948153243465}
+{"cumulative_games": 50016, "kind": "progress_indicator", "deck": "ALL", "label": "IMPROVING", "score": 0.538125, "lo": 0.5136345606877042, "hi": 0.5624328082685122, "games": 1600, "policy_ratio": 0.3609000840304555}
