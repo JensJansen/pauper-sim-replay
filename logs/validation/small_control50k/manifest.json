@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-11-14T13:55:19-0500",
+  "config_history": [],
+  "model_history": [],
+  "sessions": [
+    {
+      "started_at": "2026-11-14T13:55:19-0500",
+      "finished_at": null,
+      "games_start": 0,
+      "games_end": null,
+      "code": {
+        "commit": "b0c729460fddb970b11bea7d623188428e8312d9",
+        "branch": "main",
+        "dirty": true
+      },
+      "argv": [
+        "run_training_pipeline.py",
+        "--config",
+        "../training_configs/small_control_50k.json"
+      ]
+    }
+  ],
+  "config": {
+    "league_name": "small_control50k",
+    "total_games": 50000,
+    "roster": [
+      "rakdos_madness",
+      "dmir_terror",
+      "elves",
+      "mono_red_rally"
+    ],
+    "create_training_league": true,
+    "training_league_name": "small_control50k-training",
+    "checks_cadence_pct": 10,
+    "checks_games": 50,
+    "history_checks": true,
+    "history_games": 100,
+    "field_games": 40,
+    "history_ladder": null,
+    "probe_states_dir": "C:\\Users\\jens2\\OneDrive\\Desktop\\pauper_sim\\data\\probe_states\\small_league",
+    "n_workers": 10,
+    "games_per_iteration": 24,
+    "snapshot_every": 8,
+    "checkpoint_rate": 0.15,
+    "stratify_0land_pct": 0.0,
+    "overlap_collect": true,
+    "pfsp": true,
+    "pfsp_power": 0.5,
+    "device": "cuda",
+    "trunk_hidden": [
+      128,
+      128
+    ],
+    "encoder": null,
+    "ppo_hparams": null,
+    "seed": null,
+    "cadence_games": 5000
+  },
+  "model": {
+    "trunk_hidden": [
+      128,
+      128
+    ],
+    "vocab_size": 155,
+    "encoder_d_model": 64,
+    "n_params_example_deck": 372878,
+    "structure_sha": "4747420e94348a96",
+    "n_fixed_actions": {
+      "rakdos_madness": 125,
+      "dmir_terror": 121,
+      "elves": 126,
+      "mono_red_rally": 123
+    }
+  },
+  "environment": {
+    "python": "3.10.6",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "torch": "2.11.0+cu128",
+    "cuda_device": "NVIDIA GeForce RTX 5060 Ti"
+  }
+}
