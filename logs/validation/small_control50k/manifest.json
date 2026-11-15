@@ -6,9 +6,9 @@
   "sessions": [
     {
       "started_at": "2026-11-14T13:55:19-0500",
-      "finished_at": null,
+      "finished_at": "2026-11-15T02:08:03-0500",
       "games_start": 0,
-      "games_end": null,
+      "games_end": 50016,
       "code": {
         "commit": "b0c729460fddb970b11bea7d623188428e8312d9",
         "branch": "main",
