@@ -3,32 +3,33 @@ import { clampIndex, nextStart, phaseIndex, prevStart } from '../../lib/replayNa
 
 // game.turn.Phase order; main2 only occurs for combat-enabled decks, so it simply never lights for the rest.
 const PHASES = [
-  ['untap', 'Untap'], ['upkeep', 'Upkeep'], ['draw', 'Draw'], ['main1', 'Main'],
+  ['pregame', 'Mulligans'], ['untap', 'Untap'], ['upkeep', 'Upkeep'], ['draw', 'Draw'], ['main1', 'Main'],
   ['declare_attackers', 'Attack'], ['declare_blockers', 'Block'], ['combat_damage', 'Damage'],
   ['main2', 'Main 2'], ['end', 'End'],
 ]
 
-// One row: whose turn it is, the phase pills, what just happened, then the transport (children).
-// Tinted in the turn player's seat color. Each phase pill jumps to that phase in the current turn (disabled
-// if this turn never entered it, e.g. no combat).
+// One row of three regions whose sizes never depend on their content (a grid, see .turn-banner): [turn + phase pills]
+// [what just happened] [transport (children)]. The same ten pills show on every step, so nothing shifts as the
+// phase changes. Tinted in the turn player's seat color. Each pill jumps to that phase in the current turn (disabled
+// if this turn never entered it, e.g. no combat); Mulligans jumps back to the start of the game.
 export function TurnBanner({ step, phase, nav, go, children }) {
   const p = step.turn_player_idx
   const pill = (key, label) => {
-    const to = phaseIndex(nav, step.turn, key)
+    const to = key === 'pregame' ? phaseIndex(nav, 0, 'pregame') : phaseIndex(nav, step.turn, key)
     return (
-      <button key={key} className={`phase-pill${key === phase ? ' current' : ''}`} disabled={to === null}
-              title={to === null ? 'This turn never reached this phase' : `Jump to ${label} of this turn`} onClick={() => go(to)}>
+      <button key={key} data-label={label} className={`phase-pill${key === phase ? ' current' : ''}`} disabled={to === null}
+              title={to === null ? 'This turn never reached this phase' : key === 'pregame' ? 'Jump to the start of the game' : `Jump to ${label} of this turn`} onClick={() => go(to)}>
         {label}
       </button>
     )
   }
   return (
     <div className={`turn-banner p${p}`}>
-      <div className="turn-who">
-        {phase === 'pregame' ? 'Pre-game' : <>Turn {step.turn} · <b>P{p}</b></>}
-      </div>
-      <div className="phase-track">
-        {step.turn === 0 ? pill('pregame', 'Mulligans') : PHASES.map(([key, label]) => pill(key, label))}
+      <div className="banner-left">
+        <div className="turn-who">
+          {phase === 'pregame' ? 'Pre-game' : <>Turn {step.turn} · <b>P{p}</b></>}
+        </div>
+        <div className="phase-track">{PHASES.map(([key, label]) => pill(key, label))}</div>
       </div>
       <div className="turn-desc" title={step.description}>{step.description}</div>
       {children}
@@ -66,7 +67,7 @@ export function Transport({ i, last, nav, go }) {
         <input value={draft} inputMode="numeric" aria-label="Event number"
                onChange={e => setDraft(e.target.value)} onBlur={commit}
                onKeyDown={e => e.key === 'Enter' && (commit(), e.target.blur())} />
-        <span className="hint">/ {last}</span>
+        <span className="hint event-last">/ {last}</span>
       </label>
     </div>
   )

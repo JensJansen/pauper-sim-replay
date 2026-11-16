@@ -5,15 +5,21 @@
 .p1 { --seat: var(--p1); --seat-bg: var(--p1-bg); }
 
 /* turn banner: a single row -- turn, phase pills, what just happened, transport */
-.turn-banner { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 6px 16px; background: var(--seat-bg); border-bottom: 3px solid var(--seat); }
-.turn-who { font-size: 15px; font-weight: 600; color: #fff; white-space: nowrap; }
+/* Three regions, sized by the grid and never by what is in them: [turn + phase pills] [description] [transport].
+   The pill set, the turn label's box and the event box are all fixed-size too, so changing step moves nothing. */
+.turn-banner { position: sticky; top: 0; z-index: 40; display: grid; grid-template-columns: minmax(680px, 6fr) minmax(0, 3fr) minmax(500px, 6fr); align-items: center; column-gap: 16px; padding: 6px 16px; background: var(--seat-bg); border-bottom: 3px solid var(--seat); }
+.banner-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.turn-who { flex: 0 0 124px; font-size: 15px; font-weight: 600; color: #fff; white-space: nowrap; }
 .turn-who b { color: var(--seat); }
-.phase-track { display: flex; gap: 2px; }
-.replay .phase-pill { padding: 2px 8px; border-radius: 11px; font-size: 12px; color: #aab1bd; background: none; border: 1px solid transparent; }
+.phase-track { display: flex; gap: 2px; flex: none; }
+.replay .phase-pill { padding: 2px 8px; border-radius: 11px; font-size: 12px; white-space: nowrap; color: #aab1bd; background: none; border: 1px solid transparent; }
+/* the current pill is bold: a hidden bold copy of the label reserves that width, so a pill is the same size current or not */
+.replay .phase-pill { display: inline-flex; flex-direction: column; align-items: center; }
+.replay .phase-pill::after { content: attr(data-label); font-weight: 600; height: 0; overflow: hidden; visibility: hidden; }
 .replay .phase-pill:hover:not(:disabled) { background: #ffffff14; border-color: #ffffff30; color: #fff; }
 .replay .phase-pill:disabled { color: #4d525b; opacity: 1; cursor: default; }
 .replay .phase-pill.current { color: #fff; font-weight: 600; border-color: var(--seat); background: #0006; }
-.turn-desc { flex: 1 1 200px; min-width: 0; text-align: center; font-size: 13px; color: #b8c0d0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.turn-desc { min-width: 0; text-align: center; font-size: 13px; color: #b8c0d0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .game-layout { display: flex; gap: 16px; padding: 14px 20px 24px; align-items: flex-start; }
 .board { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
@@ -108,10 +114,12 @@
 .dbar.chosen .dbar-fill { background: var(--seat); }
 
 /* transport: inline in the banner -- icon buttons, scrubber, event box */
-.transport { display: flex; gap: 4px; align-items: center; flex: 1 1 360px; }
+.transport { display: flex; gap: 4px; align-items: center; min-width: 0; }
 .replay .tbtn { padding: 2px 9px; font-size: 12px; line-height: 1.5; min-width: 34px; letter-spacing: -1px; }
-.scrubber { flex: 1; min-width: 100px; margin: 0 8px; }
-.event-box { display: flex; gap: 6px; align-items: center; font-size: 12px; color: #b8c0d0; }
+.scrubber { flex: 1; min-width: 60px; margin: 0 8px; }
+.event-box { display: flex; gap: 6px; align-items: center; flex: none; font-size: 12px; color: #b8c0d0; }
+.event-last { min-width: 5ch; } /* "/ 518" and "/ 1137" take the same room */
 .event-box input { width: 60px; padding: 3px 6px; background: #0e1013; border: 1px solid #34383f; border-radius: 5px; color: #e8eaf0; font-size: 13px; }
 
 @media (max-width: 900px) { .game-layout { flex-direction: column; } .player { flex-direction: column; } .stats { flex-basis: auto; border-right: none; padding-right: 4px; } }
+@media (max-width: 1260px) { .turn-banner { grid-template-columns: 1fr; row-gap: 6px; } .turn-desc { text-align: left; } }
