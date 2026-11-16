@@ -1,5 +1,6 @@
 /* Seat colors: P0 amber, P1 teal (deliberately not red/blue, which are deck colors). */
-.replay { --p0: #e8a33d; --p1: #2fb5a8; --p0-bg: #2a2110; --p1-bg: #0f2a28; --card-w: 120px; --card-h: 168px; }
+.replay { --p0: #e8a33d; --p1: #2fb5a8; --p0-bg: #2a2110; --p1-bg: #0f2a28; --k: 1.7; --card-w: calc(120px * var(--k)); --card-h: calc(168px * var(--k)); }
+/* --k scales the board: cards and everything sized around them (gaps, badges, piles, the attachment tuck). */
 .p0 { --seat: var(--p0); --seat-bg: var(--p0-bg); }
 .p1 { --seat: var(--p1); --seat-bg: var(--p1-bg); }
 
@@ -22,22 +23,29 @@
 .field { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
 .board-box, .hand-box { border: 1px solid #ffffff1c; border-radius: 8px; background: #0003; padding: 8px 10px; }
 .board-box { display: flex; flex-direction: column; gap: 6px; }
-.bf-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; min-height: 64px; }
+.bf-row { display: flex; flex-wrap: wrap; gap: calc(10px * var(--k)); align-items: flex-start; min-height: calc(64px * var(--k)); }
 .bf-row:empty { align-items: center; }
 .bf-row:empty::before { content: attr(data-label); font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: #ffffff30; } /* empty row: faint label, keeps the 3-row shape */
-.bf-row + .bf-row { border-top: 1px dashed #ffffff14; padding-top: 10px; }
+.bf-row + .bf-row { border-top: 1px dashed #ffffff14; padding-top: calc(10px * var(--k)); }
 .hand-box { min-height: calc(var(--card-h) + 36px); }
 .box-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: #8a909b; margin-bottom: 6px; }
-.hand-cards { display: flex; flex-wrap: wrap; gap: 10px; }
+.hand-cards { display: flex; flex-wrap: wrap; gap: calc(10px * var(--k)); }
+/* A hand stays on one row: when it is wider than its box the cards overlap (each slot shrinks, the face keeps its size),
+   and the hovered one comes to the front. Anything with room to spare just sits side by side. */
+.hand-cards { flex-wrap: nowrap; }
+.hand-cards .card-slot { flex: 0 1 var(--card-w); min-width: calc(var(--card-w) * 0.3); }
+.hand-cards .card-face { width: var(--card-w); }
+.hand-cards .card-slot:last-child { flex-shrink: 0; min-width: var(--card-w); } /* the last card keeps its full width, so the fan never pokes past the box */
+.hand-cards .card-slot:hover { z-index: 3; }
 
-.stats { flex: 0 0 300px; display: flex; flex-direction: column; justify-content: space-between; gap: 16px; padding: 4px 16px 4px 4px; border-right: 1px solid #ffffff1c; } /* spreads top-to-bottom of the zone */
+.stats { flex: 0 0 calc(120px + calc(130px * var(--k))); display: flex; flex-direction: column; justify-content: space-between; gap: 16px; padding: 4px 16px 4px 4px; border-right: 1px solid #ffffff1c; } /* spreads top-to-bottom of the zone */
 .seat-tag { font-weight: 700; font-size: 14px; letter-spacing: .04em; color: var(--seat); text-transform: uppercase; }
-.life { font-size: 56px; font-weight: 700; color: #fff; line-height: 1; }
+.life { font-size: calc(44px * var(--k)); font-weight: 700; color: #fff; line-height: 1; }
 .life span { font-size: 12px; font-weight: 400; color: #8a909b; margin-left: 6px; }
 .stat-grid { display: flex; flex-direction: column; gap: 14px; }
 .stat { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; color: #9aa0aa; padding-bottom: 6px; border-bottom: 1px solid #ffffff12; }
 .stat b { font-size: 16px; color: #e8eaf0; }
-.pile-row { display: flex; gap: 18px; flex-wrap: wrap; }
+.pile-row { display: flex; gap: calc(18px * var(--k)); flex-wrap: wrap; }
 .row-tag { flex: none; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: #888; }
 
 /* cards */
@@ -48,10 +56,10 @@
 .card-face img { width: 100%; height: 100%; border-radius: 5px; display: block; }
 .card-face.attacking { outline: 2px solid #e5484d; }
 .card-face.blocking { outline: 2px solid #4a8dff; }
-.card-fallback { width: 100%; height: 100%; padding: 8px; font-size: 15px; display: flex; align-items: center; justify-content: center; text-align: center; background: #2a2d33; border-radius: 5px; color: #d8dbe0; }
-.card-pt { position: absolute; right: 4px; bottom: 4px; background: #000c; color: #fff; font-size: 16px; padding: 1px 8px; border-radius: 5px; }
+.card-fallback { width: 100%; height: 100%; padding: calc(8px * var(--k)); font-size: calc(15px * var(--k)); display: flex; align-items: center; justify-content: center; text-align: center; background: #2a2d33; border-radius: 5px; color: #d8dbe0; }
+.card-pt { position: absolute; right: calc(4px * var(--k)); bottom: calc(4px * var(--k)); background: #000c; color: #fff; font-size: calc(16px * var(--k)); padding: 1px calc(8px * var(--k)); border-radius: calc(5px * var(--k)); }
 .card-pt.up { color: #6fe08a; } .card-pt.down { color: #ff7b7b; }
-.card-token { position: absolute; left: 4px; top: 4px; background: #3a3f47; color: #fff; font-size: 13px; padding: 1px 7px; border-radius: 5px; }
+.card-token { position: absolute; left: calc(4px * var(--k)); top: calc(4px * var(--k)); background: #3a3f47; color: #fff; font-size: calc(13px * var(--k)); padding: 1px calc(7px * var(--k)); border-radius: calc(5px * var(--k)); }
 
 /* attachments tucked behind their host */
 .perm { position: relative; flex: none; }
@@ -61,21 +69,21 @@
 /* piles */
 .pile-label { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: #888; margin-bottom: 2px; }
 .pile-body { position: relative; width: var(--card-w); height: var(--card-h); }
-.pile-count { position: absolute; right: -6px; bottom: -6px; background: #3a3f47; color: #fff; font-size: 14px; padding: 2px 9px; border-radius: 12px; border: 1px solid #14161a; }
-.pile-empty { width: 100%; height: 100%; border: 1px dashed #ffffff33; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #666; }
+.pile-count { position: absolute; right: calc(-6px * var(--k)); bottom: calc(-6px * var(--k)); background: #3a3f47; color: #fff; font-size: calc(14px * var(--k)); padding: 2px calc(9px * var(--k)); border-radius: calc(12px * var(--k)); border: 1px solid #14161a; }
+.pile-empty { width: 100%; height: 100%; border: 1px dashed #ffffff33; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: calc(13px * var(--k)); color: #666; }
 
 /* floating popups (portaled to <body>, so not scoped under .replay) */
 .float-pop { position: fixed; z-index: 100; pointer-events: none; }
 .card-large { width: 300px; height: 418px; border-radius: 14px; box-shadow: 0 8px 28px #000c; background: #111; display: block; }
-.pile-flyout { width: 640px; display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; background: #1b1e24; border: 1px solid #3a3f47; border-radius: 8px; box-shadow: 0 8px 24px #000a; pointer-events: auto; --card-w: 120px; --card-h: 168px; }
+.pile-flyout { width: calc(640px * var(--k)); display: flex; flex-wrap: wrap; gap: calc(8px * var(--k)); padding: calc(12px * var(--k)); background: #1b1e24; border: 1px solid #3a3f47; border-radius: 8px; box-shadow: 0 8px 24px #000a; pointer-events: auto; --card-w: calc(108px * var(--k)); --card-h: calc(151px * var(--k)); }
 
 /* center strip between the boards: the shared stack (left) and the agent's decision (right) */
-.center-strip { display: flex; gap: 0; min-height: 150px; border: 1px solid #3a3f47; border-radius: 8px; background: #1b1e24; overflow: hidden; }
+.center-strip { display: flex; gap: 0; min-height: calc(90px * var(--k)); border: 1px solid #3a3f47; border-radius: 8px; background: #1b1e24; overflow: hidden; }
 .stack-zone { flex: 1 1 0; min-width: 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; align-content: center; padding: 8px 12px; }
 .stack-zone .row-tag { flex-basis: 100%; }
 .stack-zone.p0, .stack-zone.p1 { background: var(--seat-bg); box-shadow: inset 4px 0 0 var(--seat); } /* tinted by the controller of the top (most recent) item */
 .stack-entry { display: flex; gap: 8px; align-items: center; padding: 5px 8px; border: 2px solid var(--seat); border-radius: 8px; background: var(--seat-bg); }
-.stack-meta { font-size: 14px; color: #d8dbe0; max-width: 170px; }
+.stack-meta { font-size: calc(13px * var(--k)); color: #d8dbe0; max-width: calc(150px * var(--k)); }
 .stack-meta b { color: var(--seat); }
 
 /* agent decision: bars sorted by probability, deciding player's color; dimmed when it's not from this event */

@@ -1,6 +1,7 @@
 import { CardView, Pile } from './Cards'
 
-const ATTACH_STEP = 36 // px of each attachment left visible beneath/above its host
+const ATTACH_STEP = 36 // px of each attachment left visible beneath/above its host at --k = 1 (see replay-board.css)
+const tuck = n => `calc(${n * ATTACH_STEP}px * var(--k))` // n steps, scaled by the board's size knob
 
 const hostKey = (idx, c) => `${idx}|${c.name}|${c.slot}`
 const attachKey = e => `${e.controller_idx}|${e.name}|${e.slot}`
@@ -27,12 +28,12 @@ export function groupAttachments(players) {
 // strip shows). `flip` (the top player) tucks them upward instead of downward, so the two sides mirror.
 function Permanent({ card, attachments, flip }) {
   const n = attachments.length
-  const pad = n * ATTACH_STEP
+  const pad = tuck(n)
   return (
     <div className="perm" style={flip ? { paddingTop: pad } : { paddingBottom: pad }}>
       {attachments.map((a, i) => (
         <div key={i} className="perm-attach"
-             style={{ top: flip ? (n - 1 - i) * ATTACH_STEP : (i + 1) * ATTACH_STEP, zIndex: n - i }}>
+             style={{ top: tuck(flip ? n - 1 - i : i + 1), zIndex: n - i }}>
           <CardView name={a.name} card={a} />
         </div>
       ))}
