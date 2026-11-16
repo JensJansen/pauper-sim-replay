@@ -1,14 +1,14 @@
 # logs/validation/
 
 A copy of the parent pauper_sim repo's `checkpoints/<league>/` validation
-output, committed here so `/stats` has real data to show even when this
+output, committed here so the stats page has real data to show even when this
 submodule is checked out on its own (`checkpoints/` itself is gitignored at
 the pauper_sim root). Per league: `metrics.jsonl`, `progress.json`,
 `checks/*.jsonl`, and `<deck>/checks/*.jsonl` -- never the `live.pt` /
 `archive/*.pt` / `mulligan.pt` model weights, which are multi-GB and not
 needed by the stats page. Per league there is also `manifest.json` (the run's config, model architecture,
 code state and sessions; served at `/api/stats/leagues/<league>/manifest`), kept whole like `progress.json`. Likewise `opponent_stats.json` (every training deck's PFSP win/games tally against each
-opponent deck and snapshot, cumulative over the run; served at `/api/stats/leagues/<league>/opponents`, shown on the Opponents tab).
+opponent deck and snapshot, cumulative over the run; served at `/api/stats/leagues/<league>/opponents`, shown on the Training tab).
 
 Note the `checks/` shape here is NOT a copy of `checkpoints/<league>/checks/`'s
 own layout: the parent repo's canonical copy still writes one
@@ -23,6 +23,14 @@ parent repo for the write side, and `app.py`'s `stats_checks`/
 `stats_check_detail` here for how a per-snapshot request resolves to one
 line in the consolidated file. The old one-file-per-snapshot shape is no
 longer understood on the read side -- every league here has been migrated.
+
+## compare/
+
+`compare/<a>_vs_<b>.json` -- matched-age head-to-head results between two training arms, as written by the parent
+repo's `analysis/eval/compare_arms.py --out <path>` (`{a, b, ids, rows: [{deck, snapshot, games, a_wins, b_wins,
+no_winner}]}`; snapshot id k is the arm's snapshot at about (k+1) x 192 games/deck). Not mirrored automatically: copy
+a result here (or point `--out` here) to publish it. Served whole at `/api/stats/compare` and shown on the
+Compare tab.
 
 ## Kept current automatically
 

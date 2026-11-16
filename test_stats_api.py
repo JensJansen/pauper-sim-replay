@@ -140,3 +140,17 @@ def test_opponents_is_null_until_a_run_writes_it_then_served_whole(client, tmp_p
     (tmp_path / "test-league" / "opponent_stats.json").write_text(json.dumps({"elves": {"deck:elves": [1, 2]}}))
     assert client.get("/api/stats/leagues/test-league/opponents").get_json() == {"elves": {"deck:elves": [1, 2]}}
     assert client.get("/api/stats/leagues/does-not-exist/opponents").status_code == 404
+
+
+def test_compare_lists_published_head_to_head_files(client, tmp_path):
+    assert client.get("/api/stats/compare").get_json() == []          # none published yet
+    cmp = tmp_path / "compare"
+    cmp.mkdir()
+    (cmp / "b_vs_a.json").write_text(json.dumps({"a": "b", "b": "a", "ids": [1], "rows": [{"deck": "elves", "a_wins": 5}]}))
+    (cmp / "broken.json").write_text("{not json")
+    (cmp / "not_a_result.json").write_text(json.dumps({"hello": 1}))
+    got = client.get("/api/stats/compare").get_json()
+    assert [g["name"] for g in got] == ["b_vs_a"]                      # unreadable / wrong-shape files are skipped
+    assert got[0]["a"] == "b" and got[0]["rows"][0]["a_wins"] == 5
+    # a compare/ dir is not a league: it has no metrics.jsonl, so it never shows up in the league list
+    assert "compare" not in [l["name"] for l in client.get("/api/stats/leagues").get_json()]

@@ -1,0 +1,107 @@
+{
+ "a": "small_lrdecay50k",
+ "b": "small_baseline",
+ "ids": [
+  257,
+  258,
+  259
+ ],
+ "rows": [
+  {
+   "deck": "dmir_terror",
+   "snapshot": 257,
+   "games": 300,
+   "a_wins": 173,
+   "b_wins": 127,
+   "no_winner": 0
+  },
+  {
+   "deck": "dmir_terror",
+   "snapshot": 258,
+   "games": 300,
+   "a_wins": 150,
+   "b_wins": 150,
+   "no_winner": 0
+  },
+  {
+   "deck": "dmir_terror",
+   "snapshot": 259,
+   "games": 300,
+   "a_wins": 157,
+   "b_wins": 143,
+   "no_winner": 0
+  },
+  {
+   "deck": "elves",
+   "snapshot": 257,
+   "games": 300,
+   "a_wins": 170,
+   "b_wins": 130,
+   "no_winner": 0
+  },
+  {
+   "deck": "elves",
+   "snapshot": 258,
+   "games": 300,
+   "a_wins": 158,
+   "b_wins": 142,
+   "no_winner": 0
+  },
+  {
+   "deck": "elves",
+   "snapshot": 259,
+   "games": 300,
+   "a_wins": 152,
+   "b_wins": 148,
+   "no_winner": 0
+  },
+  {
+   "deck": "mono_red_rally",
+   "snapshot": 257,
+   "games": 300,
+   "a_wins": 153,
+   "b_wins": 147,
+   "no_winner": 0
+  },
+  {
+   "deck": "mono_red_rally",
+   "snapshot": 258,
+   "games": 300,
+   "a_wins": 150,
+   "b_wins": 150,
+   "no_winner": 0
+  },
+  {
+   "deck": "mono_red_rally",
+   "snapshot": 259,
+   "games": 300,
+   "a_wins": 159,
+   "b_wins": 141,
+   "no_winner": 0
+  },
+  {
+   "deck": "rakdos_madness",
+   "snapshot": 257,
+   "games": 300,
+   "a_wins": 169,
+   "b_wins": 131,
+   "no_winner": 0
+  },
+  {
+   "deck": "rakdos_madness",
+   "snapshot": 258,
+   "games": 300,
+   "a_wins": 170,
+   "b_wins": 130,
+   "no_winner": 0
+  },
+  {
+   "deck": "rakdos_madness",
+   "snapshot": 259,
+   "games": 300,
+   "a_wins": 177,
+   "b_wins": 123,
+   "no_winner": 0
+  }
+ ]
+}

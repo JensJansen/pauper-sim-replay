@@ -143,17 +143,6 @@ def test_the_listing_does_not_show_sidecars(client):
     assert [r["name"] for r in client.get("/api/replay/runs").get_json()] == [NAME]
 
 
-def test_posting_a_light_or_single_game_doc_still_works(client, tmp_path):
-    """The viewer's local-file path posts a light doc for the list and ONE game per click."""
-    doc = json.loads((tmp_path / NAME).read_text(encoding="utf-8"))
-    light = {"meta": doc["meta"], "games": [{"game_index": g["game_index"], "deck_a": g["deck_a"],
-                                             "deck_b": g["deck_b"], "n_events": len(g["events"])} for g in doc["games"]]}
-    assert client.post("/api/replay/games", json={"content": json.dumps(light)}).get_json() == list_games(doc)
-    one = {"meta": doc["meta"], "games": [doc["games"][1]]}
-    assert client.post("/api/replay/game", json={"content": json.dumps(one), "game_index": 1}).get_json() == \
-        reduce_game(doc, 1)
-
-
 # ---- gzip ----
 
 def test_json_is_gzipped_only_when_asked_and_worth_it(client):
@@ -168,12 +157,10 @@ def test_json_is_gzipped_only_when_asked_and_worth_it(client):
         assert zipped.headers.get("Content-Encoding") is None
 
 
-def test_gzip_applies_to_large_json_and_skips_small_and_non_json(client, tmp_path):
+def test_gzip_applies_to_large_json_and_skips_small_bodies(client, tmp_path):
     _write(tmp_path / "big.json", _doc(40, n=60))
     big = client.get("/api/replay/runs/big.json/games/0", headers={"Accept-Encoding": "gzip"})
     assert big.headers["Content-Encoding"] == "gzip"
     assert json.loads(gzip.decompress(big.data))["game_index"] == 0
     small = client.get("/api/replay/runs", headers={"Accept-Encoding": "gzip"})  # tiny listing
     assert small.headers.get("Content-Encoding") is None
-    raw = client.get("/api/replay/runs/big.json/raw", headers={"Accept-Encoding": "gzip"})  # file response
-    assert raw.headers.get("Content-Encoding") is None

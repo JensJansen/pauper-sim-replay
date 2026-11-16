@@ -1,46 +1,26 @@
-"""Public-hostable subset of app.py: same routes (landing page, "/replay",
-"/stats", "/methodology" and their APIs), identical except for which logs/
-it can see (this already-public repo's own committed logs/, vs. whatever's
+"""Public-hostable subset of app.py: same routes (the React frontend at "/" and the /api routes behind it),
+identical except for which logs/ it can see (this already-public repo's own committed logs/, vs. whatever's
 on the local machine running app.py). Deploy entrypoint for Render/Fly/etc:
-gunicorn app_public:app (render.yaml).
+gunicorn app_public:app (render.yaml, which also builds the frontend).
 """
 import json
 from collections import defaultdict
 from pathlib import Path
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify
 
-from replay_engine import list_games, reduce_game
 from compress import init_gzip
+from frontend import init_frontend
 from replay_listing import list_replay_runs, resolve_run, run_game, run_games
-from stats_checks import CHECK_FILE_RE, iter_check_snapshots, read_consolidated_record
+from stats_checks import CHECK_FILE_RE, iter_check_snapshots, list_compare, read_consolidated_record
 
 WEBAPP_LOGS_DIR = Path(__file__).resolve().parent / "logs"
 REPLAY_LOGS_DIR = WEBAPP_LOGS_DIR / "replays"
 VALIDATION_DIR = WEBAPP_LOGS_DIR / "validation"
 
-app = Flask(__name__, static_folder="static", static_url_path="")
-init_gzip(app)  # gzip JSON responses (stdlib) -- see compress.py
-
-
-@app.get("/")
-def home_page():
-    return send_from_directory(app.static_folder, "index.html")
-
-
-@app.get("/replay")
-def replay_page():
-    return send_from_directory(app.static_folder, "replay.html")
-
-
-@app.get("/stats")
-def stats_page():
-    return send_from_directory(app.static_folder, "stats.html")
-
-
-@app.get("/methodology")
-def methodology_page():
-    return send_from_directory(app.static_folder, "methodology.html")
+app = Flask(__name__, static_folder=None)  # the frontend is served by init_frontend, not Flask's static route
+init_gzip(app)  # gzip JSON and text responses (stdlib) -- see compress.py
+init_frontend(app)  # the built React app at "/" -- see frontend.py
 
 
 @app.get("/api/replay/runs")
@@ -50,14 +30,6 @@ def replay_runs():
     see replay_listing.py. Scoped to replays/ specifically (not all of logs/) so a
     validation checks/*.json never shows up here as if it were a game log."""
     return jsonify(list_replay_runs(REPLAY_LOGS_DIR))
-
-
-@app.get("/api/replay/runs/<path:name>/raw")
-def replay_run_raw(name):
-    path = (REPLAY_LOGS_DIR / name).resolve()
-    if REPLAY_LOGS_DIR.resolve() not in path.parents or not path.is_file():
-        return jsonify({"error": "not found"}), 404
-    return send_from_directory(path.parent, path.name)
 
 
 @app.get("/api/replay/runs/<path:name>/games")
@@ -84,27 +56,6 @@ def replay_run_game(name, game_index):
         return jsonify({"error": str(exc)}), 400
 
 
-@app.post("/api/replay/games")
-def replay_games():
-    body = request.get_json(force=True)
-    try:
-        doc = json.loads(body["content"])
-    except (KeyError, TypeError, json.JSONDecodeError) as exc:
-        return jsonify({"error": f"couldn't parse log file: {exc}"}), 400
-    return jsonify(list_games(doc))
-
-
-@app.post("/api/replay/game")
-def replay_game():
-    body = request.get_json(force=True)
-    try:
-        doc = json.loads(body["content"])
-        result = reduce_game(doc, int(body["game_index"]))
-    except (KeyError, TypeError, ValueError, json.JSONDecodeError) as exc:
-        return jsonify({"error": str(exc)}), 400
-    return jsonify(result)
-
-
 def _league_dir(name):
     path = (VALIDATION_DIR / name).resolve()
     if VALIDATION_DIR.resolve() not in path.parents or not path.is_dir():
@@ -127,9 +78,16 @@ def stats_leagues():
                 "mtime": metrics_path.stat().st_mtime,
                 "cumulative_games_per_deck": progress.get("cumulative_games_per_deck"),
             })
-    # No league is special: most recently written first (what /stats opens on), ties by name
+    # No league is special: most recently written first (what the stats page opens on), ties by name
     leagues.sort(key=lambda l: (-l["mtime"], l["name"]))
     return jsonify(leagues)
+
+
+@app.get("/api/stats/compare")
+def stats_compare():
+    """Published head-to-head results between training arms (logs/validation/compare/*.json -- see
+    stats_checks.list_compare); [] when none have been published."""
+    return jsonify(list_compare(VALIDATION_DIR))
 
 
 @app.get("/api/stats/leagues/<league>/manifest")

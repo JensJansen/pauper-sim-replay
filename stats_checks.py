@@ -15,8 +15,23 @@ import re
 
 CHECK_FILE_RE = re.compile(r"(.+)_(\d+)games\.json$")  # virtual per-snapshot filename shape
 
+def list_compare(validation_dir):
+    """Head-to-head results between training arms (analysis/eval/compare_arms.py --out ...), published as
+    logs/validation/compare/<a>_vs_<b>.json: [{"name": <file stem>, "a", "b", "ids", "rows"}], sorted by name. An
+    unreadable or non-object file is skipped rather than failing the listing."""
+    out = []
+    for path in sorted((validation_dir / "compare").glob("*.json")) if (validation_dir / "compare").is_dir() else []:
+        try:
+            doc = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if isinstance(doc, dict) and isinstance(doc.get("rows"), list):
+            out.append({"name": path.stem, **doc})
+    return out
+
+
 def league_sort_key(name):
-    """Sort key for grouping replays by league: by name. No league is special -- /stats lists leagues most
+    """Sort key for grouping replays by league: by name. No league is special -- the stats page lists leagues most
     recently written first and opens on the first one."""
     return name
 

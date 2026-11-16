@@ -1,0 +1,21 @@
+.chart-card { padding: 14px 16px; display: flex; flex-direction: column; }
+.chart-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
+.chart-title { font-size: 14px; font-weight: 600; color: #e8eaf0; }
+.chart-actions { display: flex; align-items: center; gap: 12px; flex: none; }
+.chart-toggle { cursor: pointer; border: 1px solid #3a3f47; border-radius: 5px; background: #262a31; color: #d8dbe0; padding: 3px 10px; font-size: 12px; font-family: inherit; }
+.chart-toggle:hover { background: #2f343c; }
+.chart-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0 0 6px; min-height: 18px; }
+.legend-item { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #b8c0d0; }
+.line-key { display: inline-block; width: 14px; height: 3px; border-radius: 2px; flex: none; }
+
+.chart-tip { background: #1b1e24; border: 1px solid #3a3f47; border-radius: 6px; padding: 8px 10px; box-shadow: 0 6px 20px #000a; font-size: 12px; color: #b8c0d0; }
+.chart-tip-x { color: #8a909b; font-size: 11px; margin-bottom: 4px; }
+.chart-tip-row { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+.chart-tip-row b { color: #fff; min-width: 44px; text-align: right; font-variant-numeric: tabular-nums; }
+.chart-table-wrap { overflow: auto; }
+.chart-table-wrap table { margin: 0; }
+.recharts-wrapper:focus, .recharts-surface:focus { outline: none; }
+.bar-key { display: inline-block; width: 10px; height: 10px; border-radius: 2px; flex: none; }
+
+/* in a grid of charts every header reserves the same height (title + up to two subtitle lines), so plots start level */
+.chart-grid .chart-head { min-height: 54px; }

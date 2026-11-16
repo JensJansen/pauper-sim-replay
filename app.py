@@ -1,76 +1,41 @@
-"""Local Flask app: "/" is a landing page (static/index.html) linking to the
-three tools below. Local-only: no auth, binds to localhost. See app_public.py
-for the publicly-hostable equivalent -- same routes, identical except for
-which logs/ it can see (this machine's vs. whatever's committed).
+"""Local Flask app: the React frontend (frontend/, built to frontend/dist -- see frontend.py) at "/", and the
+JSON API it reads under /api. Local-only: no auth, binds to localhost. See app_public.py for the publicly-hostable
+equivalent -- same routes, identical except for which logs/ it can see (this machine's vs. whatever's committed).
 
-logs/ has two independent, sibling subdirectories -- each tool only ever
-reads its own:
-- "/replay" -- the game-log replay viewer (static/replay.html) and an API to
-  browse logs/replays/ and reduce a logged game's events into board-state
-  snapshots (replay_engine.py). A file doesn't have to live under
-  logs/replays/ to be viewable, though -- "Open new file" reads any
-  correctly-shaped JSON from disk client-side, no server route involved, so
-  e.g. a validation check's own output (checkpoints/<league>/checks/
-  primary_vs_primary_round_robin_<N>games.json in the parent repo -- see
-  validation/round_robin_primary.py, which embeds a "games" key in that
-  exact file) opens here directly with zero wiring on this end.
-- "/stats" -- static/stats.html, a validation-metrics dashboard reading
-  logs/validation/. That's a COPY of the parent pauper_sim repo's
-  checkpoints/<league>/ (metrics.jsonl, progress.json, and every
-  checks/*.jsonl -- never the multi-GB live/archive/mulligan .pt weights,
-  and never a check's embedded "games" key either -- see
-  validation/_common.py write_league_json's own docstring), kept current
-  automatically: src/validation/_common.py and rl/league/league_runner.py
-  (both in the parent repo) mirror every write here as they make it,
-  best-effort, whenever this submodule is checked out -- see
-  webapp_publish/mirror.py there and logs/validation/README.md here. Made because
-  checkpoints/ itself is gitignored at the pauper_sim root and this
-  submodule has no other way to ship real data with itself.
-- "/methodology" -- static/methodology.html, a static explainer of the
-  training methodology (league structure, model architecture, reward
-  function, PPO, mulligan net, validation). No API route: it doesn't read
-  logs/ at all, just prose and hand-authored diagrams describing how the
-  parent repo's rl/ and src/validation/ actually work.
+The frontend's pages are client-side routes (/, /replay, /stats/<tab>, /methodology); the API behind them:
+- /api/replay/... -- browse logs/replays/ (event-log JSON written by training's round_robin_review check) and read
+  one logged game at a time, reduced into per-event board-state snapshots (replay_listing.py / replay_engine.py /
+  replay_index.py). Only already-written files under logs/replays/ are readable, never anything outside it.
+- /api/stats/... -- reads logs/validation/: a COPY of the parent pauper_sim repo's checkpoints/<league>/
+  (metrics.jsonl, progress.json, manifest.json, opponent_stats.json and every checks/*.jsonl -- never the multi-GB
+  live/archive/mulligan .pt weights, and never a check's embedded "games" key either -- see validation/_common.py
+  write_league_json's own docstring), kept current automatically: src/validation/_common.py and
+  rl/league/league_runner.py (both in the parent repo) mirror every write here as they make it, best-effort,
+  whenever this submodule is checked out -- see webapp_publish/mirror.py there and logs/validation/README.md here.
+  Made because checkpoints/ itself is gitignored at the pauper_sim root and this submodule has no other way to
+  ship real data with itself. /api/stats/compare serves the published head-to-head results in
+  logs/validation/compare/.
 
-Run: python app.py (paths are anchored to this file, not to cwd).
+Run: python app.py (paths are anchored to this file, not to cwd), after `npm ci && npm run build` in frontend/.
 """
 import json
 from collections import defaultdict
 from pathlib import Path
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify
 
-from replay_engine import list_games, reduce_game
 from compress import init_gzip
+from frontend import init_frontend
 from replay_listing import list_replay_runs, resolve_run, run_game, run_games
-from stats_checks import CHECK_FILE_RE, iter_check_snapshots, read_consolidated_record
+from stats_checks import CHECK_FILE_RE, iter_check_snapshots, list_compare, read_consolidated_record
 
 WEBAPP_LOGS_DIR = Path(__file__).resolve().parent / "logs"
 REPLAY_LOGS_DIR = WEBAPP_LOGS_DIR / "replays"
 VALIDATION_DIR = WEBAPP_LOGS_DIR / "validation"
 
-app = Flask(__name__, static_folder="static", static_url_path="")
-init_gzip(app)  # gzip JSON responses (stdlib) -- see compress.py
-
-
-@app.get("/")
-def home_page():
-    return send_from_directory(app.static_folder, "index.html")
-
-
-@app.get("/replay")
-def replay_page():
-    return send_from_directory(app.static_folder, "replay.html")
-
-
-@app.get("/stats")
-def stats_page():
-    return send_from_directory(app.static_folder, "stats.html")
-
-
-@app.get("/methodology")
-def methodology_page():
-    return send_from_directory(app.static_folder, "methodology.html")
+app = Flask(__name__, static_folder=None)  # the frontend is served by init_frontend, not Flask's static route
+init_gzip(app)  # gzip JSON and text responses (stdlib) -- see compress.py
+init_frontend(app)  # the built React app at "/" -- see frontend.py
 
 
 @app.get("/api/replay/runs")
@@ -80,16 +45,6 @@ def replay_runs():
     see replay_listing.py. Scoped to replays/ specifically (not all of logs/) so a
     validation checks/*.json never shows up here as if it were a game log."""
     return jsonify(list_replay_runs(REPLAY_LOGS_DIR))
-
-
-@app.get("/api/replay/runs/<path:name>/raw")
-def replay_run_raw(name):
-    # Reject a ".." escape: resolve() collapses it, then check the result
-    # is still inside REPLAY_LOGS_DIR.
-    path = (REPLAY_LOGS_DIR / name).resolve()
-    if REPLAY_LOGS_DIR.resolve() not in path.parents or not path.is_file():
-        return jsonify({"error": "not found"}), 404
-    return send_from_directory(path.parent, path.name)
 
 
 @app.get("/api/replay/runs/<path:name>/games")
@@ -114,31 +69,6 @@ def replay_run_game(name, game_index):
         return jsonify(run_game(path, game_index))
     except (ValueError, UnicodeDecodeError) as exc:
         return jsonify({"error": str(exc)}), 400
-
-
-@app.post("/api/replay/games")
-def replay_games():
-    """Body: {"content": <raw log JSON text>}. Returns the game index (label +
-    event count per game) without reducing any board state."""
-    body = request.get_json(force=True)
-    try:
-        doc = json.loads(body["content"])
-    except (KeyError, TypeError, json.JSONDecodeError) as exc:
-        return jsonify({"error": f"couldn't parse log file: {exc}"}), 400
-    return jsonify(list_games(doc))
-
-
-@app.post("/api/replay/game")
-def replay_game():
-    """Body: {"content": <same raw log JSON text>, "game_index": N}. Returns
-    one board-state snapshot per event in that game."""
-    body = request.get_json(force=True)
-    try:
-        doc = json.loads(body["content"])
-        result = reduce_game(doc, int(body["game_index"]))
-    except (KeyError, TypeError, ValueError, json.JSONDecodeError) as exc:
-        return jsonify({"error": str(exc)}), 400
-    return jsonify(result)
 
 
 def _league_dir(name):
@@ -167,9 +97,16 @@ def stats_leagues():
                 "mtime": metrics_path.stat().st_mtime,
                 "cumulative_games_per_deck": progress.get("cumulative_games_per_deck"),
             })
-    # No league is special: most recently written first (what /stats opens on), ties by name
+    # No league is special: most recently written first (what the stats page opens on), ties by name
     leagues.sort(key=lambda l: (-l["mtime"], l["name"]))
     return jsonify(leagues)
+
+
+@app.get("/api/stats/compare")
+def stats_compare():
+    """Published head-to-head results between training arms (logs/validation/compare/*.json -- see
+    stats_checks.list_compare); [] when none have been published."""
+    return jsonify(list_compare(VALIDATION_DIR))
 
 
 @app.get("/api/stats/leagues/<league>/manifest")

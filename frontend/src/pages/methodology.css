@@ -1,0 +1,49 @@
+/* Methodology-only layout; shared pieces (card, callout, drill, tables, flow/arch diagrams) live in components/ui.css */
+.meth { line-height: 1.55; }
+.meth .toc {
+  position: sticky; top: 0; z-index: 5; display: flex; gap: 6px; flex-wrap: wrap;
+  padding: 10px 20px; background: #14161ae8; backdrop-filter: blur(4px); border-bottom: 1px solid #2a2d33;
+}
+.meth .toc a { color: #9aa0aa; text-decoration: none; font-size: 12px; padding: 5px 10px; border-radius: 14px; border: 1px solid #2a2d33; white-space: nowrap; }
+.meth .toc a:hover { color: #fff; border-color: #3a6df0; }
+
+.meth main { max-width: 1200px; margin: 0 auto; padding: 30px 20px 90px; }
+.meth .lede { color: #b8c0d0; font-size: 15px; margin: 8px 0 30px; }
+.meth h1.title { font-size: 26px; margin: 4px 0 2px; color: #fff; }
+.meth a { color: #6a9dff; }
+
+.meth section { padding-top: 48px; margin-top: 30px; scroll-margin-top: 58px; border-top: 1px solid #21242a; }
+.meth section:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+.meth .kicker { color: #6a9dff; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; font-weight: 600; }
+.meth section h2 { font-size: 21px; margin: 0 0 8px; color: #fff; }
+.meth p.intro { color: #b8c0d0; margin: 0 0 6px; }
+.meth h3.sub { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: #9aa0aa; margin: 26px 0 10px; }
+.meth .flow-loop { font-size: 11px; color: #666; margin: 4px 0 18px 4px; }
+
+.meth .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin: 16px 0; }
+.meth .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
+@media (max-width: 640px) { .meth .grid-2 { grid-template-columns: 1fr; } }
+
+.meth .league-diagram { display: flex; gap: 14px; flex-wrap: wrap; margin: 18px 0; align-items: stretch; }
+.meth .pop-box { flex: 1 1 300px; background: #1b1e24; border: 1px solid #2a2d33; border-radius: 10px; padding: 14px; }
+.meth .pop-box.dim { opacity: .92; border-style: dashed; }
+.meth .pop-box h4 { margin: 0 0 4px; font-size: 13px; color: #fff; }
+.meth .pop-box .pop-sub { color: #888; font-size: 11px; margin-bottom: 10px; }
+.meth .pop-box .sub-item { background: #14161a; border: 1px solid #262a31; border-radius: 6px; padding: 8px 10px; margin-bottom: 6px; font-size: 11.5px; color: #b8c0d0; }
+.meth .pop-box .sub-item b { color: #d8dbe0; }
+.meth .pop-link { text-align: center; color: #666; font-size: 11px; margin: 4px 0 14px; }
+
+.meth .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 18px 0 10px; }
+.meth .compare .col { background: #1b1e24; border: 1px solid #2a2d33; border-radius: 8px; padding: 14px; }
+.meth .compare .col h4 { margin: 0 0 8px; font-size: 13px; color: #fff; }
+.meth .compare ul { margin: 0; padding-left: 18px; font-size: 12px; color: #b8c0d0; }
+.meth .compare ul li { margin-bottom: 5px; }
+.meth .merge-box { text-align: center; }
+@media (max-width: 640px) { .meth .compare { grid-template-columns: 1fr; } }
+
+.meth pre.code { background: #0e1013; border: 1px solid #262a31; border-radius: 6px; padding: 12px 14px; font-size: 11.5px; color: #9dc0ff; overflow-x: auto; margin: 8px 0 0; }
+.meth pre.tree { background: #0e1013; border: 1px solid #262a31; border-radius: 8px; padding: 14px 16px; font-size: 12px; color: #7d8590; overflow-x: auto; line-height: 1.6; margin: 12px 0; }
+.meth pre.tree b { color: #e8eaf0; font-weight: 600; }
+.meth pre.tree .c { color: #555; }
+
+.meth footer { max-width: 1200px; margin: 40px auto 0; padding: 20px; color: #555; font-size: 11.5px; border-top: 1px solid #2a2d33; }

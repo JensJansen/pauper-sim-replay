@@ -3,5 +3,8 @@ services:
     name: pauper-sim-replay
     runtime: python
     plan: free
-    buildCommand: pip install -r requirements-public.txt
+    buildCommand: pip install -r requirements-public.txt && cd frontend && npm ci && npm run build
     startCommand: gunicorn app_public:app
+    envVars:
+      - key: NODE_VERSION  # the frontend build (Vite 8) needs Node >= 20.19 / 22.12; see frontend/package.json "engines"
+        value: "22"
