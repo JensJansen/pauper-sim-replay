@@ -1,6 +1,6 @@
 import { CardView, Pile } from './Cards'
 
-const ATTACH_STEP = 18 // px of each attachment left visible beneath/above its host
+const ATTACH_STEP = 36 // px of each attachment left visible beneath/above its host
 
 const hostKey = (idx, c) => `${idx}|${c.name}|${c.slot}`
 const attachKey = e => `${e.controller_idx}|${e.name}|${e.slot}`
