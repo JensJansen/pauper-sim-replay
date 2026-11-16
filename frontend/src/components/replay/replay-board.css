@@ -1,6 +1,7 @@
 /* Seat colors: P0 amber, P1 teal (deliberately not red/blue, which are deck colors). */
-.replay { --p0: #e8a33d; --p1: #2fb5a8; --p0-bg: #2a2110; --p1-bg: #0f2a28; --k: 1.7; --card-w: calc(120px * var(--k)); --card-h: calc(168px * var(--k)); }
-/* --k scales the board: cards and everything sized around them (gaps, badges, piles, the attachment tuck). */
+.replay { --p0: #e8a33d; --p1: #2fb5a8; --p0-bg: #2a2110; --p1-bg: #0f2a28; }
+/* --k scales the board: cards and everything sized around them (gaps, badges, piles, the attachment tuck). GameView's
+   useFitBoard solves for the largest k at which the whole board fits the window and sets it on .game-layout. */
 .p0 { --seat: var(--p0); --seat-bg: var(--p0-bg); }
 .p1 { --seat: var(--p1); --seat-bg: var(--p1-bg); }
 
@@ -21,15 +22,15 @@
 .replay .phase-pill.current { color: #fff; font-weight: 600; border-color: var(--seat); background: #0006; }
 .turn-desc { min-width: 0; text-align: center; font-size: 13px; color: #b8c0d0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.game-layout { display: flex; gap: 16px; padding: 14px 20px 24px; align-items: flex-start; }
-.board { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.game-layout { --k: 1; --card-w: calc(120px * var(--k)); --card-h: calc(168px * var(--k)); display: flex; gap: 12px; padding: 10px 14px 10px; align-items: stretch; height: var(--avail, auto); box-sizing: border-box; }
+.board { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
 
 /* player areas: [field | stats]. The field is two separate boxes -- the three battlefield rows and the hand. */
-.player { display: flex; gap: 16px; padding: 12px; border: 1px solid var(--seat); border-radius: 8px; background: var(--seat-bg); }
-.field { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
-.board-box, .hand-box { border: 1px solid #ffffff1c; border-radius: 8px; background: #0003; padding: 8px 10px; }
-.board-box { display: flex; flex-direction: column; gap: 6px; }
-.bf-row { display: flex; flex-wrap: wrap; gap: calc(10px * var(--k)); align-items: flex-start; min-height: calc(64px * var(--k)); }
+.player { flex: 1 1 auto; min-height: 0; display: flex; gap: 14px; padding: 10px; border: 1px solid var(--seat); border-radius: 8px; background: var(--seat-bg); }
+.field { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.board-box, .hand-box { border: 1px solid #ffffff1c; border-radius: 8px; background: #0003; padding: 6px 8px; }
+.board-box { flex: 1; display: flex; flex-direction: column; justify-content: space-around; gap: 6px; }
+.bf-row { display: flex; flex-wrap: wrap; gap: calc(10px * var(--k)); align-items: flex-start; min-height: var(--card-h); } /* every row always reserves one card's height */
 .bf-row:empty { align-items: center; }
 .bf-row:empty::before { content: attr(data-label); font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: #ffffff30; } /* empty row: faint label, keeps the 3-row shape */
 .bf-row + .bf-row { border-top: 1px dashed #ffffff14; padding-top: calc(10px * var(--k)); }
@@ -46,7 +47,7 @@
 
 .stats { flex: 0 0 calc(120px + calc(130px * var(--k))); display: flex; flex-direction: column; justify-content: space-between; gap: 16px; padding: 4px 16px 4px 4px; border-right: 1px solid #ffffff1c; } /* spreads top-to-bottom of the zone */
 .seat-tag { font-weight: 700; font-size: 14px; letter-spacing: .04em; color: var(--seat); text-transform: uppercase; }
-.life { font-size: calc(44px * var(--k)); font-weight: 700; color: #fff; line-height: 1; }
+.life { font-size: max(26px, calc(44px * var(--k))); font-weight: 700; color: #fff; line-height: 1; }
 .life span { font-size: 12px; font-weight: 400; color: #8a909b; margin-left: 6px; }
 .stat-grid { display: flex; flex-direction: column; gap: 14px; }
 .stat { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; color: #9aa0aa; padding-bottom: 6px; border-bottom: 1px solid #ffffff12; }
@@ -62,10 +63,10 @@
 .card-face img { width: 100%; height: 100%; border-radius: 5px; display: block; }
 .card-face.attacking { outline: 2px solid #e5484d; }
 .card-face.blocking { outline: 2px solid #4a8dff; }
-.card-fallback { width: 100%; height: 100%; padding: calc(8px * var(--k)); font-size: calc(15px * var(--k)); display: flex; align-items: center; justify-content: center; text-align: center; background: #2a2d33; border-radius: 5px; color: #d8dbe0; }
-.card-pt { position: absolute; right: calc(4px * var(--k)); bottom: calc(4px * var(--k)); background: #000c; color: #fff; font-size: calc(16px * var(--k)); padding: 1px calc(8px * var(--k)); border-radius: calc(5px * var(--k)); }
+.card-fallback { width: 100%; height: 100%; padding: calc(8px * var(--k)); font-size: max(9px, calc(15px * var(--k))); display: flex; align-items: center; justify-content: center; text-align: center; background: #2a2d33; border-radius: 5px; color: #d8dbe0; }
+.card-pt { position: absolute; right: calc(4px * var(--k)); bottom: calc(4px * var(--k)); background: #000c; color: #fff; font-size: max(10px, calc(16px * var(--k))); padding: 1px calc(8px * var(--k)); border-radius: calc(5px * var(--k)); }
 .card-pt.up { color: #6fe08a; } .card-pt.down { color: #ff7b7b; }
-.card-token { position: absolute; left: calc(4px * var(--k)); top: calc(4px * var(--k)); background: #3a3f47; color: #fff; font-size: calc(13px * var(--k)); padding: 1px calc(7px * var(--k)); border-radius: calc(5px * var(--k)); }
+.card-token { position: absolute; left: calc(4px * var(--k)); top: calc(4px * var(--k)); background: #3a3f47; color: #fff; font-size: max(9px, calc(13px * var(--k))); padding: 1px calc(7px * var(--k)); border-radius: calc(5px * var(--k)); }
 
 /* attachments tucked behind their host */
 .perm { position: relative; flex: none; }
@@ -75,8 +76,8 @@
 /* piles */
 .pile-label { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: #888; margin-bottom: 2px; }
 .pile-body { position: relative; width: var(--card-w); height: var(--card-h); }
-.pile-count { position: absolute; right: calc(-6px * var(--k)); bottom: calc(-6px * var(--k)); background: #3a3f47; color: #fff; font-size: calc(14px * var(--k)); padding: 2px calc(9px * var(--k)); border-radius: calc(12px * var(--k)); border: 1px solid #14161a; }
-.pile-empty { width: 100%; height: 100%; border: 1px dashed #ffffff33; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: calc(13px * var(--k)); color: #666; }
+.pile-count { position: absolute; right: calc(-6px * var(--k)); bottom: calc(-6px * var(--k)); background: #3a3f47; color: #fff; font-size: max(9px, calc(14px * var(--k))); padding: 2px calc(9px * var(--k)); border-radius: calc(12px * var(--k)); border: 1px solid #14161a; }
+.pile-empty { width: 100%; height: 100%; border: 1px dashed #ffffff33; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: max(9px, calc(13px * var(--k))); color: #666; }
 
 /* floating popups (portaled to <body>, so not scoped under .replay) */
 .float-pop { position: fixed; z-index: 100; pointer-events: none; }
@@ -84,12 +85,12 @@
 .pile-flyout { width: calc(640px * var(--k)); display: flex; flex-wrap: wrap; gap: calc(8px * var(--k)); padding: calc(12px * var(--k)); background: #1b1e24; border: 1px solid #3a3f47; border-radius: 8px; box-shadow: 0 8px 24px #000a; pointer-events: auto; --card-w: calc(108px * var(--k)); --card-h: calc(151px * var(--k)); }
 
 /* center strip between the boards: the shared stack (left) and the agent's decision (right) */
-.center-strip { display: flex; gap: 0; min-height: calc(90px * var(--k)); border: 1px solid #3a3f47; border-radius: 8px; background: #1b1e24; overflow: hidden; }
-.stack-zone { flex: 1 1 0; min-width: 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; align-content: center; padding: 8px 12px; }
+.center-strip { display: flex; gap: 0; flex: none; height: max(calc(var(--card-h) + 24px), 128px); border: 1px solid #3a3f47; border-radius: 8px; background: #1b1e24; overflow: hidden; }
+.stack-zone { flex: 1 1 0; min-width: 0; display: flex; flex-wrap: nowrap; overflow: hidden; gap: 10px; align-items: center; align-content: center; padding: 8px 12px; }
 .stack-zone .row-tag { flex-basis: 100%; }
 .stack-zone.p0, .stack-zone.p1 { background: var(--seat-bg); box-shadow: inset 4px 0 0 var(--seat); } /* tinted by the controller of the top (most recent) item */
 .stack-entry { display: flex; gap: 8px; align-items: center; padding: 5px 8px; border: 2px solid var(--seat); border-radius: 8px; background: var(--seat-bg); }
-.stack-meta { font-size: calc(13px * var(--k)); color: #d8dbe0; max-width: calc(150px * var(--k)); }
+.stack-meta { font-size: max(9px, calc(13px * var(--k))); color: #d8dbe0; max-width: calc(150px * var(--k)); }
 .stack-meta b { color: var(--seat); }
 
 /* agent decision: bars sorted by probability, deciding player's color; dimmed when it's not from this event */

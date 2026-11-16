@@ -27,9 +27,14 @@ function useFloat(anchor) {
 // Hover handlers + the popup for one anchor element: const { bind, popup } = useHover(content)
 function useHover(render) {
   const [anchor, setAnchor] = useState(null)
+  const [k, setK] = useState('1')
   const [ref, pos] = useFloat(anchor)
-  const bind = { onMouseEnter: e => setAnchor(e.currentTarget.getBoundingClientRect()), onMouseLeave: () => setAnchor(null) }
-  const popup = anchor && createPortal(<div ref={ref} className="float-pop" style={pos}>{render()}</div>, document.body)
+  const bind = {
+    onMouseEnter: e => { setK(getComputedStyle(e.currentTarget).getPropertyValue('--k').trim() || '1'); setAnchor(e.currentTarget.getBoundingClientRect()) },
+    onMouseLeave: () => setAnchor(null),
+  }
+  // the popup lives on <body>, outside the board that --k is set on, so pass the board's current scale along
+  const popup = anchor && createPortal(<div ref={ref} className="float-pop" style={{ ...pos, '--k': k }}>{render()}</div>, document.body)
   return { bind, popup }
 }
 
