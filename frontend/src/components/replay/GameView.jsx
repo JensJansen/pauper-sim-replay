@@ -23,16 +23,18 @@ function useFitBoard(ref) {
       layout.style.setProperty('--avail', 'auto') // measure the board's natural height, not the old fitted one
       const top = layout.getBoundingClientRect().top + window.scrollY
       const avail = Math.max(240, window.innerHeight - top)
+      const cs = getComputedStyle(layout)
+      const fitH = avail - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) // the board gets the height inside the layout's padding
       const probe = k => { set(k); return { h: board.offsetHeight, w: field.clientWidth } }
       const a = probe(1), b = probe(0.5)
       const slopeH = (a.h - b.h) / 0.5, slopeW = (b.w - a.w) / 0.5 // height grows, field width shrinks, as k grows
-      const kHeight = (avail - (a.h - slopeH)) / slopeH
+      const kHeight = (fitH - (a.h - slopeH)) / slopeH
       const kWidth = ((a.w + slopeW) - 24) / (ROW_CARDS * 130 + slopeW) // width left at k=0, less padding, over the cards' width per k
       let k = Math.min(Math.max(Math.min(kHeight, kWidth), K_MIN), K_MAX)
       for (let n = 0; n < 3; n += 1) { // the model is nearly linear; correct for what it misses (borders, rounding, a wrapped row)
         const { h } = probe(k)
-        if (Math.abs(h - avail) < 2) break
-        const next = Math.min(Math.max(k + (avail - h) / slopeH, K_MIN), Math.min(K_MAX, Math.max(kWidth, K_MIN)))
+        if (Math.abs(h - fitH) < 2) break
+        const next = Math.min(Math.max(k + (fitH - h) / slopeH, K_MIN), Math.min(K_MAX, Math.max(kWidth, K_MIN)))
         if (next === k) break
         k = next
       }
