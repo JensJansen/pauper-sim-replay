@@ -40,6 +40,84 @@
         "seed": null,
         "cadence_games": 5000
       }
+    },
+    {
+      "replaced_at": "2026-11-16T08:50:59-0500",
+      "config": {
+        "league_name": "small_baseline",
+        "total_games": 50000,
+        "roster": [
+          "rakdos_madness",
+          "dmir_terror",
+          "elves",
+          "mono_red_rally"
+        ],
+        "create_training_league": true,
+        "training_league_name": "small_baseline-training",
+        "checks_cadence_pct": 10,
+        "checks_games": 50,
+        "history_checks": true,
+        "history_games": 100,
+        "field_games": 40,
+        "history_ladder": null,
+        "probe_states_dir": "C:\\Users\\jens2\\OneDrive\\Desktop\\pauper_sim\\data\\probe_states\\small_league",
+        "n_workers": 10,
+        "games_per_iteration": 24,
+        "snapshot_every": 8,
+        "checkpoint_rate": 0.15,
+        "stratify_0land_pct": 0.0,
+        "overlap_collect": true,
+        "pfsp": true,
+        "pfsp_power": 0.5,
+        "device": "cuda",
+        "trunk_hidden": [
+          128,
+          128
+        ],
+        "encoder": null,
+        "ppo_hparams": null,
+        "seed": null,
+        "cadence_games": 5000
+      }
+    },
+    {
+      "replaced_at": "2026-11-16T20:08:35-0500",
+      "config": {
+        "league_name": "small_baseline",
+        "total_games": 100000,
+        "roster": [
+          "rakdos_madness",
+          "dmir_terror",
+          "elves",
+          "mono_red_rally"
+        ],
+        "create_training_league": true,
+        "training_league_name": "small_baseline-training",
+        "checks_cadence_pct": 5,
+        "checks_games": 50,
+        "history_checks": true,
+        "history_games": 100,
+        "field_games": 40,
+        "history_ladder": null,
+        "probe_states_dir": "C:\\Users\\jens2\\OneDrive\\Desktop\\pauper_sim\\data\\probe_states\\small_league",
+        "n_workers": 6,
+        "games_per_iteration": 24,
+        "snapshot_every": 8,
+        "checkpoint_rate": 0.15,
+        "stratify_0land_pct": 0.0,
+        "overlap_collect": true,
+        "pfsp": true,
+        "pfsp_power": 0.5,
+        "device": "cuda",
+        "trunk_hidden": [
+          128,
+          128
+        ],
+        "encoder": null,
+        "ppo_hparams": null,
+        "seed": null,
+        "cadence_games": 5000
+      }
     }
   ],
   "model_history": [],
@@ -188,11 +266,59 @@
         "--config",
         "../training_configs/small_baseline.json"
       ]
+    },
+    {
+      "started_at": "2026-11-16T08:50:59-0500",
+      "finished_at": null,
+      "games_start": 50016,
+      "games_end": null,
+      "code": {
+        "commit": "d7b67e03477ad5839bddb0ec2c5056f4c166efe3",
+        "branch": "main",
+        "dirty": true
+      },
+      "argv": [
+        "run_training_pipeline.py",
+        "--config",
+        "../training_configs/small_baseline.json"
+      ]
+    },
+    {
+      "started_at": "2026-11-16T09:58:47-0500",
+      "finished_at": null,
+      "games_start": 51840,
+      "games_end": null,
+      "code": {
+        "commit": "03a7b8ddc699c752d40058352e638320f51dfcf9",
+        "branch": "main",
+        "dirty": true
+      },
+      "argv": [
+        "run_training_pipeline.py",
+        "--config",
+        "../training_configs/small_baseline.json"
+      ]
+    },
+    {
+      "started_at": "2026-11-16T20:08:35-0500",
+      "finished_at": null,
+      "games_start": 56640,
+      "games_end": null,
+      "code": {
+        "commit": "d38c067259bc9a3e253296d154e5b4782ea9d97e",
+        "branch": "main",
+        "dirty": true
+      },
+      "argv": [
+        "run_training_pipeline.py",
+        "--config",
+        "../training_configs/small_baseline.json"
+      ]
     }
   ],
   "config": {
     "league_name": "small_baseline",
-    "total_games": 50000,
+    "total_games": 100000,
     "roster": [
       "rakdos_madness",
       "dmir_terror",
@@ -201,14 +327,14 @@
     ],
     "create_training_league": true,
     "training_league_name": "small_baseline-training",
-    "checks_cadence_pct": 10,
+    "checks_cadence_pct": 5,
     "checks_games": 50,
     "history_checks": true,
     "history_games": 100,
     "field_games": 40,
     "history_ladder": null,
     "probe_states_dir": "C:\\Users\\jens2\\OneDrive\\Desktop\\pauper_sim\\data\\probe_states\\small_league",
-    "n_workers": 10,
+    "n_workers": 6,
     "games_per_iteration": 24,
     "snapshot_every": 8,
     "checkpoint_rate": 0.15,
@@ -222,7 +348,9 @@
       128
     ],
     "encoder": null,
-    "ppo_hparams": null,
+    "ppo_hparams": {
+      "max_token_rows": 40000
+    },
     "seed": null,
     "cadence_games": 5000
   },
