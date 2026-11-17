@@ -301,9 +301,9 @@
     },
     {
       "started_at": "2026-11-16T20:08:35-0500",
-      "finished_at": null,
+      "finished_at": "2026-11-17T11:40:46-0500",
       "games_start": 56640,
-      "games_end": null,
+      "games_end": 100008,
       "code": {
         "commit": "d38c067259bc9a3e253296d154e5b4782ea9d97e",
         "branch": "main",
