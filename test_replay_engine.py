@@ -202,7 +202,7 @@ def test_same_phase_flashback_does_not_duplicate_card():
     ]
     steps = GameReducer(events).run()
     p0 = steps[-1]["players"][0]
-    assert steps[-1]["stack"] == []
+    assert [c["name"] for c in steps[-1]["stack"]] == ["Lava Dart"]  # resolving item still shown on its resolve step
     assert p0["exile"] == ["Lava Dart"]
     assert p0["graveyard"] == []
 
@@ -308,6 +308,8 @@ def test_pass_produces_no_step_regardless_of_stack():
     kinds = [s["kind"] for s in steps]
     assert "pass" not in kinds
     assert kinds == ["turn_start", "phase_change", "zone_move", "zone_move"]
+    # the resolve step still shows the resolving spell on the stack; the next step doesn't
+    assert [c["name"] for c in steps[-1]["stack"]] == ["Lightning Bolt"]
 
 
 def test_empty_phases_collapse():

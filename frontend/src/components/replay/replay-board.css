@@ -87,7 +87,6 @@
 /* center strip between the boards: the shared stack (left) and the agent's decision (right) */
 .center-strip { display: flex; gap: 0; flex: none; height: max(calc(var(--card-h) + 24px), 128px); border: 1px solid #3a3f47; border-radius: 8px; background: #1b1e24; overflow: hidden; }
 .stack-zone { flex: 1 1 0; min-width: 0; display: flex; flex-wrap: nowrap; overflow: hidden; gap: 10px; align-items: center; align-content: center; padding: 8px 12px; }
-.stack-zone .row-tag { flex-basis: 100%; }
 .stack-zone.p0, .stack-zone.p1 { background: var(--seat-bg); box-shadow: inset 4px 0 0 var(--seat); } /* tinted by the controller of the top (most recent) item */
 .stack-entry { display: flex; gap: 8px; align-items: center; padding: 5px 8px; border: 2px solid var(--seat); border-radius: 8px; background: var(--seat-bg); }
 .stack-meta { font-size: max(9px, calc(13px * var(--k))); color: #d8dbe0; max-width: calc(150px * var(--k)); }

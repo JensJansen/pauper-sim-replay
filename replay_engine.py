@@ -457,6 +457,7 @@ class GameReducer:
 
     # ------------------------------------------------------------------ zone_move (the big dispatcher)
     def _handle_zone_move(self, e):
+        on_stack = None
         if "disposed" in e:
             desc = self._mutate_disposed(e)
         elif "permanent" in e:
@@ -464,13 +465,16 @@ class GameReducer:
         else:
             name = e.get("card")
             names = [name] if name is not None else (e.get("cards") or [])
+            if _norm_zone(e.get("from_zone")) == "stack":
+                # The resolving item is still on the stack at this step; snapshot before it's popped.
+                on_stack = [dict(c) for c in self.stack]
             for n in names:
                 self._mutate_card_move(e, n)
             frm, to = _norm_zone(e.get("from_zone")), _norm_zone(e.get("to_zone"))
             reason = f" ({e['reason']})" if e.get("reason") else ""
             idx = e.get("active_idx")
             desc = f"P{idx}: {', '.join(names) or '(nothing)'} {frm or '?'} → {to or '?'}{reason}"
-        self._emit(e, "zone_move", desc)
+        self._emit(e, "zone_move", desc, extra={"stack": on_stack} if on_stack is not None else None)
 
     def _mutate_disposed(self, e):
         """Scry/surveil. disposed_to='library_bottom' has no visible zone change
